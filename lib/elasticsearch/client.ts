@@ -73,6 +73,28 @@ export async function createSignalsIndex() {
             similarity: 'cosine',
           },
           indexed_at: { type: 'date' },
+
+          // Enhanced analysis fields
+          sentiment: {
+            properties: {
+              score: { type: 'float' },
+              comparative: { type: 'float' },
+              label: { type: 'keyword' },
+              confidence: { type: 'float' },
+            },
+          },
+          quality: {
+            properties: {
+              textLength: { type: 'integer' },
+              wordCount: { type: 'integer' },
+              readabilityScore: { type: 'float' },
+              hasCode: { type: 'boolean' },
+              hasLinks: { type: 'boolean' },
+              spamScore: { type: 'float' },
+            },
+          },
+          domain_context: { type: 'keyword' },
+          relevance_score: { type: 'float' },
         },
       },
     },
@@ -105,6 +127,10 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
       tags: post.tags,
       embedding: post.embedding,
       indexed_at: post.indexed_at,
+      sentiment: post.sentiment,
+      quality: post.quality,
+      domain_context: post.domain_context,
+      relevance_score: post.relevance_score,
     },
   ]);
 

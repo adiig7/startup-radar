@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "setup-es": "tsx scripts/setup-elasticsearch.ts",
+    "reset-index": "tsx scripts/reset-index.ts",
     "collect-data": "tsx scripts/collect-data.ts",
     "seed": "tsx scripts/seed-initial-data.ts"
   },

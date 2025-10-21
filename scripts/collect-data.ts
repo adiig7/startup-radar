@@ -6,6 +6,8 @@ import { fetchHackerNewsStories, fetchAskHNPosts, fetchShowHNPosts } from '../li
 import { fetchProductHuntPosts } from '../lib/connectors/producthunt';
 import { generateBatchEmbeddings, prepareTextForEmbedding } from '../lib/ai/embeddings';
 import { bulkIndexPosts, getIndexStats } from '../lib/elasticsearch/client';
+import { analyzeSentiment } from '../lib/analysis/sentiment';
+import { analyzeQuality, classifyDomain } from '../lib/analysis/quality';
 import type { SocialPost } from '../lib/types';
 
 // Load environment variables
@@ -43,8 +45,25 @@ async function collectData() {
       process.exit(1);
     }
 
-    // Step 2: Generate embeddings
-    console.log('=== STEP 2: Generating Embeddings ===');
+    // Step 2: Analyze content (sentiment, quality, domain)
+    console.log('\n=== STEP 2: Analyzing Content ===');
+    allPosts.forEach((post) => {
+      const fullText = `${post.title} ${post.content}`;
+
+      // Sentiment analysis
+      post.sentiment = analyzeSentiment(fullText);
+
+      // Quality metrics
+      post.quality = analyzeQuality(fullText);
+
+      // Domain classification
+      post.domain_context = classifyDomain(fullText, post.tags);
+    });
+
+    console.log('✅ Content analysis complete');
+
+    // Step 3: Generate embeddings
+    console.log('\n=== STEP 3: Generating Embeddings ===');
     const texts = allPosts.map(prepareTextForEmbedding);
     const embeddings = await generateBatchEmbeddings(texts);
 
@@ -52,14 +71,29 @@ async function collectData() {
       post.embedding = embeddings[idx];
     });
 
-    // Step 3: Index to Elasticsearch
-    console.log('\n=== STEP 3: Indexing to Elasticsearch ===');
+    // Step 4: Index to Elasticsearch
+    console.log('\n=== STEP 4: Indexing to Elasticsearch ===');
     await bulkIndexPosts(allPosts);
 
-    // Step 4: Show final stats
+    // Step 5: Show final stats
     const stats = await getIndexStats();
     console.log(`\n📈 Index Stats:`);
     console.log(`  - Total documents in index: ${stats.total_documents}`);
+
+    // Show analysis summary
+    const sentimentCounts = allPosts.reduce((acc, post) => {
+      const label = post.sentiment?.label || 'unknown';
+      acc[label] = (acc[label] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const highQualityCount = allPosts.filter(p => p.quality && p.quality.spamScore < 0.3).length;
+
+    console.log(`\n📊 Analysis Summary:`);
+    console.log(`  - Positive sentiment: ${sentimentCounts.positive || 0}`);
+    console.log(`  - Negative sentiment: ${sentimentCounts.negative || 0}`);
+    console.log(`  - Neutral sentiment: ${sentimentCounts.neutral || 0}`);
+    console.log(`  - High quality posts: ${highQualityCount}`);
 
     console.log(`\n✅ Data collection completed successfully!`);
     console.log(`Finished at: ${new Date().toLocaleString()}`);

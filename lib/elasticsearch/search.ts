@@ -128,6 +128,40 @@ function buildHybridQuery(query: string, embedding: number[], filters?: SearchFi
         },
       });
     }
+
+    // Sentiment filter
+    if (filters.sentiment) {
+      filterClauses.push({
+        term: { 'sentiment.label': filters.sentiment },
+      });
+    }
+
+    // Domain filter
+    if (filters.domains && filters.domains.length > 0) {
+      filterClauses.push({
+        terms: { domain_context: filters.domains },
+      });
+    }
+
+    // Quality filter (low spam)
+    if (filters.minQuality !== undefined) {
+      filterClauses.push({
+        range: { 'quality.spamScore': { lte: 1 - filters.minQuality } },
+      });
+    }
+
+    // Problems only (negative sentiment or problem keywords)
+    if (filters.problemsOnly) {
+      filterClauses.push({
+        bool: {
+          should: [
+            { term: { 'sentiment.label': 'negative' } },
+            { range: { 'sentiment.score': { lt: 0 } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
   }
 
   return {
