@@ -20,18 +20,42 @@ const embeddingModel = vertexAI.preview.getGenerativeModel({
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    // Use the proper Prediction Service for text embeddings
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
+    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+
+    const { GoogleAuth } = require('google-auth-library');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Load credentials directly from file
+    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+    if (!credentialsPath) {
+      throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
+    }
+
+    // Read and parse the credentials file
+    let credentials;
+    try {
+      const credentialsContent = fs.readFileSync(credentialsPath, 'utf8');
+      credentials = JSON.parse(credentialsContent);
+    } catch (error) {
+      throw new Error(`Failed to read credentials file at ${credentialsPath}: ${error.message}`);
+    }
+
+    // Create auth client with credentials directly
+    const auth = new GoogleAuth({
+      credentials: credentials,
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+
+    const client = await auth.getClient();
+
+    // Make the API request
+    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
     const request = {
       instances: [{ content: text }],
     };
-
-    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
-    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
-    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
-
-    const { GoogleAuth } = require('google-auth-library');
-    const auth = new GoogleAuth();
-    const client = await auth.getClient();
 
     // @ts-ignore
     const response = await client.request({

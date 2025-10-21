@@ -10,8 +10,15 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
   try {
     console.log(`\n[Hybrid Search] Query: "${request.query}"`);
 
-    // Generate query embedding for semantic search
-    const queryEmbedding = await generateEmbedding(request.query);
+    // Generate query embedding for semantic search (optional - falls back to keyword-only)
+    let queryEmbedding: number[] = [];
+    try {
+      queryEmbedding = await generateEmbedding(request.query);
+      console.log('[Hybrid Search] Using semantic + keyword search');
+    } catch (error) {
+      console.warn('[Hybrid Search] Embedding generation failed, falling back to keyword-only search');
+      console.warn('[Hybrid Search] Error:', error.message);
+    }
 
     // Build Elasticsearch query
     const esQuery = buildHybridQuery(request.query, queryEmbedding, request.filters);

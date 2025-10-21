@@ -12,7 +12,7 @@ const vertexAI = new VertexAI({
 });
 
 // Use Gemini 1.5 Flash for cost-effective conversations
-const model = vertexAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
 /**
  * Send a message to Gemini with grounding from Elasticsearch
