@@ -1,6 +1,6 @@
 // Core types for SignalScout
 
-export type Platform = 'reddit' | 'hackernews' | 'stackoverflow' | 'producthunt' | 'twitter' | 'quora';
+export type Platform = 'reddit' | 'hackernews' | 'producthunt' | 'quora' | 'youtube';
 
 export interface SentimentScore {
   score: number; // -5 to 5 (negative to positive)

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { fetchRedditPosts } from '../lib/connectors/reddit';
 import { fetchHackerNewsStories, fetchAskHNPosts, fetchShowHNPosts } from '../lib/connectors/hackernews';
 import { fetchProductHuntPosts } from '../lib/connectors/producthunt';
+import { searchYouTubeVideos } from '../lib/connectors/youtube';
 import { generateBatchEmbeddings, prepareTextForEmbedding } from '../lib/ai/embeddings';
 import { bulkIndexPosts, getIndexStats } from '../lib/elasticsearch/client';
 import { analyzeSentiment } from '../lib/analysis/sentiment';
@@ -21,16 +22,29 @@ async function collectData() {
     // Step 1: Fetch data from all sources
     console.log('=== STEP 1: Fetching Data ===');
 
-    const [redditPosts, hnStories, askHN, showHN, phPosts] = await Promise.all([
+    // Define trending topics for YouTube search
+    const youtubeKeywords = [
+      'startup problems',
+      'entrepreneur struggles',
+      'remote work challenges',
+      'saas feedback',
+      'small business pain points'
+    ];
+
+    const [redditPosts, hnStories, askHN, showHN, phPosts, youtubePosts] = await Promise.all([
       fetchRedditPosts(['startups', 'Entrepreneur', 'SaaS', 'smallbusiness', 'sidehustle', 'buildinpublic'], 25),
       fetchHackerNewsStories(30),
       fetchAskHNPosts(20),
       fetchShowHNPosts(20),
       fetchProductHuntPosts(20),
+      // Fetch YouTube videos for each keyword (5 videos per keyword)
+      Promise.all(youtubeKeywords.map(keyword =>
+        searchYouTubeVideos(keyword, { numOfPosts: 5 })
+      )).then(results => results.flat()),
     ]);
 
     // Combine all posts
-    const allPosts: SocialPost[] = [...redditPosts, ...hnStories, ...askHN, ...showHN, ...phPosts];
+    const allPosts: SocialPost[] = [...redditPosts, ...hnStories, ...askHN, ...showHN, ...phPosts, ...youtubePosts];
 
     console.log(`\n📊 Collection Summary:`);
     console.log(`  - Reddit posts: ${redditPosts.length}`);
@@ -38,6 +52,7 @@ async function collectData() {
     console.log(`  - Ask HN: ${askHN.length}`);
     console.log(`  - Show HN: ${showHN.length}`);
     console.log(`  - Product Hunt: ${phPosts.length}`);
+    console.log(`  - YouTube videos: ${youtubePosts.length}`);
     console.log(`  - TOTAL: ${allPosts.length} posts\n`);
 
     if (allPosts.length === 0) {

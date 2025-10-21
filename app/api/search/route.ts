@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { hybridSearch } from '@/lib/elasticsearch/search';
+import { queueSearchQuery } from '@/lib/services/background-collector';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`\n[Search API] Query: "${query}"`);
+
+    // Queue query for background YouTube data collection
+    // This will trigger collection every 10 unique searches
+    queueSearchQuery(query.trim());
 
     const results = await hybridSearch({
       query: query.trim(),
