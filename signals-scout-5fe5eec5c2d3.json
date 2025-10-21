@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "signals-scout",
+  "private_key_id": "5fe5eec5c2d3b1b9a167e18b6c4483cd5ad194f7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCVX8Sreql6fBeG\nNuv1uoHfPFiade0ur9EK1p06V7Ylysk+/YrzxFP77G4qMl0WnVfKY5WAm+uvqmPq\nDUqAGW0ATvD26oQ7TqW4dhId4LrGlp8B2s8Mb7ExgujYaENKmc4b7KiR67WV1MgL\nGAqHiWDi0RuFLzPEwFLNbTPexqAXHyEt/HW6XXP+VzRxgRnZM/7ZnqmHXI9TV0Vi\njIYBlqork4cjfGGHqTyI6xMSbzGbhKRvVTHADOBjgzqZsslwPIsjBo+8WqBLh/aq\nbwlHvnktq9BnL/ge1bk0iClLipZavt5j7y1318L8SpUf9/D+FF/nRpg8ZgIJT0+Q\nEDjXadBXAgMBAAECggEAHZ4UDlYvdYBWX7/TEHGPH7bE8LdyNGAbCFWebjuG+75W\nId2+5++lIV3zR/2ddIb1KcWOFqaT2ExmLDm/bF/eO4HriGHeny3McSNEG1V8YzTp\nSUJb7GDXFvSYe5RMx2Vwtxu5HtnIMvGySnTVXaNxKPgCR2mhD6F8qYu+Da1/f6XY\nO5vgnLmXQDjgeHtP3AGDfSNXtO4n3HfFZFppF4bmP3czHZW/rMRu9cQ2SX8wPn0T\nVMfBvXBFqktrwiMKWv33oNyByDnjnhjoVztjdLSB5Tjqb1bdCISVIaMiTVB56zA2\n1FAiHBGI8n/qEJj8YPSA721LsM8WL6OQh476ztfJjQKBgQDSPWynjkm7lUKBj2y3\n969n15IVYVN4c3e8NY0h3+wAFOwYxS8RY0ciKjur6OPNdkf4+r+5ho4fCbOwjtAB\nN/UIZukvAsQZZLpi/V2IuR17dOj1SP+3dfdo+slDNN9GVp8F/d3KD+WEPq9RsyK1\no6DP03DyQ+VF3KB9J4BquAy9AwKBgQC14uWtFTrqTlg1hVfXKZXbiyYz06ZuwbL0\nv6m20Pub4xGlQjOjU+iscjmNfFtME9/ajXlRJ4SfwAQUbbVQLF+w237GZTd0aayF\nOQ5+fyAMZOi6MXCjBHbaPnLsqORIQDVv1kYPOydtOUAd+VZAd4CY0OqyNm0nGGfv\niI4ut9/NHQKBgQDLmxsYJk+37/RpnuoOPDxOV9ItDIWW+FR0HHSi4sYeyiRgVM6h\ni0D/kGEbur6rY6qOMODunqYS3wV7rsM4+uU+DtQzZ/1cDlYHuhIUcBpiTrWxntGv\n7fn+XCoAATteVlNJrTNXFhAUA9UsTU0HFgGOY9pVdXWcM+/lZRUTxUzo2wKBgQC0\nRtE4zYsYg1CAs8qNs2UaNoBF7CjRLGGwnmubjOVl7BkoQEaoQtmiWpDawIBJFoXQ\nvFqbalzUbeBdUyPb9C9gPx4XjGj7lGXvoc7Q6DWes0HMkoY+vYUD6dPE591kE2gj\nkjDcldgNNSpsyx6HRSsLzD5jJvjnQBR8YU/z1EIZrQKBgH4/q3xH/OwWb/4+JVPC\nHOu/b/qOz3OdqAnoUNwy5C9uDYA8RTCH3mbJBiK3C6zj3NHG3Bg7dbRhr+O/4NiV\nPdECgTsx9IGsVw6uEaK1tXExBQSSsuubxgdoaq9MSHuSl4CEMirJGM0jSZO6gHqo\nakek09YGXzTBHwoftiJ5FuXI\n-----END PRIVATE KEY-----\n",
+  "client_email": "signals-scout@signals-scout.iam.gserviceaccount.com",
+  "client_id": "110345375995872275363",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/signals-scout%40signals-scout.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
