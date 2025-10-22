@@ -1,8 +1,8 @@
-# SignalScout 🔍
+# StartupRadar 🔍
 
 > Find startup opportunities hidden in social conversations
 
-SignalScout uses **Elasticsearch hybrid search** and **Vertex AI grounding** to analyze real discussions from Reddit, Hacker News, Stack Overflow, and more - helping you discover trending problems, validate ideas, and find early adopters.
+StartupRadar uses **Elasticsearch hybrid search** and **Vertex AI grounding** to analyze real discussions from Reddit, Hacker News, Stack Overflow, and more - helping you discover trending problems, validate ideas, and find early adopters.
 
 ## 🎯 Built for AI Accelerate Hackathon - Elastic Challenge
 
@@ -23,7 +23,7 @@ This project demonstrates:
 ### 1. Install Dependencies
 
 ```bash
-cd signalscout
+cd startupradar
 npm install
 ```
 
@@ -41,7 +41,7 @@ ELASTIC_CLOUD_ID="your-cloud-id"
 ELASTIC_API_KEY="your-api-key"
 
 # Reddit (optional - uses public API by default)
-REDDIT_USER_AGENT="SignalScout/1.0"
+REDDIT_USER_AGENT="StartupRadar/1.0"
 ```
 
 ### 3. Authenticate with Google Cloud
@@ -81,7 +81,7 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ## 💬 Example Queries
 
-Try asking SignalScout:
+Try asking StartupRadar:
 - "What problems are fintech founders facing?"
 - "Find early adopters for AI developer tools"
 - "What are people saying about no-code platforms?"
@@ -123,7 +123,7 @@ User Query → Vertex AI Gemini
 ## 📁 Project Structure
 
 ```
-signalscout/
+startupradar/
 ├── app/
 │   ├── api/
 │   │   ├── chat/route.ts        # Conversational AI endpoint

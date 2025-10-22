@@ -21,7 +21,7 @@ export async function fetchRedditPosts(
         `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`,
         {
           headers: {
-            'User-Agent': process.env.REDDIT_USER_AGENT || 'SignalScout/1.0',
+            'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
           },
         }
       );
@@ -59,7 +59,7 @@ export async function searchRedditPosts(query: string, limit: number = 50): Prom
       `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=${limit}&sort=hot`,
       {
         headers: {
-          'User-Agent': process.env.REDDIT_USER_AGENT || 'SignalScout/1.0',
+          'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
         },
       }
     );
@@ -108,7 +108,7 @@ export async function fetchRedditComments(postId: string): Promise<string[]> {
 
     const response = await fetch(`https://www.reddit.com/comments/${cleanId}.json`, {
       headers: {
-        'User-Agent': process.env.REDDIT_USER_AGENT || 'SignalScout/1.0',
+        'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
       },
     });
 

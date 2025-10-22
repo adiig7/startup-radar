@@ -1,4 +1,3 @@
-// Setup Elasticsearch index for SignalScout
 
 import * as dotenv from 'dotenv';
 import { createSignalsIndex } from '../lib/elasticsearch/client';

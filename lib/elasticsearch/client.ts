@@ -1,4 +1,4 @@
-// Elasticsearch client configuration for SignalScout
+// Elasticsearch client configuration for StartupRadar
 
 import { Client } from '@elastic/elasticsearch';
 import type { SocialPost } from '../types';

@@ -6,7 +6,7 @@ import { ThemeProvider } from './providers/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SignalScout - Find Startup Opportunities in Social Conversations',
+  title: 'StartupRadar - Find Startup Opportunities in Social Conversations',
   description: 'Discover startup opportunities hidden in social media. Find early adopters, validate ideas, and spot trending problems.',
 };
 

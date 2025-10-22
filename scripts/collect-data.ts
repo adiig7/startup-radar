@@ -114,7 +114,7 @@ async function collectData() {
     console.log(`Finished at: ${new Date().toLocaleString()}`);
 
     console.log(`\n💡 Tip: Set up a cron job to run this script every 6 hours:`);
-    console.log(`   crontab: 0 */6 * * * cd /path/to/signalscout && npm run collect-data`);
+    console.log(`   crontab: 0 */6 * * * cd /path/to/startupradar && npm run collect-data`);
   } catch (error) {
     console.error('\n❌ Error during data collection:', error);
     console.error('\nTroubleshooting:');

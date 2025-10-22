@@ -27,7 +27,7 @@ export default function Header({ showDashboardButton = false, currentPage = 'hom
           >
             <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
             <span className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
-              SignalScout
+              StartupRadar
             </span>
           </button>
           

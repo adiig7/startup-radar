@@ -93,7 +93,7 @@ export default function LandingPage() {
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto ${
             theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
           }`}>
-            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI grounding</span>, SignalScout analyzes real discussions from Reddit, Hacker News, Stack Overflow, and more to help you discover trending problems, validate ideas, and find early adopters.
+            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI grounding</span>, StartupRadar analyzes real discussions from Reddit, Hacker News, Stack Overflow, and more to help you discover trending problems, validate ideas, and find early adopters.
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 max-w-md mx-auto text-left">

@@ -1,4 +1,4 @@
-// Text utility functions for SignalScout
+// Text utility functions for StartupRadar
 
 /**
  * Truncates text to a specified length with ellipsis

@@ -74,4 +74,4 @@ export function createLogger(namespace: string): Logger {
 }
 
 // Export default logger
-export const logger = new Logger('SignalScout');
+export const logger = new Logger('StartupRadar');

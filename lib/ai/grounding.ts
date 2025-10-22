@@ -1,5 +1,5 @@
 // Vertex AI Grounding with Elasticsearch
-// This is the KEY feature that makes SignalScout work!
+// This is the KEY feature that makes StartupRadar work!
 
 import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
@@ -132,7 +132,7 @@ function buildConversationPrompt(
   groundingContext: string,
   chatHistory: ChatMessage[]
 ): string {
-  const systemPrompt = `You are SignalScout AI, an expert at analyzing social media discussions to identify startup opportunities and market trends.
+  const systemPrompt = `You are StartupRadar AI, an expert at analyzing social media discussions to identify startup opportunities and market trends.
 
 Your job is to:
 1. Analyze the search results provided from Reddit, Hacker News, YouTube, and Product Hunt

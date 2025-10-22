@@ -1,4 +1,4 @@
-// Core types for SignalScout
+// Core types for StartupRadar
 
 export type Platform = 'reddit' | 'hackernews' | 'producthunt' | 'quora' | 'youtube';
 
