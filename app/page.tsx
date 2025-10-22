@@ -71,9 +71,17 @@ export default function Home() {
               SignalScout
             </h1>
           </div>
-          <p className="text-sm text-gray-600 hidden sm:block">
-            Find startup opportunities in social conversations
-          </p>
+          <div className="flex items-center gap-4">
+            <a
+              href="/search"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            >
+              🔍 Advanced Search
+            </a>
+            <p className="text-sm text-gray-600 hidden sm:block">
+              Find startup opportunities in social conversations
+            </p>
+          </div>
         </div>
       </header>
 
