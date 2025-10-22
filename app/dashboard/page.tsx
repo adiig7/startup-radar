@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { FaReddit, FaYoutube } from 'react-icons/fa';
 import { SiProducthunt } from 'react-icons/si';
 import { useTheme } from '../providers/ThemeProvider';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import type { Platform, SocialPost } from '@/lib/types';
+import { formatContentForDisplay } from '@/lib/utils/text';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
@@ -17,12 +18,14 @@ export default function DashboardPage() {
   const { theme } = useTheme();
 
   const [query, setQuery] = useState('');
-  const [timeframe, setTimeframe] = useState<Timeframe>('1year');
-  const [limit, setLimit] = useState(10);
+  const [timeframe, setTimeframe] = useState<Timeframe>('7days');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['youtube', 'reddit', 'hackernews', 'producthunt']);
   const [results, setResults] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
   const timeframeOptions = [
     { value: '24hours', label: '24 Hours' },
@@ -71,6 +74,40 @@ export default function DashboardPage() {
     }
   };
 
+  const toggleExpandPost = (postId: string) => {
+    const newExpanded = new Set(expandedPosts);
+    if (newExpanded.has(postId)) {
+      newExpanded.delete(postId);
+    } else {
+      newExpanded.add(postId);
+    }
+    setExpandedPosts(newExpanded);
+  };
+
+  // Pagination helpers
+  const totalPages = Math.ceil(totalResults / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentResults = results.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of results
+    document.getElementById('search-results')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
   const getDateRange = (timeframe: Timeframe) => {
     const now = new Date();
     const from = new Date();
@@ -100,10 +137,16 @@ export default function DashboardPage() {
     return { from, to: now };
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (page: number = 1) => {
     if (!query.trim() || selectedPlatforms.length === 0) return;
 
     setLoading(true);
+    
+    // Reset to first page if this is a new search
+    if (page === 1) {
+      setCurrentPage(1);
+      setExpandedPosts(new Set());
+    }
 
     try {
       const dateRange = getDateRange(timeframe);
@@ -120,7 +163,8 @@ export default function DashboardPage() {
               to: dateRange.to,
             },
           },
-          limit,
+          limit: 1000, // Fetch a large number to get all results
+          offset: 0,
         }),
       });
 
@@ -221,39 +265,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Results Limit */}
-          <div className="mb-6">
-            <label className={`block text-sm font-medium mb-3 ${
-              theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
-            }`}>Results Limit</label>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="grid grid-cols-4 sm:flex sm:items-center gap-2 sm:gap-3">
-                {[10, 25, 50, 100].map((value) => (
-                  <button
-                    key={value}
-                    onClick={() => setLimit(value)}
-                    className={`px-3 py-2 sm:px-4 rounded-lg border font-medium transition-all text-sm sm:text-base ${
-                      limit === value
-                        ? theme === 'dark'
-                          ? 'border-amber-600 bg-[#a8907033] text-amber-200'
-                          : 'border-amber-700 bg-[#a890703d] text-amber-900'
-                        : theme === 'dark'
-                          ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
-                          : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
-                    }`}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
-              <div className={`flex items-center gap-2 sm:ml-auto ${
-                theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
-              }`}>
-                <span className="text-xl sm:text-2xl">📊</span>
-                <span className="font-medium text-sm sm:text-base">{limit} results</span>
-              </div>
-            </div>
-          </div>
 
           {/* Platform Selection */}
           <div className="mb-6">
@@ -292,7 +303,7 @@ export default function DashboardPage() {
 
           {/* Search Button */}
           <button
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             disabled={loading || !query.trim() || selectedPlatforms.length === 0}
             className={`w-full flex items-center justify-center gap-2 px-4 py-3 sm:px-6 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg text-sm sm:text-base ${
               theme === 'dark'
@@ -308,22 +319,29 @@ export default function DashboardPage() {
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mt-3 sm:mt-6">
+          <div id="search-results" className="mt-3 sm:mt-6">
             <div className={`backdrop-blur-sm rounded-lg border p-3 sm:p-4 mb-3 sm:mb-4 ${
               theme === 'dark'
                 ? 'bg-[#1f1a1733] border-[#4a3824]'
                 : 'bg-[#ffffff99] border-[#e8dcc8]'
             }`}>
-              <p className={`font-medium text-sm sm:text-base ${
-                theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
-              }`}>
-                Found {totalResults} results in {selectedPlatforms.length} platform
-                {selectedPlatforms.length > 1 ? 's' : ''}
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <p className={`font-medium text-sm sm:text-base ${
+                  theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
+                }`}>
+                  Found {totalResults} results in {selectedPlatforms.length} platform
+                  {selectedPlatforms.length > 1 ? 's' : ''}
+                </p>
+                <p className={`text-xs sm:text-sm ${
+                  theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+                }`}>
+                  Showing {startIndex + 1}-{Math.min(endIndex, totalResults)} of {totalResults}
+                </p>
+              </div>
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {results.map((post) => (
+              {currentResults.map((post) => (
                 <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-4 sm:p-6 transition-all ${
                   theme === 'dark'
                     ? 'bg-[#1f1a1733] border-[#4a3824] hover:border-amber-600'
@@ -376,11 +394,44 @@ export default function DashboardPage() {
                       {post.title}
                     </a>
                     
-                    <p className={`text-sm sm:text-base leading-relaxed ${
-                      theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
-                    }`}>
-                      {post.content}
-                    </p>
+                    {(() => {
+                      const isExpanded = expandedPosts.has(post.id);
+                      const contentData = formatContentForDisplay(post.content || '', undefined, false);
+                      const displayContent = isExpanded ? contentData.originalContent : contentData.content;
+                      
+                      return (
+                        <div>
+                          <p className={`text-sm sm:text-base leading-relaxed ${
+                            theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
+                          }`}>
+                            {displayContent}
+                          </p>
+                          
+                          {contentData.isTruncated && (
+                            <button
+                              onClick={() => toggleExpandPost(post.id)}
+                              className={`mt-2 flex items-center gap-1 text-xs font-medium transition-colors ${
+                                theme === 'dark'
+                                  ? 'text-amber-400 hover:text-amber-300'
+                                  : 'text-amber-700 hover:text-amber-800'
+                              }`}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUpIcon className="w-3 h-3" />
+                                  Show less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDownIcon className="w-3 h-3" />
+                                  Show more ({contentData.originalLength - contentData.truncatedLength} more characters)
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Metadata */}
                     <div className={`flex flex-wrap items-center gap-3 pt-2 border-t text-xs ${
@@ -419,6 +470,151 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className={`mt-6 mb-8 p-3 sm:p-4 backdrop-blur-sm rounded-lg border ${
+                theme === 'dark'
+                  ? 'bg-[#1f1a1733] border-[#4a3824]'
+                  : 'bg-[#ffffff99] border-[#e8dcc8]'
+              }`}>
+                {/* Mobile Layout */}
+                <div className="flex sm:hidden flex-col items-center gap-3">
+                  <div className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+                  }`}>
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={goToPreviousPage}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-2 rounded-lg border font-medium transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                        theme === 'dark'
+                          ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 disabled:hover:border-[#6b5943]'
+                          : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 disabled:hover:border-[#d4c5ae]'
+                      }`}
+                    >
+                      Prev
+                    </button>
+                    
+                    {/* Show fewer page numbers on mobile */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 2) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 1) {
+                          pageNum = totalPages - 2 + i;
+                        } else {
+                          pageNum = currentPage - 1 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => goToPage(pageNum)}
+                            className={`w-9 h-9 rounded-lg border font-medium transition-all text-sm flex items-center justify-center ${
+                              currentPage === pageNum
+                                ? theme === 'dark'
+                                  ? 'border-amber-600 bg-[#a8907033] text-amber-200'
+                                  : 'border-amber-700 bg-[#a890703d] text-amber-900'
+                                : theme === 'dark'
+                                  ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
+                                  : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-2 rounded-lg border font-medium transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                        theme === 'dark'
+                          ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 disabled:hover:border-[#6b5943]'
+                          : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 disabled:hover:border-[#d4c5ae]'
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden sm:flex items-center justify-center gap-4">
+                  <div className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+                  }`}>
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg border font-medium transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                      theme === 'dark'
+                        ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 disabled:hover:border-[#6b5943]'
+                        : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 disabled:hover:border-[#d4c5ae]'
+                    }`}
+                  >
+                    Previous
+                  </button>
+                  
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => goToPage(pageNum)}
+                          className={`w-10 h-10 rounded-lg border font-medium transition-all text-sm flex items-center justify-center ${
+                            currentPage === pageNum
+                              ? theme === 'dark'
+                                ? 'border-amber-600 bg-[#a8907033] text-amber-200'
+                                : 'border-amber-700 bg-[#a890703d] text-amber-900'
+                              : theme === 'dark'
+                                ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
+                                : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg border font-medium transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                      theme === 'dark'
+                        ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 disabled:hover:border-[#6b5943]'
+                        : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 disabled:hover:border-[#d4c5ae]'
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
