@@ -15,7 +15,7 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
     try {
       queryEmbedding = await generateEmbedding(request.query);
       console.log('[Hybrid Search] Using semantic + keyword search');
-    } catch (error) {
+    } catch (error: any) {
       console.warn('[Hybrid Search] Embedding generation failed, falling back to keyword-only search');
       console.warn('[Hybrid Search] Error:', error.message);
     }
@@ -31,7 +31,11 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
       from: request.offset || 0,
     });
 
-    console.log(`[Hybrid Search] Found ${searchResponse.hits.total.value} results`);
+    const totalResults = typeof searchResponse.hits.total === 'number'
+      ? searchResponse.hits.total
+      : searchResponse.hits.total?.value || 0;
+
+    console.log(`[Hybrid Search] Found ${totalResults} results`);
 
     // Format results
     const results: SocialPost[] = searchResponse.hits.hits.map((hit: any) => ({
@@ -51,7 +55,7 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
     return {
       query: request.query,
       results,
-      total_results: searchResponse.hits.total.value,
+      total_results: totalResults,
       search_time_ms: Date.now() - startTime,
     };
   } catch (error) {
@@ -180,7 +184,7 @@ function buildHybridQuery(query: string, embedding: number[], filters?: SearchFi
       },
     },
     // Sort by relevance (combining BM25 + vector scores)
-    sort: [{ _score: { order: 'desc' } }],
+    sort: [{ _score: { order: 'desc' as const } }],
   };
 }
 
@@ -197,8 +201,8 @@ export async function getTrendingPosts(limit: number = 20): Promise<SocialPost[]
         },
       },
       sort: [
-        { score: { order: 'desc' } },
-        { num_comments: { order: 'desc' } },
+        { score: { order: 'desc' as const } },
+        { num_comments: { order: 'desc' as const } },
       ],
     },
     size: limit,
@@ -227,7 +231,7 @@ export async function getPostsByPlatform(platform: string, limit: number = 20): 
       query: {
         term: { platform },
       },
-      sort: [{ created_at: { order: 'desc' } }],
+      sort: [{ created_at: { order: 'desc' as const } }],
     },
     size: limit,
   });

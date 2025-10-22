@@ -27,9 +27,11 @@ async function checkIndex() {
     });
 
     console.log('Documents by platform:');
-    platformAgg.aggregations.platforms.buckets.forEach((bucket: any) => {
-      console.log(`  - ${bucket.key}: ${bucket.doc_count}`);
-    });
+    if (platformAgg.aggregations?.platforms) {
+      (platformAgg.aggregations.platforms as any).buckets.forEach((bucket: any) => {
+        console.log(`  - ${bucket.key}: ${bucket.doc_count}`);
+      });
+    }
 
     // Get some sample documents
     console.log('\nSample documents:');
@@ -37,7 +39,7 @@ async function checkIndex() {
       index: SIGNALS_INDEX,
       body: {
         size: 5,
-        sort: [{ created_at: { order: 'desc' } }]
+        sort: [{ created_at: { order: 'desc' as const } }]
       }
     });
 

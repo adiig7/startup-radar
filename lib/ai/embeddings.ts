@@ -13,39 +13,31 @@ const vertexAI = new VertexAI({
   location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
 });
 
-// Use text-embedding-004 model
-const embeddingModel = vertexAI.preview.getGenerativeModel({
-  model: 'text-embedding-004',
-});
-
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 
     const { GoogleAuth } = require('google-auth-library');
-    const path = require('path');
     const fs = require('fs');
 
-    // Load credentials directly from file
     const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
     if (!credentialsPath) {
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
     }
 
-    // Read and parse the credentials file
-    let credentials;
-    try {
-      const credentialsContent = fs.readFileSync(credentialsPath, 'utf8');
-      credentials = JSON.parse(credentialsContent);
-    } catch (error) {
-      throw new Error(`Failed to read credentials file at ${credentialsPath}: ${error.message}`);
+    const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    if (!credentialsJson) {
+      throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON not set');
     }
+
+    const tempCredentialsPath = '/tmp/gcp-credentials.json';
+    fs.writeFileSync(tempCredentialsPath, credentialsJson);
 
     // Create auth client with credentials directly
     const auth = new GoogleAuth({
-      credentials: credentials,
+      credentials: tempCredentialsPath,
       scopes: ['https://www.googleapis.com/auth/cloud-platform'],
     });
 
