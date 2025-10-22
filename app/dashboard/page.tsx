@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { FaReddit, FaYoutube } from 'react-icons/fa';
+import { SiHackerrank, SiProducthunt } from 'react-icons/si';
 import { useTheme } from '../providers/ThemeProvider';
 import type { Platform, SocialPost } from '@/lib/types';
 
@@ -28,11 +30,35 @@ export default function DashboardPage() {
     { value: 'alltime', label: 'All Time' },
   ];
 
-  const platforms: { value: Platform; label: string; icon: string }[] = [
-    { value: 'reddit', label: 'Reddit', icon: '🔴' },
-    { value: 'hackernews', label: 'Hacker News', icon: '🔶' },
-    { value: 'youtube', label: 'YouTube', icon: '📺' },
-    { value: 'producthunt', label: 'ProductHunt', icon: '🚀' },
+  const platforms: { value: Platform; label: string; icon: JSX.Element; color: string }[] = [
+    { 
+      value: 'reddit', 
+      label: 'Reddit', 
+      icon: <FaReddit className="w-5 h-5 text-orange-500" />,
+      color: 'text-orange-500'
+    },
+    { 
+      value: 'hackernews', 
+      label: 'Hacker News', 
+      icon: (
+        <div className="w-5 h-5 rounded bg-orange-600 flex items-center justify-center">
+          <span className="text-white text-xs font-bold">Y</span>
+        </div>
+      ),
+      color: 'text-orange-600'
+    },
+    { 
+      value: 'youtube', 
+      label: 'YouTube', 
+      icon: <FaYoutube className="w-5 h-5 text-red-600" />,
+      color: 'text-red-600'
+    },
+    { 
+      value: 'producthunt', 
+      label: 'ProductHunt', 
+      icon: <SiProducthunt className="w-5 h-5 text-orange-500" />,
+      color: 'text-orange-500'
+    },
   ];
 
   const togglePlatform = (platform: Platform) => {
@@ -112,13 +138,22 @@ export default function DashboardPage() {
   };
 
   const getPlatformIcon = (platform: string) => {
-    const icons: Record<string, string> = {
-      reddit: '🔴',
-      hackernews: '🔶',
-      youtube: '📺',
-      producthunt: '🚀',
-    };
-    return icons[platform] || '📌';
+    const platformData = platforms.find(p => p.value === platform);
+    if (platformData) {
+      return platformData.icon;
+    }
+    
+    // Fallback for unknown platforms
+    return (
+      <div className="w-5 h-5 rounded bg-gray-500 flex items-center justify-center">
+        <span className="text-white text-xs font-bold">?</span>
+      </div>
+    );
+  };
+
+  const getPlatformColor = (platform: string) => {
+    const platformData = platforms.find(p => p.value === platform);
+    return platformData?.color || 'bg-gray-500';
   };
 
   return (
@@ -273,7 +308,7 @@ export default function DashboardPage() {
                         : 'border-[#d4c5ae] bg-[#ffffff80] hover:border-amber-400'
                   }`}
                 >
-                  <span className="text-lg sm:text-xl">{platform.icon}</span>
+                  <div className="flex-shrink-0">{platform.icon}</div>
                   <span className={`flex-1 text-left ${selectedPlatforms.includes(platform.value) 
                     ? theme === 'dark' ? 'text-amber-200' : 'text-amber-900'
                     : theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-700'
@@ -322,56 +357,95 @@ export default function DashboardPage() {
 
             <div className="space-y-3 sm:space-y-4">
               {results.map((post) => (
-                <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-3 sm:p-4 transition-all ${
+                <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-4 sm:p-6 transition-all ${
                   theme === 'dark'
                     ? 'bg-[#1f1a1733] border-[#4a3824] hover:border-amber-600'
                     : 'bg-[#ffffff99] border-[#e8dcc8] hover:border-[#a8906e]'
                 }`}>
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <span className="text-xl sm:text-2xl flex-shrink-0">{getPlatformIcon(post.platform)}</span>
-                    <div className="flex-1 min-w-0">
-                      <a
-                        href={post.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`text-base sm:text-lg font-semibold transition-colors block ${
-                          theme === 'dark'
-                            ? 'text-amber-300 hover:text-amber-200'
-                            : 'text-amber-800 hover:text-amber-900'
-                        }`}
-                      >
-                        {post.title}
-                      </a>
-                      <p className={`mt-1 line-clamp-2 text-sm sm:text-base ${
-                        theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
-                      }`}>{post.content}</p>
-                      <div className={`flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-3 text-xs sm:text-sm ${
+                  {/* Platform Header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+                      theme === 'dark' 
+                        ? 'bg-[#2a2520] border-[#4a3824]' 
+                        : 'bg-white border-[#e8dcc8]'
+                    }`}>
+                      <div className="flex-shrink-0">{getPlatformIcon(post.platform)}</div>
+                      <span className={`text-sm font-medium ${
+                        theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+                      }`}>
+                        {post.platform === 'hackernews' ? 'Hacker News' : 
+                         post.platform === 'producthunt' ? 'Product Hunt' : 
+                         post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 ml-auto">
+                      <div className={`flex items-center gap-1 text-xs ${
                         theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
                       }`}>
-                        <span className={`capitalize font-medium ${
-                          theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
-                        }`}>{post.platform}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="truncate max-w-[100px] sm:max-w-none">{post.author}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>👍 {post.score}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>💬 {post.num_comments}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="text-xs sm:text-sm">{new Date(post.created_at).toLocaleDateString()}</span>
+                        <span className="text-green-500">▲</span>
+                        <span className="font-medium">{post.score}</span>
                       </div>
+                      <div className={`flex items-center gap-1 text-xs ${
+                        theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+                      }`}>
+                        <span className="text-blue-500">💬</span>
+                        <span className="font-medium">{post.num_comments}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-3">
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-lg sm:text-xl font-semibold transition-colors block leading-tight ${
+                        theme === 'dark'
+                          ? 'text-amber-300 hover:text-amber-200'
+                          : 'text-amber-800 hover:text-amber-900'
+                      }`}
+                    >
+                      {post.title}
+                    </a>
+                    
+                    <p className={`text-sm sm:text-base leading-relaxed ${
+                      theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
+                    }`}>
+                      {post.content}
+                    </p>
+
+                    {/* Metadata */}
+                    <div className={`flex flex-wrap items-center gap-3 pt-2 border-t text-xs ${
+                      theme === 'dark' 
+                        ? 'border-[#4a3824] text-[#d4c5ae]' 
+                        : 'border-[#e8dcc8] text-gray-600'
+                    }`}>
+                      <span className="font-medium">by {post.author}</span>
+                      <span>•</span>
+                      <span>{new Date(post.created_at).toLocaleDateString()}</span>
                       {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 sm:gap-2 mt-2">
-                          {post.tags.slice(0, 3).map((tag, idx) => (
-                            <span key={idx} className={`px-2 py-1 border text-xs rounded ${
-                              theme === 'dark'
-                                ? 'bg-[#a8907033] border-[#6b5943] text-amber-200'
-                                : 'bg-[#fbe8b880] border-[#d4c5ae] text-amber-900'
-                            }`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                        <>
+                          <span>•</span>
+                          <div className="flex flex-wrap gap-1">
+                            {post.tags.slice(0, 2).map((tag, idx) => (
+                              <span key={idx} className={`px-2 py-0.5 rounded text-xs ${
+                                theme === 'dark'
+                                  ? 'bg-[#a8907033] text-amber-300'
+                                  : 'bg-[#fbe8b880] text-amber-800'
+                              }`}>
+                                {tag}
+                              </span>
+                            ))}
+                            {post.tags.length > 2 && (
+                              <span className={`text-xs ${
+                                theme === 'dark' ? 'text-amber-400' : 'text-amber-700'
+                              }`}>
+                                +{post.tags.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
