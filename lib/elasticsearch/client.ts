@@ -7,17 +7,33 @@ import * as dotenv from 'dotenv';
 // Load environment variables
 dotenv.config({ path: '.env.local' });
 
-// Initialize Elasticsearch client
-export const esClient = new Client({
-  cloud: {
-    id: process.env.ELASTIC_CLOUD_ID!,
-  },
-  auth: {
-    apiKey: process.env.ELASTIC_API_KEY!,
-  },
-});
-
 export const SIGNALS_INDEX = 'social_signals';
+
+// Lazy-load Elasticsearch client to avoid initialization during build
+let _esClient: Client | null = null;
+
+export function getEsClient(): Client {
+  if (!_esClient) {
+    _esClient = new Client({
+      cloud: {
+        id: process.env.ELASTIC_CLOUD_ID!,
+      },
+      auth: {
+        apiKey: process.env.ELASTIC_API_KEY!,
+      },
+    });
+  }
+  return _esClient;
+}
+
+// For backwards compatibility, export a getter
+export const esClient = new Proxy({} as Client, {
+  get: (target, prop) => {
+    const client = getEsClient();
+    const value = (client as any)[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
+});
 
 // Create index with proper mappings
 export async function createSignalsIndex() {
