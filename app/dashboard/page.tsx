@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SearchForm from '../components/SearchForm';
 import SearchResults from '../components/SearchResults';
+import ChatPanel from '../components/ChatPanel';
 import type { Platform, SocialPost } from '@/lib/types';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
@@ -24,6 +25,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  const [chatOpen, setChatOpen] = useState(false);
 
 
   const toggleExpandPost = (postId: string) => {
@@ -157,6 +159,8 @@ export default function DashboardPage() {
             expandedPosts={expandedPosts}
             onToggleExpand={toggleExpandPost}
             onPageChange={handlePageChange}
+            onToggleChat={() => setChatOpen(!chatOpen)}
+            searchQuery={query}
           />
 
         {loading && (
@@ -171,6 +175,14 @@ export default function DashboardPage() {
         )}
         </div>
       </main>
+
+      {/* Chat Panel */}
+      <ChatPanel
+        searchResults={results}
+        searchQuery={query}
+        isOpen={chatOpen}
+        onToggle={() => setChatOpen(!chatOpen)}
+      />
 
       <Footer />
     </div>

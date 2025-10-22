@@ -1,5 +1,6 @@
 'use client';
 
+import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 import PostCard from './PostCard';
 import Pagination from './Pagination';
@@ -17,6 +18,8 @@ interface SearchResultsProps {
   expandedPosts: Set<string>;
   onToggleExpand: (postId: string) => void;
   onPageChange: (page: number) => void;
+  onToggleChat: () => void;
+  searchQuery: string;
 }
 
 export default function SearchResults({
@@ -30,7 +33,9 @@ export default function SearchResults({
   currentResults,
   expandedPosts,
   onToggleExpand,
-  onPageChange
+  onPageChange,
+  onToggleChat,
+  searchQuery
 }: SearchResultsProps) {
   const { theme } = useTheme();
 
@@ -44,18 +49,33 @@ export default function SearchResults({
           ? 'bg-[#1f1a1733] border-[#4a3824]'
           : 'bg-[#ffffff99] border-[#e8dcc8]'
       }`}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <p className={`font-medium text-sm sm:text-base ${
-            theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
-          }`}>
-            Found {totalResults} results in {selectedPlatforms.length} platform
-            {selectedPlatforms.length > 1 ? 's' : ''}
-          </p>
-          <p className={`text-xs sm:text-sm ${
-            theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
-          }`}>
-            Showing {startIndex + 1}-{Math.min(endIndex, totalResults)} of {totalResults}
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className={`font-medium text-sm sm:text-base ${
+              theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
+            }`}>
+              Found {totalResults} results in {selectedPlatforms.length} platform
+              {selectedPlatforms.length > 1 ? 's' : ''}
+            </p>
+            <p className={`text-xs sm:text-sm ${
+              theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+            }`}>
+              Showing {startIndex + 1}-{Math.min(endIndex, totalResults)} of {totalResults}
+            </p>
+          </div>
+          
+          <button
+            onClick={onToggleChat}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all hover:scale-105 ${
+              theme === 'dark'
+                ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 hover:text-amber-300'
+                : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 hover:text-amber-800'
+            }`}
+          >
+            <ChatBubbleLeftIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Chat about results</span>
+            <span className="sm:hidden">Chat</span>
+          </button>
         </div>
       </div>
 
