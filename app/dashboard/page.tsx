@@ -2,17 +2,19 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { FaReddit, FaYoutube } from 'react-icons/fa';
-import { SiHackerrank, SiProducthunt } from 'react-icons/si';
+import { SiProducthunt } from 'react-icons/si';
 import { useTheme } from '../providers/ThemeProvider';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import type { Platform, SocialPost } from '@/lib/types';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   const [query, setQuery] = useState('');
   const [timeframe, setTimeframe] = useState<Timeframe>('1year');
@@ -157,51 +159,16 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className={`min-h-screen transition-colors ${
+    <div className={`min-h-screen flex flex-col transition-colors ${
       theme === 'dark'
         ? 'bg-gradient-to-br from-[#29241f] via-[#39322c] to-[#29241f]'
         : 'bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]'
     }`}>
-      {/* Navigation */}
-      <nav className={`border-b sticky top-0 z-50 backdrop-blur-sm ${
-        theme === 'dark'
-          ? 'border-[#3d2f1f] bg-[#29241fcc]'
-          : 'border-[#e8dcc8] bg-[#fbf9f4cc]'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/')}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
-              <span className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
-                SignalScout
-              </span>
-            </button>
-            <div className="flex items-center">
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors ${
-                  theme === 'dark'
-                    ? 'hover:bg-[#3d2f1f] text-amber-200'
-                    : 'hover:bg-[#f5eddb] text-gray-700'
-                }`}
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? (
-                  <SunIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header showDashboardButton={false} currentPage="dashboard" />
 
       {/* Search Form */}
-      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-6">
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-6">
         <div className={`backdrop-blur-sm rounded-lg border p-4 sm:p-6 ${
           theme === 'dark'
             ? 'bg-[#1f1a1733] border-[#4a3824]'
@@ -233,7 +200,7 @@ export default function DashboardPage() {
             <label className={`block text-sm font-medium mb-3 ${
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Timeframe</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
               {timeframeOptions.map((option) => (
                 <button
                   key={option.value}
@@ -260,12 +227,12 @@ export default function DashboardPage() {
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Results Limit</label>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="grid grid-cols-4 sm:flex sm:items-center gap-2 sm:gap-3">
                 {[10, 25, 50, 100].map((value) => (
                   <button
                     key={value}
                     onClick={() => setLimit(value)}
-                    className={`px-3 py-2 sm:px-4 rounded-lg border font-medium transition-all text-sm sm:text-base flex-1 sm:flex-none ${
+                    className={`px-3 py-2 sm:px-4 rounded-lg border font-medium transition-all text-sm sm:text-base ${
                       limit === value
                         ? theme === 'dark'
                           ? 'border-amber-600 bg-[#a8907033] text-amber-200'
@@ -293,12 +260,12 @@ export default function DashboardPage() {
             <label className={`block text-sm font-medium mb-3 ${
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Select Platforms</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
               {platforms.map((platform) => (
                 <button
                   key={platform.value}
                   onClick={() => togglePlatform(platform.value)}
-                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-lg border font-medium transition-all text-sm sm:text-base ${
+                  className={`w-full sm:flex-1 sm:min-w-[160px] flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-lg border font-medium transition-all text-sm sm:text-base ${
                     selectedPlatforms.includes(platform.value)
                       ? theme === 'dark'
                         ? 'border-amber-600 bg-[#a8907033]'
@@ -465,7 +432,10 @@ export default function DashboardPage() {
             }`}>Searching across platforms...</p>
           </div>
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

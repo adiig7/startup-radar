@@ -2,12 +2,14 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { SparklesIcon, MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from './providers/ThemeProvider';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 export default function LandingPage() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   const features = [
     {
@@ -56,55 +58,14 @@ export default function LandingPage() {
   ];
 
   return (
-    <main className={`min-h-screen transition-colors ${
+    <div className={`min-h-screen flex flex-col transition-colors ${
       theme === 'dark'
         ? 'bg-gradient-to-br from-[#29241f] via-[#39322c] to-[#29241f]'
         : 'bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]'
     }`}>
-      {/* Navigation */}
-      <nav className={`border-b sticky top-0 z-50 backdrop-blur-sm ${
-        theme === 'dark'
-          ? 'border-[#3d2f1f] bg-[#29241fcc]'
-          : 'border-[#e8dcc8] bg-[#fbf9f4cc]'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
-              <span className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
-                SignalScout
-              </span>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-6">
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors ${
-                  theme === 'dark'
-                    ? 'hover:bg-[#3d2f1f] text-amber-200'
-                    : 'hover:bg-[#f5eddb] text-gray-700'
-                }`}
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? (
-                  <SunIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-              </button>
-              <button
-                onClick={() => router.push('/dashboard')}
-                className={`px-4 py-2 sm:px-6 rounded-lg transition-colors font-medium text-sm sm:text-base ${
-                  theme === 'dark'
-                    ? 'bg-amber-700 text-white hover:bg-amber-600'
-                    : 'bg-amber-800 text-white hover:bg-amber-900'
-                }`}
-              >
-                Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header showDashboardButton={true} currentPage="home" />
+
+      <main className="flex-1">
 
       {/* Hero Section */}
       <section className="max-w-6xl mx-auto px-4 py-12 sm:py-20">
@@ -286,31 +247,9 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
+      </main>
 
-      {/* Footer */}
-      <footer className={`border-t backdrop-blur-sm py-8 sm:py-12 ${
-        theme === 'dark'
-          ? 'border-[#3d2f1f] bg-[#29241f66]'
-          : 'border-[#e8dcc8] bg-[#ffffff66]'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 text-center md:text-left">
-              <SparklesIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
-              <span className={`text-sm sm:text-base ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-                Powered by <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch</span> & <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI</span>
-              </span>
-            </div>
-            <div className={`flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
-              <span>295+ indexed posts</span>
-              <span className="hidden sm:inline">•</span>
-              <span>4 platforms</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Real-time updates</span>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </main>
+      <Footer />
+    </div>
   );
 }
