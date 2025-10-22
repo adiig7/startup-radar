@@ -167,6 +167,12 @@ async function searchProductHuntByQuery(query: string, limit: number): Promise<S
 
   // Map common search terms to ProductHunt topics
   const topicMappings: Record<string, string> = {
+    'remote': 'Productivity',
+    'work from home': 'Productivity',
+    'wfh': 'Productivity',
+    'collaboration': 'Productivity',
+    'communication': 'Productivity',
+    'team': 'Productivity',
     'ai': 'AI',
     'artificial intelligence': 'AI',
     'saas': 'SaaS',
@@ -192,14 +198,15 @@ async function searchProductHuntByQuery(query: string, limit: number): Promise<S
   for (const [keyword, topic] of Object.entries(topicMappings)) {
     if (queryLower.includes(keyword)) {
       matchedTopic = topic;
+      console.log(`[ProductHunt] Matched "${keyword}" → topic: ${topic}`);
       break;
     }
   }
 
-  // If no topic matched, use most relevant default
+  // If no topic matched, return empty (ProductHunt doesn't support generic search)
   if (!matchedTopic) {
-    // Default to SaaS as it's most common for startup signals
-    matchedTopic = 'SaaS';
+    console.log(`[ProductHunt] No topic match for "${query}" - skipping ProductHunt`);
+    return [];
   }
 
   try {

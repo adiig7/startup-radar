@@ -60,14 +60,17 @@ export async function fetchProductHuntPosts(limit: number = 20): Promise<SocialP
     });
 
     if (!response.ok) {
-      throw new Error(`Product Hunt API failed: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('ProductHunt API Error:', response.status, errorData);
+      throw new Error(`Product Hunt API failed: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
+    console.log('[ProductHunt] API Response:', JSON.stringify(data, null, 2).substring(0, 500));
 
     if (data.errors) {
-      console.error('Product Hunt GraphQL errors:', data.errors);
-      throw new Error('GraphQL query failed');
+      console.error('Product Hunt GraphQL errors:', JSON.stringify(data.errors, null, 2));
+      throw new Error(`GraphQL query failed: ${JSON.stringify(data.errors)}`);
     }
 
     const posts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
@@ -82,6 +85,8 @@ export async function fetchProductHuntPosts(limit: number = 20): Promise<SocialP
 
 /**
  * Fetch posts by specific topic/category
+ * Note: ProductHunt GraphQL doesn't support topic filtering in the query,
+ * so we fetch more posts and filter client-side
  */
 export async function fetchProductHuntByTopic(topic: string, limit: number = 20): Promise<SocialPost[]> {
   console.log(`\n🔍 Searching Product Hunt for topic: "${topic}"`);
@@ -93,9 +98,12 @@ export async function fetchProductHuntByTopic(topic: string, limit: number = 20)
   }
 
   try {
+    // Fetch more posts than needed since we'll filter client-side
+    const fetchLimit = Math.min(limit * 5, 50); // Fetch 5x to ensure we get enough after filtering
+
     const query = `
       query {
-        posts(first: ${limit}, topic: "${topic}", order: VOTES) {
+        posts(first: ${fetchLimit}, order: VOTES) {
           edges {
             node {
               id
@@ -134,20 +142,29 @@ export async function fetchProductHuntByTopic(topic: string, limit: number = 20)
     });
 
     if (!response.ok) {
-      throw new Error(`Product Hunt API failed: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('ProductHunt API Error:', response.status, errorData);
+      throw new Error(`Product Hunt API failed: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
 
     if (data.errors) {
-      console.error('Product Hunt GraphQL errors:', data.errors);
-      throw new Error('GraphQL query failed');
+      console.error('Product Hunt GraphQL errors:', JSON.stringify(data.errors, null, 2));
+      throw new Error(`GraphQL query failed: ${JSON.stringify(data.errors)}`);
     }
 
-    const posts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
+    // Normalize all posts
+    const allPosts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
 
-    console.log(`✅ Found ${posts.length} posts for topic "${topic}"`);
-    return posts;
+    // Filter by topic (case-insensitive partial match)
+    const topicLower = topic.toLowerCase();
+    const filteredPosts = allPosts.filter((post: SocialPost) =>
+      post.tags.some((tag: string) => tag.toLowerCase().includes(topicLower))
+    ).slice(0, limit); // Return only the requested limit
+
+    console.log(`✅ Found ${filteredPosts.length} posts for topic "${topic}" (from ${allPosts.length} total)`);
+    return filteredPosts;
   } catch (error) {
     console.error('Error searching Product Hunt:', error);
     return [];
@@ -208,14 +225,17 @@ export async function fetchProductHuntByDate(date: string, limit: number = 20): 
     });
 
     if (!response.ok) {
-      throw new Error(`Product Hunt API failed: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('ProductHunt API Error:', response.status, errorData);
+      throw new Error(`Product Hunt API failed: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
+    console.log('[ProductHunt] API Response:', JSON.stringify(data, null, 2).substring(0, 500));
 
     if (data.errors) {
-      console.error('Product Hunt GraphQL errors:', data.errors);
-      throw new Error('GraphQL query failed');
+      console.error('Product Hunt GraphQL errors:', JSON.stringify(data.errors, null, 2));
+      throw new Error(`GraphQL query failed: ${JSON.stringify(data.errors)}`);
     }
 
     const posts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
