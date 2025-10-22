@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendGroundedMessage } from '@/lib/ai/grounding';
 import type { ConversationContext } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

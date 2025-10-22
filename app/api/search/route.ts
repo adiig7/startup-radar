@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hybridSearch } from '@/lib/elasticsearch/search';
 import { queueSearchQuery } from '@/lib/services/background-collector';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
