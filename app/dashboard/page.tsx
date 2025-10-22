@@ -120,29 +120,29 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <main className="min-h-screen bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]">
       {/* Navigation */}
-      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-[#e8dcc8] bg-[#fbf9f4cc] backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.push('/')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <SparklesIcon className="w-8 h-8 text-blue-400" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <SparklesIcon className="w-8 h-8 text-amber-700" />
+              <span className="text-2xl font-bold text-gray-900">
                 SignalScout
               </span>
             </button>
             <div className="flex items-center gap-6">
               <button
-                className="text-blue-400 font-medium border-b-2 border-blue-400 pb-1"
+                className="text-amber-800 font-medium border-b-2 border-amber-800 pb-1"
               >
                 Dashboard
               </button>
               <button
                 onClick={() => router.push('/')}
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Home
               </button>
@@ -153,23 +153,23 @@ export default function DashboardPage() {
 
       {/* Search Form */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-6">
+        <div className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-6">
           {/* Query Input */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Search Query</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Search Query</label>
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g., 'people struggling with remote work' or 'alternatives to Slack for small teams'"
-              className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-white placeholder-gray-400"
+              className="w-full px-4 py-3 bg-[#ffffffcc] border border-[#d4c5ae] rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600 resize-none text-gray-900 placeholder-gray-500"
               rows={3}
             />
-            <p className="text-sm text-gray-400 mt-1">{query.length} characters</p>
+            <p className="text-sm text-gray-600 mt-1">{query.length} characters</p>
           </div>
 
           {/* Timeframe */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-3">Timeframe</label>
+            <label className="block text-sm font-medium text-gray-800 mb-3">Timeframe</label>
             <div className="grid grid-cols-5 gap-3">
               {timeframeOptions.map((option) => (
                 <button
@@ -177,8 +177,8 @@ export default function DashboardPage() {
                   onClick={() => setTimeframe(option.value as Timeframe)}
                   className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     timeframe === option.value
-                      ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                      : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
+                      ? 'border-amber-700 bg-[#a890703d] text-amber-900'
+                      : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
                   }`}
                 >
                   {option.label}
@@ -189,7 +189,7 @@ export default function DashboardPage() {
 
           {/* Results Limit */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-3">Results Limit</label>
+            <label className="block text-sm font-medium text-gray-800 mb-3">Results Limit</label>
             <div className="flex items-center gap-3">
               {[10, 25, 50, 100].map((value) => (
                 <button
@@ -197,14 +197,14 @@ export default function DashboardPage() {
                   onClick={() => setLimit(value)}
                   className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     limit === value
-                      ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                      : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
+                      ? 'border-amber-700 bg-[#a890703d] text-amber-900'
+                      : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
                   }`}
                 >
                   {value}
                 </button>
               ))}
-              <div className="flex items-center gap-2 text-gray-300 ml-auto">
+              <div className="flex items-center gap-2 text-gray-800 ml-auto">
                 <span className="text-2xl">📊</span>
                 <span className="font-medium">{limit} results</span>
               </div>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
 
           {/* Platform Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-3">Select Platforms</label>
+            <label className="block text-sm font-medium text-gray-800 mb-3">Select Platforms</label>
             <div className="grid grid-cols-4 gap-3">
               {platforms.map((platform) => (
                 <button
@@ -221,15 +221,15 @@ export default function DashboardPage() {
                   onClick={() => togglePlatform(platform.value)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg border font-medium transition-all ${
                     selectedPlatforms.includes(platform.value)
-                      ? 'border-blue-500 bg-blue-500/20'
-                      : 'border-white/20 bg-white/5 hover:border-white/40'
+                      ? 'border-amber-700 bg-[#a890703d]'
+                      : 'border-[#d4c5ae] bg-[#ffffff80] hover:border-amber-400'
                   }`}
                 >
                   <span className="text-xl">{platform.icon}</span>
-                  <span className={selectedPlatforms.includes(platform.value) ? 'text-blue-300' : 'text-gray-300'}>
+                  <span className={selectedPlatforms.includes(platform.value) ? 'text-amber-900' : 'text-gray-700'}>
                     {platform.label}
                   </span>
-                  {selectedPlatforms.includes(platform.value) && <span className="ml-auto text-blue-400">✓</span>}
+                  {selectedPlatforms.includes(platform.value) && <span className="ml-auto text-amber-700">✓</span>}
                 </button>
               ))}
             </div>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim() || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-amber-800 text-white rounded-lg font-medium hover:bg-amber-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
             {loading ? 'Searching & Collecting Data...' : 'Search'}
@@ -249,8 +249,8 @@ export default function DashboardPage() {
         {/* Results */}
         {results.length > 0 && (
           <div className="mt-6">
-            <div className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-4 mb-4">
-              <p className="text-gray-200 font-medium">
+            <div className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-4 mb-4">
+              <p className="text-gray-900 font-medium">
                 Found {totalResults} results in {selectedPlatforms.length} platform
                 {selectedPlatforms.length > 1 ? 's' : ''}
               </p>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               {results.map((post) => (
-                <div key={post.id} className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-4 hover:border-blue-500/50 transition-all">
+                <div key={post.id} className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-4 hover:border-[#a8906e] transition-all">
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{getPlatformIcon(post.platform)}</span>
                     <div className="flex-1">
@@ -266,13 +266,13 @@ export default function DashboardPage() {
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg font-semibold text-blue-300 hover:text-blue-400 transition-colors"
+                        className="text-lg font-semibold text-amber-800 hover:text-amber-900 transition-colors"
                       >
                         {post.title}
                       </a>
-                      <p className="text-gray-300 mt-1 line-clamp-2">{post.content}</p>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-400">
-                        <span className="capitalize font-medium text-gray-300">{post.platform}</span>
+                      <p className="text-gray-700 mt-1 line-clamp-2">{post.content}</p>
+                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                        <span className="capitalize font-medium text-gray-800">{post.platform}</span>
                         <span>•</span>
                         <span>{post.author}</span>
                         <span>•</span>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                       {post.tags.length > 0 && (
                         <div className="flex gap-2 mt-2">
                           {post.tags.slice(0, 3).map((tag, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs rounded">
+                            <span key={idx} className="px-2 py-1 bg-[#fbe8b880] border border-[#d4c5ae] text-amber-900 text-xs rounded">
                               {tag}
                             </span>
                           ))}
@@ -301,8 +301,8 @@ export default function DashboardPage() {
 
         {loading && (
           <div className="mt-6 text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-400 border-t-transparent"></div>
-            <p className="mt-4 text-gray-300">Searching across platforms...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-700 border-t-transparent"></div>
+            <p className="mt-4 text-gray-700">Searching across platforms...</p>
           </div>
         )}
       </div>
