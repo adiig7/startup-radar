@@ -1,33 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, SparklesIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import type { Platform, SocialPost } from '@/lib/types';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
-export default function SearchPage() {
-  const searchParams = useSearchParams();
+export default function DashboardPage() {
   const router = useRouter();
-  const urlQuery = searchParams.get('q');
 
-  const [query, setQuery] = useState(urlQuery || '');
+  const [query, setQuery] = useState('');
   const [timeframe, setTimeframe] = useState<Timeframe>('1year');
   const [limit, setLimit] = useState(10);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['youtube', 'reddit', 'hackernews', 'producthunt']);
   const [results, setResults] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
-
-  // Auto-search if query param is present
-  useEffect(() => {
-    if (urlQuery && urlQuery.trim()) {
-      // Trigger search on mount if query is present
-      handleSearch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlQuery]);
 
   const timeframeOptions = [
     { value: '24hours', label: '24 Hours' },
@@ -132,30 +121,35 @@ export default function SearchPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
+      {/* Navigation */}
+      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <SparklesIcon className="w-8 h-8 text-blue-400" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                SignalScout
+              </span>
+            </button>
+            <div className="flex items-center gap-6">
+              <button
+                className="text-blue-400 font-medium border-b-2 border-blue-400 pb-1"
+              >
+                Dashboard
+              </button>
               <button
                 onClick={() => router.push('/')}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                className="text-gray-300 hover:text-white transition-colors"
               >
-                <ArrowLeftIcon className="w-5 h-5 text-gray-300" />
+                Home
               </button>
-              <div className="flex items-center gap-2">
-                <SparklesIcon className="w-8 h-8 text-blue-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  SignalScout
-                </h1>
-              </div>
             </div>
-            <p className="text-sm text-gray-300 hidden sm:block">
-              Search across YouTube, Reddit, HackerNews & ProductHunt
-            </p>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Search Form */}
       <div className="max-w-7xl mx-auto px-4 py-6">

@@ -1,147 +1,231 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, SparklesIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
-export default function Home() {
+export default function LandingPage() {
   const router = useRouter();
-  const [input, setInput] = useState('');
 
-  const handleSearch = () => {
-    if (!input.trim()) return;
-    // Navigate to search page with query
-    router.push(`/search?q=${encodeURIComponent(input.trim())}`);
-  };
+  const features = [
+    {
+      icon: <MagnifyingGlassIcon className="w-8 h-8" />,
+      title: 'Social Media Search',
+      description: 'Search across Reddit, Stack Overflow, Hacker News, Quora, Product Hunt, YouTube, and more platforms to find relevant conversations and discussions.'
+    },
+    {
+      icon: <LightBulbIcon className="w-8 h-8" />,
+      title: 'Trending Problems',
+      description: 'Identify trending problems and market gaps before competitors by analyzing real-time social conversations and discussions.'
+    },
+    {
+      icon: <ChartBarIcon className="w-8 h-8" />,
+      title: 'Competitive Intelligence',
+      description: 'Monitor your competitors and discover market opportunities before they become obvious to everyone else with AI-powered analysis.'
+    },
+    {
+      icon: <SparklesIcon className="w-8 h-8" />,
+      title: 'GPT Analysis',
+      description: 'Analyze how well your brand gets recommended by AI systems and get actionable insights to improve your visibility.'
+    },
+  ];
 
-  const handleExampleClick = (query: string) => {
-    router.push(`/search?q=${encodeURIComponent(query)}`);
-  };
-
-  const exampleQueries = [
-    { icon: '💼', text: 'What problems are fintech founders facing?' },
-    { icon: '🤖', text: 'Find early adopters for AI developer tools' },
-    { icon: '🛠️', text: 'What are people saying about no-code tools?' },
-    { icon: '📈', text: 'Trending problems in SaaS this week' },
+  const steps = [
+    {
+      number: '1',
+      title: 'Enter Your Search',
+      description: 'Start by entering keywords or a natural language query that describes what your startup is about. Our smart search understands context and intent.'
+    },
+    {
+      number: '2',
+      title: 'Select Platforms',
+      description: 'Choose from Reddit, Stack Overflow, Hacker News, Pinterest, Tumblr, GitHub, YouTube, Quora, and Mastodon to search across multiple platforms simultaneously.'
+    },
+    {
+      number: '3',
+      title: 'Advanced Analysis',
+      description: 'We analyze posts for emotional content, intent, and relevance to help you find exactly what you\'re looking for with signal strength indicators.'
+    },
+    {
+      number: '4',
+      title: 'Get Results',
+      description: 'Receive curated results with emotional context, making it easy to identify and connect with the right people for your startup.'
+    },
   ];
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SparklesIcon className="w-8 h-8 text-blue-400" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              SignalScout
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <a
-              href="/search"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-            >
-              🔍 Search
-            </a>
-            <p className="text-sm text-gray-300 hidden sm:block">
-              Find startup opportunities in social conversations
-            </p>
+      {/* Navigation */}
+      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-8 h-8 text-blue-400" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                SignalScout
+              </span>
+            </div>
+            <div className="flex items-center gap-6">
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Get Started
+              </button>
+            </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <div className="max-w-5xl mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          {/* Icon */}
-          <div className="mb-8 flex justify-center">
-            <div className="relative">
-              <SparklesIcon className="w-20 h-20 text-blue-400" />
-              <div className="absolute -top-2 -right-2">
-                <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
-              </div>
-            </div>
+      <section className="max-w-6xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <div className="inline-block px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
+            <span className="text-blue-300 text-sm font-medium">Your Startup's Secret Weapon</span>
           </div>
 
-          {/* Heading */}
-          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Find Your Next Startup Idea
-          </h2>
+          <h1 className="text-6xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Find Signals
+            </span>
+            <br />
+            <span className="text-white">That Build Startups</span>
+          </h1>
 
-          {/* Subtitle */}
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-            Ask me anything about startup opportunities, market trends, or early adopter insights from Reddit, Hacker News, and more.
+          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            Discover startup opportunities hidden in social conversations. Find early adopters, validate ideas, and spot trending problems across Reddit, Hacker News, Stack Overflow, Quora, Product Hunt, and 5+ more platforms.
           </p>
 
-          {/* Example Queries */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16 max-w-3xl mx-auto">
-            {exampleQueries.map((query, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleExampleClick(query.text)}
-                className="group p-6 border border-white/10 rounded-xl hover:border-blue-400/50 hover:bg-white/5 transition-all text-left bg-black/20 backdrop-blur-sm"
-              >
-                <div className="flex items-start gap-3">
-                  <MagnifyingGlassIcon className="w-5 h-5 text-blue-400 mt-1 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <p className="text-gray-200 group-hover:text-white transition-colors">
-                      {query.text}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Feature Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-12 text-sm">
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-green-300">Real-time data</span>
+          <div className="space-y-4 mb-8 max-w-md mx-auto text-left">
+            <div className="flex items-start gap-3">
+              <div className="text-green-400 mt-1">✓</div>
+              <p className="text-gray-300">Discover early adopters and validate startup ideas with real conversations</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
-              <SparklesIcon className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-300">AI-powered insights</span>
+            <div className="flex items-start gap-3">
+              <div className="text-green-400 mt-1">✓</div>
+              <p className="text-gray-300">Identify trending problems and market gaps before competitors</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full">
-              <ChatBubbleLeftRightIcon className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-300">Grounded in facts</span>
+            <div className="flex items-start gap-3">
+              <div className="text-green-400 mt-1">✓</div>
+              <p className="text-gray-300">Free to start - no credit card required</p>
             </div>
           </div>
-        </div>
 
-        {/* Search Input */}
-        <div className="max-w-3xl mx-auto">
-          <div className="flex gap-3 p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Ask about startup opportunities, trends, or problems..."
-              className="flex-1 px-6 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
-            />
+          <div className="flex items-center justify-center gap-4">
             <button
-              onClick={handleSearch}
-              disabled={!input.trim()}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg hover:shadow-xl"
+              onClick={() => router.push('/dashboard')}
+              className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
             >
-              Send
+              Detect Signals
+              <ArrowRightIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-8 py-4 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors font-medium"
+            >
+              How It Works
             </button>
           </div>
-          <p className="text-center text-gray-400 text-sm mt-4">
-            Press Enter to search across YouTube, Reddit, HackerNews, and ProductHunt
-          </p>
         </div>
-      </div>
+
+        {/* Platform Icons */}
+        <div className="flex flex-wrap items-center justify-center gap-8 mt-16 opacity-60">
+          <div className="text-4xl">🔴</div>
+          <div className="text-4xl">🔶</div>
+          <div className="text-4xl">📺</div>
+          <div className="text-4xl">🚀</div>
+          <div className="text-4xl">💬</div>
+          <div className="text-4xl">📌</div>
+          <div className="text-4xl">🐙</div>
+          <div className="text-4xl">🟣</div>
+        </div>
+      </section>
+
+      {/* Core Features */}
+      <section className="bg-black/20 backdrop-blur-sm border-y border-white/10 py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Core Features</h2>
+            <p className="text-gray-300 text-lg">
+              Everything you need to discover market opportunities, validate ideas, and stay ahead of the competition.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8 hover:border-blue-500/50 transition-all"
+              >
+                <div className="text-blue-400 mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-300">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">How Social Media Search Works</h2>
+            <p className="text-gray-300 text-lg">
+              Our advanced search technology helps you find meaningful conversations and validate startup ideas across multiple social media platforms.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            {steps.map((step, idx) => (
+              <div
+                key={idx}
+                className="flex gap-8 items-start bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8"
+              >
+                <div className="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+                  {step.number}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-white mb-3">{step.title}</h3>
+                  <p className="text-gray-300 text-lg">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-y border-white/10 py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to Find Your Next Startup Idea?</h2>
+          <p className="text-xl text-gray-300 mb-8">
+            Join thousands of founders discovering opportunities in social conversations
+          </p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-10 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg inline-flex items-center gap-2"
+          >
+            Start Searching Now
+            <ArrowRightIcon className="w-6 h-6" />
+          </button>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm mt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
               <SparklesIcon className="w-6 h-6 text-blue-400" />
-              <span className="text-gray-300 text-sm">
+              <span className="text-gray-300">
                 Powered by Elasticsearch & Google Cloud Vertex AI
               </span>
             </div>
