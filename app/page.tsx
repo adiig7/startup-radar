@@ -1,10 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { SparklesIcon, MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { useTheme } from './providers/ThemeProvider';
 
 export default function LandingPage() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   const features = [
     {
@@ -53,21 +55,48 @@ export default function LandingPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <main className={`min-h-screen transition-colors ${
+      theme === 'dark'
+        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900'
+        : 'bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50'
+    }`}>
       {/* Navigation */}
-      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+      <nav className={`border-b sticky top-0 z-50 backdrop-blur-sm ${
+        theme === 'dark'
+          ? 'border-white/10 bg-black/20'
+          : 'border-gray-200 bg-white/80'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <SparklesIcon className="w-8 h-8 text-blue-400" />
+              <SparklesIcon className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 SignalScout
               </span>
             </div>
             <div className="flex items-center gap-6">
               <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-white/10 text-gray-300'
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <SunIcon className="w-5 h-5" />
+                ) : (
+                  <MoonIcon className="w-5 h-5" />
+                )}
+              </button>
+              <button
                 onClick={() => router.push('/dashboard')}
-                className="text-gray-300 hover:text-white transition-colors"
+                className={`transition-colors ${
+                  theme === 'dark'
+                    ? 'text-gray-300 hover:text-white'
+                    : 'text-gray-700 hover:text-gray-900'
+                }`}
               >
                 Dashboard
               </button>
@@ -85,8 +114,14 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <div className="inline-block px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
-            <span className="text-blue-300 text-sm font-medium">Your Startup's Secret Weapon</span>
+          <div className={`inline-block px-4 py-2 border rounded-full mb-6 ${
+            theme === 'dark'
+              ? 'bg-blue-500/10 border-blue-500/20'
+              : 'bg-blue-100 border-blue-200'
+          }`}>
+            <span className={`text-sm font-medium ${
+              theme === 'dark' ? 'text-blue-300' : 'text-blue-700'
+            }`}>Your Startup's Secret Weapon</span>
           </div>
 
           <h1 className="text-6xl font-bold mb-6">
@@ -94,25 +129,33 @@ export default function LandingPage() {
               Find Signals
             </span>
             <br />
-            <span className="text-white">That Build Startups</span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>That Build Startups</span>
           </h1>
 
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className={`text-xl mb-8 max-w-3xl mx-auto ${
+            theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+          }`}>
             Discover startup opportunities hidden in social conversations. Find early adopters, validate ideas, and spot trending problems across Reddit, Hacker News, Stack Overflow, Quora, Product Hunt, and 5+ more platforms.
           </p>
 
           <div className="space-y-4 mb-8 max-w-md mx-auto text-left">
             <div className="flex items-start gap-3">
-              <div className="text-green-400 mt-1">✓</div>
-              <p className="text-gray-300">Discover early adopters and validate startup ideas with real conversations</p>
+              <div className="text-green-500 mt-1">✓</div>
+              <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                Discover early adopters and validate startup ideas with real conversations
+              </p>
             </div>
             <div className="flex items-start gap-3">
-              <div className="text-green-400 mt-1">✓</div>
-              <p className="text-gray-300">Identify trending problems and market gaps before competitors</p>
+              <div className="text-green-500 mt-1">✓</div>
+              <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                Identify trending problems and market gaps before competitors
+              </p>
             </div>
             <div className="flex items-start gap-3">
-              <div className="text-green-400 mt-1">✓</div>
-              <p className="text-gray-300">Free to start - no credit card required</p>
+              <div className="text-green-500 mt-1">✓</div>
+              <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                Free to start - no credit card required
+              </p>
             </div>
           </div>
 
@@ -128,7 +171,11 @@ export default function LandingPage() {
               onClick={() => {
                 document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="px-8 py-4 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors font-medium"
+              className={`px-8 py-4 rounded-lg transition-colors font-medium ${
+                theme === 'dark'
+                  ? 'bg-white/10 text-white hover:bg-white/20'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+              }`}
             >
               How It Works
             </button>
@@ -149,7 +196,11 @@ export default function LandingPage() {
       </section>
 
       {/* Core Features */}
-      <section className="bg-black/20 backdrop-blur-sm border-y border-white/10 py-20">
+      <section className={`backdrop-blur-sm border-y py-20 ${
+        theme === 'dark'
+          ? 'bg-black/20 border-white/10'
+          : 'bg-white/50 border-gray-200'
+      }`}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">Core Features</h2>
