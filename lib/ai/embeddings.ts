@@ -2,6 +2,9 @@
 
 import { VertexAI } from '@google-cloud/vertexai';
 import type { SocialPost } from '../types';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('Embeddings');
 
 // Lazy-load VertexAI client to avoid initialization during build
 let _vertexAI: VertexAI | null = null;
@@ -24,33 +27,101 @@ function getVertexAI(): VertexAI {
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
+  const startTime = Date.now();
+
   try {
+    logger.debug('Starting embedding generation', {
+      textLength: text.length,
+      textPreview: text.substring(0, 100) + '...',
+    });
+
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 
+    if (!projectId) {
+      logger.error('Missing GOOGLE_CLOUD_PROJECT_ID');
+      throw new Error('GOOGLE_CLOUD_PROJECT_ID not set in environment');
+    }
+
+    logger.debug('Using Google Cloud configuration', {
+      projectId,
+      location,
+    });
+
     const { GoogleAuth } = require('google-auth-library');
-    const fs = require('fs');
 
-    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-
-    if (!credentialsPath) {
+    const credentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    if (!credentialsEnv) {
+      logger.error('Missing GOOGLE_APPLICATION_CREDENTIALS');
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
     }
 
-    const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    if (!credentialsJson) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set');
-    }
-
-    const tempCredentialsPath = '/tmp/gcp-credentials.json';
-    fs.writeFileSync(tempCredentialsPath, credentialsJson);
-
-    // Create auth client with credentials directly
-    const auth = new GoogleAuth({
-      credentials: tempCredentialsPath,
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    logger.debug('Processing Google credentials', {
+      credentialsType: credentialsEnv.includes('/') ? 'file_path' : 'content',
+      credentialsInfo: credentialsEnv.includes('/') ? credentialsEnv : `${credentialsEnv.length} chars`,
     });
 
+    // Create auth client - handle both file paths and direct credentials
+    logger.debug('Creating Google Auth client');
+    let auth;
+    
+    if (credentialsEnv.includes('/') || credentialsEnv.includes('\\')) {
+      // File path - use standard Google Auth with keyFilename
+      logger.debug('Using credentials file path');
+      auth = new GoogleAuth({
+        keyFilename: credentialsEnv,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+      });
+    } else {
+      // Direct credentials content - parse and use credentials object
+      logger.debug('Parsing credentials content');
+      let credentials;
+      try {
+        // First, try to parse as direct JSON
+        try {
+          credentials = JSON.parse(credentialsEnv);
+          logger.debug('Credentials parsed as direct JSON');
+        } catch (directParseError) {
+          // If direct JSON parsing fails, try base64 decoding
+          logger.debug('Direct JSON parsing failed, trying base64 decode');
+          
+          // Validate that it looks like base64 (no binary characters)
+          if (!/^[A-Za-z0-9+/=\s]*$/.test(credentialsEnv)) {
+            throw new Error('Credentials contain invalid characters - not valid base64 or JSON');
+          }
+          
+          const credentialsJson = Buffer.from(credentialsEnv.trim(), 'base64').toString('utf-8');
+          credentials = JSON.parse(credentialsJson);
+          logger.debug('Credentials decoded from base64 and parsed');
+        }
+
+        // Validate that it has the required fields
+        if (!credentials.client_email) {
+          throw new Error('Credentials missing client_email field');
+        }
+        if (!credentials.private_key) {
+          throw new Error('Credentials missing private_key field');
+        }
+
+        logger.debug('Credentials validated successfully', {
+          clientEmail: credentials.client_email,
+          projectId: credentials.project_id,
+        });
+
+        auth = new GoogleAuth({
+          credentials: credentials,
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        });
+      } catch (parseError: any) {
+        logger.error('Failed to parse Google credentials', parseError, {
+          credentialsLength: credentialsEnv.length,
+          credentialsPreview: credentialsEnv.substring(0, 100),
+        });
+        throw new Error(`Invalid GOOGLE_APPLICATION_CREDENTIALS format: ${parseError.message}`);
+      }
+    }
+
+    logger.debug('Getting authenticated client');
     const client = await auth.getClient();
 
     // Make the API request
@@ -58,6 +129,8 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     const request = {
       instances: [{ content: text }],
     };
+
+    logger.debug('Making Vertex AI API request', { endpoint });
 
     // @ts-ignore
     const response = await client.request({
@@ -67,18 +140,34 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     });
 
     if (response.data?.predictions?.[0]?.embeddings?.values) {
-      return response.data.predictions[0].embeddings.values;
+      const embedding = response.data.predictions[0].embeddings.values;
+      const elapsedTime = Date.now() - startTime;
+
+      logger.info('Embedding generated successfully', {
+        dimensions: embedding.length,
+        timeMs: elapsedTime,
+      });
+
+      return embedding;
     }
 
+    logger.error('No embedding found in API response', null, {
+      responseData: response.data,
+    });
     throw new Error('No embedding found in response');
-  } catch (error) {
-    console.error('Error generating embedding:', error);
+  } catch (error: any) {
+    const elapsedTime = Date.now() - startTime;
+    logger.error('Embedding generation failed', error, {
+      timeMs: elapsedTime,
+      textLength: text?.length,
+    });
     throw error; // Don't fallback to zero vector - let it fail properly
   }
 }
 
 export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
-  console.log(`Generating embeddings for ${texts.length} items...`);
+  const startTime = Date.now();
+  logger.info('Starting batch embedding generation', { count: texts.length });
 
   // Process in smaller batches to avoid rate limits (5 per batch)
   const batchSize = 5;
@@ -86,12 +175,27 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
 
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize);
+    const batchNumber = Math.floor(i / batchSize) + 1;
+    const totalBatches = Math.ceil(texts.length / batchSize);
 
-    console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(texts.length / batchSize)} (items ${i + 1}-${Math.min(i + batchSize, texts.length)}/${texts.length})...`);
+    logger.info(`Processing batch ${batchNumber}/${totalBatches}`, {
+      batchNumber,
+      totalBatches,
+      itemsRange: `${i + 1}-${Math.min(i + batchSize, texts.length)}`,
+      totalItems: texts.length,
+    });
 
-    const batchResults = await Promise.all(batch.map((text) => generateEmbedding(text)));
+    try {
+      const batchResults = await Promise.all(batch.map((text) => generateEmbedding(text)));
+      embeddings.push(...batchResults);
 
-    embeddings.push(...batchResults);
+      logger.debug(`Batch ${batchNumber} completed successfully`, {
+        embeddingsGenerated: batchResults.length,
+      });
+    } catch (batchError: any) {
+      logger.error(`Batch ${batchNumber} failed`, batchError);
+      throw batchError;
+    }
 
     // Longer delay to avoid rate limiting (2 seconds between batches)
     if (i + batchSize < texts.length) {
@@ -99,7 +203,13 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
     }
   }
 
-  console.log(`✅ Generated ${embeddings.length} embeddings`);
+  const totalTime = Date.now() - startTime;
+  logger.info('Batch embedding generation completed', {
+    totalEmbeddings: embeddings.length,
+    totalTimeMs: totalTime,
+    averageTimePerEmbedding: Math.round(totalTime / embeddings.length),
+  });
+
   return embeddings;
 }
 

@@ -9,7 +9,11 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, context } = body as { message: string; context?: ConversationContext };
+    const { message, searchResults, context } = body as {
+      message: string;
+      searchResults?: any[];
+      context?: ConversationContext;
+    };
 
     // Validate message
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
@@ -24,13 +28,56 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`\n[Chat API] New message: "${message.substring(0, 50)}..."`);
+    console.log(`[Chat API] Using ${searchResults?.length || 0} pre-fetched results`);
 
-    // Send grounded message to Vertex AI
-    const response = await sendGroundedMessage(message, context);
+    const { stream, citations } = await sendGroundedMessage(message, context, searchResults);
 
-    console.log(`[Chat API] Response generated\n`);
+    // Create a ReadableStream to send data to the client
+    const encoder = new TextEncoder();
+    let fullContent = '';
 
-    return NextResponse.json(response);
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (text) {
+              fullContent += text;
+              // Send chunk to client
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ content: text, done: false })}\n\n`)
+              );
+            }
+          }
+
+          // Send final message with citations
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                done: true,
+                fullContent,
+                citations,
+                timestamp: new Date().toISOString(),
+              })}\n\n`
+            )
+          );
+
+          controller.close();
+          console.log(`[Chat API] Streaming completed (${fullContent.length} chars)\n`);
+        } catch (error) {
+          console.error('[Chat API] Streaming error:', error);
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(readableStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    });
   } catch (error: any) {
     console.error('[Chat API] Error:', error);
 

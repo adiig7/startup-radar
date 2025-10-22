@@ -40,43 +40,49 @@ function getModel() {
  */
 export async function sendGroundedMessage(
   userMessage: string,
-  context?: ConversationContext
-): Promise<ChatMessage> {
+  context?: ConversationContext,
+  providedResults?: SocialPost[]
+): Promise<{ stream: any; citations: SocialPost[] }> {
   try {
     console.log(`\n[Grounded Chat] User query: "${userMessage}"`);
 
-    // Step 1: Search Elasticsearch for relevant posts
-    const searchResults = await hybridSearch({
-      query: userMessage,
-      filters: context?.filters,
-      limit: 10, // Get top 10 relevant posts for grounding
-    });
+    let relevantPosts: SocialPost[];
 
-    console.log(`[Grounded Chat] Found ${searchResults.results.length} relevant posts`);
+    // Step 1: Use provided results or search Elasticsearch
+    if (providedResults && providedResults.length > 0) {
+      console.log(`[Grounded Chat] Using ${providedResults.length} pre-fetched results from dashboard`);
+      // Use top 15 posts to reduce context size and improve speed
+      relevantPosts = providedResults.slice(0, 15);
+    } else {
+      console.log(`[Grounded Chat] No pre-fetched results, searching Elasticsearch...`);
+      const searchResults = await hybridSearch({
+        query: userMessage,
+        filters: context?.filters,
+        limit: 10, // Get top 10 relevant posts for grounding
+      });
+      console.log(`[Grounded Chat] Found ${searchResults.results.length} relevant posts from search`);
+      relevantPosts = searchResults.results;
+    }
 
-    // Step 2: Prepare grounding context from search results
-    const groundingContext = prepareGroundingContext(searchResults.results);
+    // Step 2: Prepare grounding context from posts
+    const groundingContext = prepareGroundingContext(relevantPosts);
 
     // Step 3: Build conversation history
     const chatHistory = context?.messages || [];
     const conversationPrompt = buildConversationPrompt(userMessage, groundingContext, chatHistory);
 
-    // Step 4: Send to Gemini
+    // Step 4: Send to Gemini with streaming
     const model = getModel();
-    const result = await model.generateContent({
+    const result = await model.generateContentStream({
       contents: [{ role: 'user', parts: [{ text: conversationPrompt }] }],
     });
 
-    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+    console.log(`[Grounded Chat] Streaming response...`);
 
-    console.log(`[Grounded Chat] Generated response (${responseText.length} chars)`);
-
-    // Return assistant message with citations
+    // Return the stream and citations
     return {
-      role: 'assistant',
-      content: responseText,
-      citations: searchResults.results.slice(0, 5), // Top 5 posts as citations
-      timestamp: new Date(),
+      stream: result.stream,
+      citations: relevantPosts.slice(0, 5), // Top 5 posts as citations
     };
   } catch (error) {
     console.error('[Grounded Chat] Error:', error);
@@ -94,15 +100,19 @@ function prepareGroundingContext(posts: SocialPost[]): string {
   }
 
   const contextParts = posts.map((post, idx) => {
+    // Handle date - it might be a Date object or a string after JSON serialization
+    const dateStr = post.created_at instanceof Date
+      ? post.created_at.toLocaleDateString()
+      : new Date(post.created_at).toLocaleDateString();
+
+    // Reduce content size for faster processing
     return `
 [Source ${idx + 1}] ${post.platform.toUpperCase()} - ${post.title}
 Author: ${post.author}
 Score: ${post.score} | Comments: ${post.num_comments}
-Date: ${post.created_at.toLocaleDateString()}
-URL: ${post.url}
+Date: ${dateStr}
 
-Content: ${post.content.substring(0, 500)}${post.content.length > 500 ? '...' : ''}
-Tags: ${post.tags.join(', ')}
+Content: ${post.content.substring(0, 300)}${post.content.length > 300 ? '...' : ''}
 ---`;
   });
 
@@ -125,17 +135,24 @@ function buildConversationPrompt(
   const systemPrompt = `You are SignalScout AI, an expert at analyzing social media discussions to identify startup opportunities and market trends.
 
 Your job is to:
-1. Analyze real conversations from Reddit, Hacker News, Stack Overflow, and other platforms
-2. Identify problems, pain points, and market opportunities
-3. Provide insights grounded in actual user discussions
+1. Analyze the search results provided from Reddit, Hacker News, YouTube, and Product Hunt
+2. Identify problems, pain points, and market opportunities in these specific discussions
+3. Provide insights grounded in the actual user discussions shown in the search results
 4. Cite specific sources when making claims
 
 IMPORTANT RULES:
+- Be EXTREMELY CONCISE and DIRECT - answer ONLY what was asked, nothing more
+- If asked for "the best" or "which one", give ONLY that ONE answer, not a ranking or comparison
+- If asked for a list, give the list. If asked for one thing, give ONE thing
+- Skip ALL preambles like "Of course", "Based on the provided results", "Here's my analysis"
+- Skip explanations about methodology or how you measure things
+- Get straight to the answer in the first sentence
 - Always cite sources using [Source X] format when referencing discussions
-- Focus on REAL problems mentioned by actual users, not generic advice
-- Identify patterns across multiple discussions
-- Be specific about the opportunity size and validation signals
-- Don't make up information - only use the grounding context provided
+- Focus on REAL problems mentioned by actual users in the search results, not generic advice
+- Be specific about the opportunity size and validation signals based on the engagement metrics (scores, comments)
+- ONLY analyze the posts provided in the context below - do not make up information or search for new content
+- When asked about "engagement" or "most popular", look at the score and num_comments fields and sort by them
+- Use bullet points and clear headers only when asked for multiple items
 `;
 
   // Add conversation history
@@ -173,8 +190,13 @@ Based on the grounding context, provide:
 
 Format your response clearly with these sections.`;
 
-  const response = await sendGroundedMessage(prompt);
-  return response.content;
+  // Use non-streaming version for simple text response
+  const model = getModel();
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+  });
+  
+  return result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
 }
 
 /**
@@ -192,6 +214,11 @@ Provide:
 
 Focus on users who seem most frustrated and engaged.`;
 
-  const response = await sendGroundedMessage(prompt);
-  return response.content;
+  // Use non-streaming version for simple text response
+  const model = getModel();
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+  });
+  
+  return result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
 }

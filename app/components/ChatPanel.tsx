@@ -64,6 +64,9 @@ Some example questions:
     setInput('');
     setLoading(true);
 
+    // Don't add placeholder message yet - wait for first chunk
+    const streamingMessageIndex = messages.length + 1;
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -80,28 +83,93 @@ Some example questions:
         }),
       });
 
-      if (response.ok) {
-        const assistantMessage = await response.json();
-        setMessages(prev => [...prev, {
-          ...assistantMessage,
-          timestamp: new Date(assistantMessage.timestamp)
-        }]);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to get response');
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
+      let messageCreated = false;
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.done) {
+                  // Final message with citations
+                  setMessages(prev => {
+                    const updated = [...prev];
+                    updated[streamingMessageIndex] = {
+                      role: 'assistant',
+                      content: data.fullContent,
+                      citations: data.citations,
+                      timestamp: new Date(data.timestamp),
+                    };
+                    return updated;
+                  });
+                } else {
+                  // Streaming chunk
+                  fullContent += data.content;
+
+                  setMessages(prev => {
+                    const updated = [...prev];
+
+                    // Create message on first chunk
+                    if (!messageCreated) {
+                      updated[streamingMessageIndex] = {
+                        role: 'assistant',
+                        content: fullContent,
+                        timestamp: new Date(),
+                      };
+                    } else {
+                      updated[streamingMessageIndex] = {
+                        ...updated[streamingMessageIndex],
+                        content: fullContent,
+                      };
+                    }
+                    return updated;
+                  });
+
+                  if (!messageCreated) {
+                    messageCreated = true;
+                    setLoading(false); // Stop loading animation once streaming starts
+                  }
+                }
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
       }
     } catch (error: any) {
       console.error('Chat error:', error);
       const errorMessage: ChatMessageType = {
         role: 'assistant',
-        content: error.message?.includes('Authentication error') 
+        content: error.message?.includes('Authentication error')
           ? 'Sorry, there\'s an authentication issue with the AI service. The search results are still available above.'
           : error.message?.includes('quota') || error.message?.includes('rate limit')
           ? 'The AI service is temporarily unavailable due to rate limits. Please try again in a few minutes.'
           : 'Sorry, I encountered an error analyzing the results. Please try again or check the search results above.',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[streamingMessageIndex] = errorMessage;
+        return updated;
+      });
     } finally {
       setLoading(false);
     }

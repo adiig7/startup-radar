@@ -75,13 +75,13 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         )}
         
         <div className={`mt-2 text-xs ${
-          message.role === 'user' 
-            ? 'text-white text-opacity-50' 
+          message.role === 'user'
+            ? 'text-white text-opacity-50'
             : theme === 'dark'
               ? 'text-[#d4c5ae] opacity-50'
               : 'text-gray-500'
         }`}>
-          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {message.timestamp?.toLocaleTimeString?.([], { hour: '2-digit', minute: '2-digit' }) || '...'}
         </div>
       </div>
     </div>
