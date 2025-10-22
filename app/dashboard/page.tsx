@@ -139,12 +139,12 @@ export default function DashboardPage() {
               onClick={() => router.push('/')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <SparklesIcon className={`w-8 h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
-              <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
+              <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
+              <span className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
                 SignalScout
               </span>
             </button>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center">
               <button
                 onClick={toggleTheme}
                 className={`p-2 rounded-lg transition-colors ${
@@ -155,29 +155,10 @@ export default function DashboardPage() {
                 aria-label="Toggle theme"
               >
                 {theme === 'dark' ? (
-                  <SunIcon className="w-5 h-5" />
+                  <SunIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 ) : (
-                  <MoonIcon className="w-5 h-5" />
+                  <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
-              </button>
-              <button
-                className={`font-medium border-b-2 pb-1 ${
-                  theme === 'dark'
-                    ? 'text-amber-200 border-amber-200'
-                    : 'text-amber-800 border-amber-800'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => router.push('/')}
-                className={`transition-colors ${
-                  theme === 'dark'
-                    ? 'text-amber-200 hover:text-amber-100'
-                    : 'text-gray-700 hover:text-gray-900'
-                }`}
-              >
-                Home
               </button>
             </div>
           </div>
@@ -185,8 +166,8 @@ export default function DashboardPage() {
       </nav>
 
       {/* Search Form */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className={`backdrop-blur-sm rounded-lg border p-6 ${
+      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-6">
+        <div className={`backdrop-blur-sm rounded-lg border p-4 sm:p-6 ${
           theme === 'dark'
             ? 'bg-[#1f1a1733] border-[#4a3824]'
             : 'bg-[#ffffff99] border-[#e8dcc8]'
@@ -217,12 +198,12 @@ export default function DashboardPage() {
             <label className={`block text-sm font-medium mb-3 ${
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Timeframe</label>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
               {timeframeOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setTimeframe(option.value as Timeframe)}
-                  className={`px-4 py-2 rounded-lg border font-medium transition-all ${
+                  className={`px-3 py-2 sm:px-4 rounded-lg border font-medium transition-all text-sm sm:text-base ${
                     timeframe === option.value
                       ? theme === 'dark'
                         ? 'border-amber-600 bg-[#a8907033] text-amber-200'
@@ -243,29 +224,31 @@ export default function DashboardPage() {
             <label className={`block text-sm font-medium mb-3 ${
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Results Limit</label>
-            <div className="flex items-center gap-3">
-              {[10, 25, 50, 100].map((value) => (
-                <button
-                  key={value}
-                  onClick={() => setLimit(value)}
-                  className={`px-4 py-2 rounded-lg border font-medium transition-all ${
-                    limit === value
-                      ? theme === 'dark'
-                        ? 'border-amber-600 bg-[#a8907033] text-amber-200'
-                        : 'border-amber-700 bg-[#a890703d] text-amber-900'
-                      : theme === 'dark'
-                        ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
-                        : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
-                  }`}
-                >
-                  {value}
-                </button>
-              ))}
-              <div className={`flex items-center gap-2 ml-auto ${
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {[10, 25, 50, 100].map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => setLimit(value)}
+                    className={`px-3 py-2 sm:px-4 rounded-lg border font-medium transition-all text-sm sm:text-base flex-1 sm:flex-none ${
+                      limit === value
+                        ? theme === 'dark'
+                          ? 'border-amber-600 bg-[#a8907033] text-amber-200'
+                          : 'border-amber-700 bg-[#a890703d] text-amber-900'
+                        : theme === 'dark'
+                          ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
+                          : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
+                    }`}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <div className={`flex items-center gap-2 sm:ml-auto ${
                 theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
               }`}>
-                <span className="text-2xl">📊</span>
-                <span className="font-medium">{limit} results</span>
+                <span className="text-xl sm:text-2xl">📊</span>
+                <span className="font-medium text-sm sm:text-base">{limit} results</span>
               </div>
             </div>
           </div>
@@ -275,12 +258,12 @@ export default function DashboardPage() {
             <label className={`block text-sm font-medium mb-3 ${
               theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
             }`}>Select Platforms</label>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               {platforms.map((platform) => (
                 <button
                   key={platform.value}
                   onClick={() => togglePlatform(platform.value)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border font-medium transition-all ${
+                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-lg border font-medium transition-all text-sm sm:text-base ${
                     selectedPlatforms.includes(platform.value)
                       ? theme === 'dark'
                         ? 'border-amber-600 bg-[#a8907033]'
@@ -290,15 +273,15 @@ export default function DashboardPage() {
                         : 'border-[#d4c5ae] bg-[#ffffff80] hover:border-amber-400'
                   }`}
                 >
-                  <span className="text-xl">{platform.icon}</span>
-                  <span className={selectedPlatforms.includes(platform.value) 
+                  <span className="text-lg sm:text-xl">{platform.icon}</span>
+                  <span className={`flex-1 text-left ${selectedPlatforms.includes(platform.value) 
                     ? theme === 'dark' ? 'text-amber-200' : 'text-amber-900'
                     : theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-700'
-                  }>
+                  }`}>
                     {platform.label}
                   </span>
                   {selectedPlatforms.includes(platform.value) && (
-                    <span className={`ml-auto ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>✓</span>
+                    <span className={`${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>✓</span>
                   )}
                 </button>
               ))}
@@ -309,26 +292,27 @@ export default function DashboardPage() {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim() || selectedPlatforms.length === 0}
-            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg ${
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 sm:px-6 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg text-sm sm:text-base ${
               theme === 'dark'
                 ? 'bg-amber-700 text-white hover:bg-amber-600'
                 : 'bg-amber-800 text-white hover:bg-amber-900'
             }`}
           >
-            <MagnifyingGlassIcon className="w-5 h-5" />
-            {loading ? 'Searching & Collecting Data...' : 'Search'}
+            <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">{loading ? 'Searching & Collecting Data...' : 'Search'}</span>
+            <span className="sm:hidden">{loading ? 'Searching...' : 'Search'}</span>
           </button>
         </div>
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mt-6">
-            <div className={`backdrop-blur-sm rounded-lg border p-4 mb-4 ${
+          <div className="mt-3 sm:mt-6">
+            <div className={`backdrop-blur-sm rounded-lg border p-3 sm:p-4 mb-3 sm:mb-4 ${
               theme === 'dark'
                 ? 'bg-[#1f1a1733] border-[#4a3824]'
                 : 'bg-[#ffffff99] border-[#e8dcc8]'
             }`}>
-              <p className={`font-medium ${
+              <p className={`font-medium text-sm sm:text-base ${
                 theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
               }`}>
                 Found {totalResults} results in {selectedPlatforms.length} platform
@@ -336,21 +320,21 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {results.map((post) => (
-                <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-4 transition-all ${
+                <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-3 sm:p-4 transition-all ${
                   theme === 'dark'
                     ? 'bg-[#1f1a1733] border-[#4a3824] hover:border-amber-600'
                     : 'bg-[#ffffff99] border-[#e8dcc8] hover:border-[#a8906e]'
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{getPlatformIcon(post.platform)}</span>
-                    <div className="flex-1">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-xl sm:text-2xl flex-shrink-0">{getPlatformIcon(post.platform)}</span>
+                    <div className="flex-1 min-w-0">
                       <a
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`text-lg font-semibold transition-colors ${
+                        className={`text-base sm:text-lg font-semibold transition-colors block ${
                           theme === 'dark'
                             ? 'text-amber-300 hover:text-amber-200'
                             : 'text-amber-800 hover:text-amber-900'
@@ -358,26 +342,26 @@ export default function DashboardPage() {
                       >
                         {post.title}
                       </a>
-                      <p className={`mt-1 line-clamp-2 ${
+                      <p className={`mt-1 line-clamp-2 text-sm sm:text-base ${
                         theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
                       }`}>{post.content}</p>
-                      <div className={`flex items-center gap-4 mt-3 text-sm ${
+                      <div className={`flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-3 text-xs sm:text-sm ${
                         theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
                       }`}>
                         <span className={`capitalize font-medium ${
                           theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
                         }`}>{post.platform}</span>
-                        <span>•</span>
-                        <span>{post.author}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="truncate max-w-[100px] sm:max-w-none">{post.author}</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>👍 {post.score}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>💬 {post.num_comments}</span>
-                        <span>•</span>
-                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="text-xs sm:text-sm">{new Date(post.created_at).toLocaleDateString()}</span>
                       </div>
                       {post.tags.length > 0 && (
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex flex-wrap gap-1 sm:gap-2 mt-2">
                           {post.tags.slice(0, 3).map((tag, idx) => (
                             <span key={idx} className={`px-2 py-1 border text-xs rounded ${
                               theme === 'dark'
