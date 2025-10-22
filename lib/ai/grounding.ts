@@ -5,14 +5,34 @@ import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
 import type { ChatMessage, ConversationContext, SocialPost } from '../types';
 
-// Initialize Vertex AI
-const vertexAI = new VertexAI({
-  project: process.env.GOOGLE_CLOUD_PROJECT_ID!,
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
-});
+// Lazy-load VertexAI client to avoid initialization during build
+let _vertexAI: VertexAI | null = null;
+let _model: any = null;
 
-// Use Gemini 1.5 Flash for cost-effective conversations
-const model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+function getVertexAI(): VertexAI {
+  if (!_vertexAI) {
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
+    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+
+    if (!projectId) {
+      throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required');
+    }
+
+    _vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+    });
+  }
+  return _vertexAI;
+}
+
+function getModel() {
+  if (!_model) {
+    const vertexAI = getVertexAI();
+    _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+  }
+  return _model;
+}
 
 /**
  * Send a message to Gemini with grounding from Elasticsearch
@@ -42,6 +62,7 @@ export async function sendGroundedMessage(
     const conversationPrompt = buildConversationPrompt(userMessage, groundingContext, chatHistory);
 
     // Step 4: Send to Gemini
+    const model = getModel();
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: conversationPrompt }] }],
     });

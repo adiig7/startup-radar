@@ -2,16 +2,26 @@
 
 import { VertexAI } from '@google-cloud/vertexai';
 import type { SocialPost } from '../types';
-import * as dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+// Lazy-load VertexAI client to avoid initialization during build
+let _vertexAI: VertexAI | null = null;
 
-// Initialize Vertex AI
-const vertexAI = new VertexAI({
-  project: process.env.GOOGLE_CLOUD_PROJECT_ID!,
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
-});
+function getVertexAI(): VertexAI {
+  if (!_vertexAI) {
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
+    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+
+    if (!projectId) {
+      throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required');
+    }
+
+    _vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+    });
+  }
+  return _vertexAI;
+}
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
