@@ -130,7 +130,7 @@ export default function LandingPage() {
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto ${
             theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
           }`}>
-            Discover startup opportunities hidden in social conversations. Find early adopters, validate ideas, and spot trending problems across Reddit, Hacker News, Stack Overflow, Quora, Product Hunt, and 5+ more platforms.
+            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI grounding</span>, SignalScout analyzes real discussions from Reddit, Hacker News, Stack Overflow, and more to help you discover trending problems, validate ideas, and find early adopters.
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 max-w-md mx-auto text-left">
@@ -298,7 +298,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-2 text-center md:text-left">
               <SparklesIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
               <span className={`text-sm sm:text-base ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-                Powered by Elasticsearch & Google Cloud Vertex AI
+                Powered by <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch</span> & <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI</span>
               </span>
             </div>
             <div className={`flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
