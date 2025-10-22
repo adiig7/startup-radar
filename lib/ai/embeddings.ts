@@ -37,9 +37,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
     }
 
-    const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     if (!credentialsJson) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON not set');
+      throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set');
     }
 
     const tempCredentialsPath = '/tmp/gcp-credentials.json';
