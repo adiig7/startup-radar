@@ -1,26 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { MagnifyingGlassIcon, SparklesIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import type { Platform, SocialPost } from '@/lib/types';
 
-type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year';
+type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('');
-  const [timeframe, setTimeframe] = useState<Timeframe>('24hours');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlQuery = searchParams.get('q');
+
+  const [query, setQuery] = useState(urlQuery || '');
+  const [timeframe, setTimeframe] = useState<Timeframe>('1year');
   const [limit, setLimit] = useState(10);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['reddit']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['youtube', 'reddit', 'hackernews', 'producthunt']);
   const [results, setResults] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
 
+  // Auto-search if query param is present
+  useEffect(() => {
+    if (urlQuery && urlQuery.trim()) {
+      // Trigger search on mount if query is present
+      handleSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery]);
+
   const timeframeOptions = [
-    { value: '1hour', label: '1 Hour' },
     { value: '24hours', label: '24 Hours' },
     { value: '7days', label: '7 Days' },
     { value: '30days', label: '30 Days' },
     { value: '1year', label: '1 Year' },
+    { value: 'alltime', label: 'All Time' },
   ];
 
   const platforms: { value: Platform; label: string; icon: string }[] = [
@@ -57,6 +71,10 @@ export default function SearchPage() {
         break;
       case '1year':
         from.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'alltime':
+        // Set to a very old date (e.g., year 2000)
+        from.setFullYear(2000, 0, 1);
         break;
     }
 
@@ -113,45 +131,60 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Social Media Search</h1>
-          <p className="text-gray-600 text-sm mt-1">
-            Find conversations around your product to identify potential early users
-          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/')}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <ArrowLeftIcon className="w-5 h-5 text-gray-300" />
+              </button>
+              <div className="flex items-center gap-2">
+                <SparklesIcon className="w-8 h-8 text-blue-400" />
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  SignalScout
+                </h1>
+              </div>
+            </div>
+            <p className="text-sm text-gray-300 hidden sm:block">
+              Search across YouTube, Reddit, HackerNews & ProductHunt
+            </p>
+          </div>
         </div>
       </header>
 
       {/* Search Form */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-6">
           {/* Query Input */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Natural Language Query</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Search Query</label>
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g., 'people struggling with remote work' or 'alternatives to Slack for small teams'"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-white placeholder-gray-400"
               rows={3}
             />
-            <p className="text-sm text-gray-500 mt-1">0/{query.length} characters</p>
+            <p className="text-sm text-gray-400 mt-1">{query.length} characters</p>
           </div>
 
           {/* Timeframe */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Timeframe</label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Timeframe</label>
             <div className="grid grid-cols-5 gap-3">
               {timeframeOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setTimeframe(option.value as Timeframe)}
-                  className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+                  className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     timeframe === option.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-500/20 text-blue-300'
+                      : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
                   }`}
                 >
                   {option.label}
@@ -162,7 +195,7 @@ export default function SearchPage() {
 
           {/* Results Limit */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Results Limit</label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Results Limit</label>
             <div className="flex items-center gap-3">
               {[10, 25, 50, 100].map((value) => (
                 <button
@@ -170,14 +203,14 @@ export default function SearchPage() {
                   onClick={() => setLimit(value)}
                   className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     limit === value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-500/20 text-blue-300'
+                      : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
                   }`}
                 >
                   {value}
                 </button>
               ))}
-              <div className="flex items-center gap-2 text-gray-600 ml-auto">
+              <div className="flex items-center gap-2 text-gray-300 ml-auto">
                 <span className="text-2xl">📊</span>
                 <span className="font-medium">{limit} results</span>
               </div>
@@ -186,23 +219,23 @@ export default function SearchPage() {
 
           {/* Platform Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Select Platforms</label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Select Platforms</label>
             <div className="grid grid-cols-4 gap-3">
               {platforms.map((platform) => (
                 <button
                   key={platform.value}
                   onClick={() => togglePlatform(platform.value)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 font-medium transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border font-medium transition-all ${
                     selectedPlatforms.includes(platform.value)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-500/20'
+                      : 'border-white/20 bg-white/5 hover:border-white/40'
                   }`}
                 >
                   <span className="text-xl">{platform.icon}</span>
-                  <span className={selectedPlatforms.includes(platform.value) ? 'text-blue-700' : 'text-gray-700'}>
+                  <span className={selectedPlatforms.includes(platform.value) ? 'text-blue-300' : 'text-gray-300'}>
                     {platform.label}
                   </span>
-                  {selectedPlatforms.includes(platform.value) && <span className="ml-auto text-blue-500">✓</span>}
+                  {selectedPlatforms.includes(platform.value) && <span className="ml-auto text-blue-400">✓</span>}
                 </button>
               ))}
             </div>
@@ -213,10 +246,10 @@ export default function SearchPage() {
             <button
               onClick={handleSearch}
               disabled={loading || !query.trim() || selectedPlatforms.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
-              {loading ? 'Searching...' : 'Search (Shift + Enter)'}
+              {loading ? 'Searching...' : 'Search'}
             </button>
             <button
               onClick={async () => {
@@ -242,7 +275,7 @@ export default function SearchPage() {
                 }
               }}
               disabled={loading || !query.trim()}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+              className="px-6 py-3 bg-green-600/80 text-white rounded-lg font-medium hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
             >
               🔄 Collect Fresh Data
             </button>
@@ -252,8 +285,8 @@ export default function SearchPage() {
         {/* Results */}
         {results.length > 0 && (
           <div className="mt-6">
-            <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
-              <p className="text-gray-700 font-medium">
+            <div className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-4 mb-4">
+              <p className="text-gray-200 font-medium">
                 Found {totalResults} results in {selectedPlatforms.length} platform
                 {selectedPlatforms.length > 1 ? 's' : ''}
               </p>
@@ -261,7 +294,7 @@ export default function SearchPage() {
 
             <div className="space-y-4">
               {results.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
+                <div key={post.id} className="bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 p-4 hover:border-blue-500/50 transition-all">
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{getPlatformIcon(post.platform)}</span>
                     <div className="flex-1">
@@ -269,13 +302,13 @@ export default function SearchPage() {
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+                        className="text-lg font-semibold text-blue-300 hover:text-blue-400 transition-colors"
                       >
                         {post.title}
                       </a>
-                      <p className="text-gray-600 mt-1 line-clamp-2">{post.content}</p>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                        <span className="capitalize font-medium">{post.platform}</span>
+                      <p className="text-gray-300 mt-1 line-clamp-2">{post.content}</p>
+                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-400">
+                        <span className="capitalize font-medium text-gray-300">{post.platform}</span>
                         <span>•</span>
                         <span>{post.author}</span>
                         <span>•</span>
@@ -288,7 +321,7 @@ export default function SearchPage() {
                       {post.tags.length > 0 && (
                         <div className="flex gap-2 mt-2">
                           {post.tags.slice(0, 3).map((tag, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            <span key={idx} className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs rounded">
                               {tag}
                             </span>
                           ))}
@@ -304,8 +337,8 @@ export default function SearchPage() {
 
         {loading && (
           <div className="mt-6 text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            <p className="mt-4 text-gray-600">Searching across platforms...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-400 border-t-transparent"></div>
+            <p className="mt-4 text-gray-300">Searching across platforms...</p>
           </div>
         )}
       </div>
