@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { useTheme } from '../providers/ThemeProvider';
 import type { Platform, SocialPost } from '@/lib/types';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   const [query, setQuery] = useState('');
   const [timeframe, setTimeframe] = useState<Timeframe>('1year');
@@ -120,29 +122,60 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]">
+    <main className={`min-h-screen transition-colors ${
+      theme === 'dark'
+        ? 'bg-gradient-to-br from-[#29241f] via-[#39322c] to-[#29241f]'
+        : 'bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]'
+    }`}>
       {/* Navigation */}
-      <nav className="border-b border-[#e8dcc8] bg-[#fbf9f4cc] backdrop-blur-sm sticky top-0 z-50">
+      <nav className={`border-b sticky top-0 z-50 backdrop-blur-sm ${
+        theme === 'dark'
+          ? 'border-[#3d2f1f] bg-[#29241fcc]'
+          : 'border-[#e8dcc8] bg-[#fbf9f4cc]'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.push('/')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <SparklesIcon className="w-8 h-8 text-amber-700" />
-              <span className="text-2xl font-bold text-gray-900">
+              <SparklesIcon className={`w-8 h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
+              <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
                 SignalScout
               </span>
             </button>
             <div className="flex items-center gap-6">
               <button
-                className="text-amber-800 font-medium border-b-2 border-amber-800 pb-1"
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-[#3d2f1f] text-amber-200'
+                    : 'hover:bg-[#f5eddb] text-gray-700'
+                }`}
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <SunIcon className="w-5 h-5" />
+                ) : (
+                  <MoonIcon className="w-5 h-5" />
+                )}
+              </button>
+              <button
+                className={`font-medium border-b-2 pb-1 ${
+                  theme === 'dark'
+                    ? 'text-amber-200 border-amber-200'
+                    : 'text-amber-800 border-amber-800'
+                }`}
               >
                 Dashboard
               </button>
               <button
                 onClick={() => router.push('/')}
-                className="text-gray-700 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${
+                  theme === 'dark'
+                    ? 'text-amber-200 hover:text-amber-100'
+                    : 'text-gray-700 hover:text-gray-900'
+                }`}
               >
                 Home
               </button>
@@ -153,23 +186,37 @@ export default function DashboardPage() {
 
       {/* Search Form */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-6">
+        <div className={`backdrop-blur-sm rounded-lg border p-6 ${
+          theme === 'dark'
+            ? 'bg-[#1f1a1733] border-[#4a3824]'
+            : 'bg-[#ffffff99] border-[#e8dcc8]'
+        }`}>
           {/* Query Input */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-800 mb-2">Search Query</label>
+            <label className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+            }`}>Search Query</label>
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g., 'people struggling with remote work' or 'alternatives to Slack for small teams'"
-              className="w-full px-4 py-3 bg-[#ffffffcc] border border-[#d4c5ae] rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600 resize-none text-gray-900 placeholder-gray-500"
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600 resize-none ${
+                theme === 'dark'
+                  ? 'bg-[#3d2f1f] border-[#6b5943] text-amber-100 placeholder-[#a8906e]'
+                  : 'bg-[#ffffffcc] border-[#d4c5ae] text-gray-900 placeholder-gray-500'
+              }`}
               rows={3}
             />
-            <p className="text-sm text-gray-600 mt-1">{query.length} characters</p>
+            <p className={`text-sm mt-1 ${
+              theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+            }`}>{query.length} characters</p>
           </div>
 
           {/* Timeframe */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-800 mb-3">Timeframe</label>
+            <label className={`block text-sm font-medium mb-3 ${
+              theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+            }`}>Timeframe</label>
             <div className="grid grid-cols-5 gap-3">
               {timeframeOptions.map((option) => (
                 <button
@@ -177,8 +224,12 @@ export default function DashboardPage() {
                   onClick={() => setTimeframe(option.value as Timeframe)}
                   className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     timeframe === option.value
-                      ? 'border-amber-700 bg-[#a890703d] text-amber-900'
-                      : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
+                      ? theme === 'dark'
+                        ? 'border-amber-600 bg-[#a8907033] text-amber-200'
+                        : 'border-amber-700 bg-[#a890703d] text-amber-900'
+                      : theme === 'dark'
+                        ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
+                        : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
                   }`}
                 >
                   {option.label}
@@ -189,7 +240,9 @@ export default function DashboardPage() {
 
           {/* Results Limit */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-800 mb-3">Results Limit</label>
+            <label className={`block text-sm font-medium mb-3 ${
+              theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+            }`}>Results Limit</label>
             <div className="flex items-center gap-3">
               {[10, 25, 50, 100].map((value) => (
                 <button
@@ -197,14 +250,20 @@ export default function DashboardPage() {
                   onClick={() => setLimit(value)}
                   className={`px-4 py-2 rounded-lg border font-medium transition-all ${
                     limit === value
-                      ? 'border-amber-700 bg-[#a890703d] text-amber-900'
-                      : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
+                      ? theme === 'dark'
+                        ? 'border-amber-600 bg-[#a8907033] text-amber-200'
+                        : 'border-amber-700 bg-[#a890703d] text-amber-900'
+                      : theme === 'dark'
+                        ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500'
+                        : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400'
                   }`}
                 >
                   {value}
                 </button>
               ))}
-              <div className="flex items-center gap-2 text-gray-800 ml-auto">
+              <div className={`flex items-center gap-2 ml-auto ${
+                theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+              }`}>
                 <span className="text-2xl">📊</span>
                 <span className="font-medium">{limit} results</span>
               </div>
@@ -213,7 +272,9 @@ export default function DashboardPage() {
 
           {/* Platform Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-800 mb-3">Select Platforms</label>
+            <label className={`block text-sm font-medium mb-3 ${
+              theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+            }`}>Select Platforms</label>
             <div className="grid grid-cols-4 gap-3">
               {platforms.map((platform) => (
                 <button
@@ -221,15 +282,24 @@ export default function DashboardPage() {
                   onClick={() => togglePlatform(platform.value)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg border font-medium transition-all ${
                     selectedPlatforms.includes(platform.value)
-                      ? 'border-amber-700 bg-[#a890703d]'
-                      : 'border-[#d4c5ae] bg-[#ffffff80] hover:border-amber-400'
+                      ? theme === 'dark'
+                        ? 'border-amber-600 bg-[#a8907033]'
+                        : 'border-amber-700 bg-[#a890703d]'
+                      : theme === 'dark'
+                        ? 'border-[#6b5943] bg-[#3d2f1f80] hover:border-amber-500'
+                        : 'border-[#d4c5ae] bg-[#ffffff80] hover:border-amber-400'
                   }`}
                 >
                   <span className="text-xl">{platform.icon}</span>
-                  <span className={selectedPlatforms.includes(platform.value) ? 'text-amber-900' : 'text-gray-700'}>
+                  <span className={selectedPlatforms.includes(platform.value) 
+                    ? theme === 'dark' ? 'text-amber-200' : 'text-amber-900'
+                    : theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-700'
+                  }>
                     {platform.label}
                   </span>
-                  {selectedPlatforms.includes(platform.value) && <span className="ml-auto text-amber-700">✓</span>}
+                  {selectedPlatforms.includes(platform.value) && (
+                    <span className={`ml-auto ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>✓</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -239,7 +309,11 @@ export default function DashboardPage() {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim() || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-amber-800 text-white rounded-lg font-medium hover:bg-amber-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg ${
+              theme === 'dark'
+                ? 'bg-amber-700 text-white hover:bg-amber-600'
+                : 'bg-amber-800 text-white hover:bg-amber-900'
+            }`}
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
             {loading ? 'Searching & Collecting Data...' : 'Search'}
@@ -249,8 +323,14 @@ export default function DashboardPage() {
         {/* Results */}
         {results.length > 0 && (
           <div className="mt-6">
-            <div className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-4 mb-4">
-              <p className="text-gray-900 font-medium">
+            <div className={`backdrop-blur-sm rounded-lg border p-4 mb-4 ${
+              theme === 'dark'
+                ? 'bg-[#1f1a1733] border-[#4a3824]'
+                : 'bg-[#ffffff99] border-[#e8dcc8]'
+            }`}>
+              <p className={`font-medium ${
+                theme === 'dark' ? 'text-amber-100' : 'text-gray-900'
+              }`}>
                 Found {totalResults} results in {selectedPlatforms.length} platform
                 {selectedPlatforms.length > 1 ? 's' : ''}
               </p>
@@ -258,7 +338,11 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               {results.map((post) => (
-                <div key={post.id} className="bg-[#ffffff99] backdrop-blur-sm rounded-lg border border-[#e8dcc8] p-4 hover:border-[#a8906e] transition-all">
+                <div key={post.id} className={`backdrop-blur-sm rounded-lg border p-4 transition-all ${
+                  theme === 'dark'
+                    ? 'bg-[#1f1a1733] border-[#4a3824] hover:border-amber-600'
+                    : 'bg-[#ffffff99] border-[#e8dcc8] hover:border-[#a8906e]'
+                }`}>
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{getPlatformIcon(post.platform)}</span>
                     <div className="flex-1">
@@ -266,13 +350,23 @@ export default function DashboardPage() {
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg font-semibold text-amber-800 hover:text-amber-900 transition-colors"
+                        className={`text-lg font-semibold transition-colors ${
+                          theme === 'dark'
+                            ? 'text-amber-300 hover:text-amber-200'
+                            : 'text-amber-800 hover:text-amber-900'
+                        }`}
                       >
                         {post.title}
                       </a>
-                      <p className="text-gray-700 mt-1 line-clamp-2">{post.content}</p>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                        <span className="capitalize font-medium text-gray-800">{post.platform}</span>
+                      <p className={`mt-1 line-clamp-2 ${
+                        theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
+                      }`}>{post.content}</p>
+                      <div className={`flex items-center gap-4 mt-3 text-sm ${
+                        theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+                      }`}>
+                        <span className={`capitalize font-medium ${
+                          theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+                        }`}>{post.platform}</span>
                         <span>•</span>
                         <span>{post.author}</span>
                         <span>•</span>
@@ -285,7 +379,11 @@ export default function DashboardPage() {
                       {post.tags.length > 0 && (
                         <div className="flex gap-2 mt-2">
                           {post.tags.slice(0, 3).map((tag, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-[#fbe8b880] border border-[#d4c5ae] text-amber-900 text-xs rounded">
+                            <span key={idx} className={`px-2 py-1 border text-xs rounded ${
+                              theme === 'dark'
+                                ? 'bg-[#a8907033] border-[#6b5943] text-amber-200'
+                                : 'bg-[#fbe8b880] border-[#d4c5ae] text-amber-900'
+                            }`}>
                               {tag}
                             </span>
                           ))}
@@ -301,8 +399,12 @@ export default function DashboardPage() {
 
         {loading && (
           <div className="mt-6 text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-700 border-t-transparent"></div>
-            <p className="mt-4 text-gray-700">Searching across platforms...</p>
+            <div className={`inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent ${
+              theme === 'dark' ? 'border-amber-600' : 'border-amber-700'
+            }`}></div>
+            <p className={`mt-4 ${
+              theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
+            }`}>Searching across platforms...</p>
           </div>
         )}
       </div>
