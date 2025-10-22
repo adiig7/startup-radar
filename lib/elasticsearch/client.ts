@@ -5,6 +5,8 @@ import type { SocialPost } from '../types';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('ElasticsearchClient');
+const dotenv = require('dotenv');
+dotenv.config();
 
 export const SIGNALS_INDEX = 'social_signals';
 
