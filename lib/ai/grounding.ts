@@ -1,11 +1,7 @@
-// Vertex AI Grounding with Elasticsearch
-// This is the KEY feature that makes StartupRadar work!
-
 import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
 import type { ChatMessage, ConversationContext, SocialPost } from '../types';
 
-// Lazy-load VertexAI client to avoid initialization during build
 let _vertexAI: VertexAI | null = null;
 let _model: any = null;
 
@@ -34,10 +30,6 @@ function getModel() {
   return _model;
 }
 
-/**
- * Send a message to Gemini with grounding from Elasticsearch
- * This retrieves relevant social posts and uses them as context
- */
 export async function sendGroundedMessage(
   userMessage: string,
   context?: ConversationContext,
@@ -48,30 +40,24 @@ export async function sendGroundedMessage(
 
     let relevantPosts: SocialPost[];
 
-    // Step 1: Use provided results or search Elasticsearch
     if (providedResults && providedResults.length > 0) {
       console.log(`[Grounded Chat] Using ${providedResults.length} pre-fetched results from dashboard`);
-      // Use top 15 posts to reduce context size and improve speed
       relevantPosts = providedResults.slice(0, 15);
     } else {
       console.log(`[Grounded Chat] No pre-fetched results, searching Elasticsearch...`);
       const searchResults = await hybridSearch({
         query: userMessage,
         filters: context?.filters,
-        limit: 10, // Get top 10 relevant posts for grounding
+        limit: 10,
       });
       console.log(`[Grounded Chat] Found ${searchResults.results.length} relevant posts from search`);
       relevantPosts = searchResults.results;
     }
 
-    // Step 2: Prepare grounding context from posts
     const groundingContext = prepareGroundingContext(relevantPosts);
-
-    // Step 3: Build conversation history
     const chatHistory = context?.messages || [];
     const conversationPrompt = buildConversationPrompt(userMessage, groundingContext, chatHistory);
 
-    // Step 4: Send to Gemini with streaming
     const model = getModel();
     const result = await model.generateContentStream({
       contents: [{ role: 'user', parts: [{ text: conversationPrompt }] }],
@@ -79,10 +65,9 @@ export async function sendGroundedMessage(
 
     console.log(`[Grounded Chat] Streaming response...`);
 
-    // Return the stream and citations
     return {
       stream: result.stream,
-      citations: relevantPosts.slice(0, 5), // Top 5 posts as citations
+      citations: relevantPosts.slice(0, 5),
     };
   } catch (error) {
     console.error('[Grounded Chat] Error:', error);
@@ -90,22 +75,16 @@ export async function sendGroundedMessage(
   }
 }
 
-/**
- * Prepare grounding context from social posts
- * This formats the posts into a context that Gemini can understand
- */
 function prepareGroundingContext(posts: SocialPost[]): string {
   if (posts.length === 0) {
     return 'No relevant discussions found.';
   }
 
   const contextParts = posts.map((post, idx) => {
-    // Handle date - it might be a Date object or a string after JSON serialization
     const dateStr = post.created_at instanceof Date
       ? post.created_at.toLocaleDateString()
       : new Date(post.created_at).toLocaleDateString();
 
-    // Reduce content size for faster processing
     return `
 [Source ${idx + 1}] ${post.platform.toUpperCase()} - ${post.title}
 Author: ${post.author}
@@ -124,9 +103,6 @@ Use these real discussions as the PRIMARY source for your answer. Always cite sp
 `;
 }
 
-/**
- * Build the full conversation prompt with grounding
- */
 function buildConversationPrompt(
   userMessage: string,
   groundingContext: string,
@@ -155,12 +131,10 @@ IMPORTANT RULES:
 - Use bullet points and clear headers only when asked for multiple items
 `;
 
-  // Add conversation history
   let conversationHistory = '';
   if (chatHistory.length > 0) {
     conversationHistory = '\n\nCONVERSATION HISTORY:\n';
     chatHistory.slice(-3).forEach((msg) => {
-      // Last 3 messages for context
       conversationHistory += `${msg.role.toUpperCase()}: ${msg.content}\n`;
     });
   }
@@ -175,9 +149,6 @@ USER QUESTION: ${userMessage}
 Please provide a detailed, well-cited answer based on the discussions above:`;
 }
 
-/**
- * Analyze a topic to find startup opportunities
- */
 export async function analyzeOpportunity(topic: string): Promise<string> {
   const prompt = `Analyze this topic for startup opportunities: "${topic}"
 
@@ -190,18 +161,14 @@ Based on the grounding context, provide:
 
 Format your response clearly with these sections.`;
 
-  // Use non-streaming version for simple text response
   const model = getModel();
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
   });
-  
+
   return result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
 }
 
-/**
- * Find early adopters for a specific problem
- */
 export async function findEarlyAdopters(problem: string): Promise<string> {
   const prompt = `Find early adopters discussing this problem: "${problem}"
 
@@ -214,11 +181,10 @@ Provide:
 
 Focus on users who seem most frustrated and engaged.`;
 
-  // Use non-streaming version for simple text response
   const model = getModel();
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
   });
-  
+
   return result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
 }

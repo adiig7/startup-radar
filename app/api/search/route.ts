@@ -1,5 +1,3 @@
-// Search API endpoint
-
 import { NextRequest, NextResponse } from 'next/server';
 import { hybridSearch } from '@/lib/elasticsearch/search';
 import { collectForQuery } from '@/lib/services/background-collector';
@@ -15,7 +13,6 @@ export async function POST(request: NextRequest) {
   try {
     logger.info('Search request received');
 
-    // Parse request body
     let body;
     try {
       body = await request.json();
@@ -30,7 +27,6 @@ export async function POST(request: NextRequest) {
 
     const { query, filters, limit, offset, skipCollection } = body;
 
-    // Validate query parameter
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
       logger.warn('Invalid query parameter', { query, type: typeof query });
       return NextResponse.json(
@@ -47,24 +43,19 @@ export async function POST(request: NextRequest) {
       skipCollection,
     });
 
-    // Check environment variables
     logger.debug('Environment check', {
       hasElasticCloudId: !!process.env.ELASTIC_CLOUD_ID,
       hasElasticApiKey: !!process.env.ELASTIC_API_KEY,
       nodeEnv: process.env.NODE_ENV,
     });
 
-    // Trigger immediate background collection for this query
-    // This runs in the background and doesn't block the search
     if (!skipCollection) {
       logger.info('Triggering background data collection');
       collectForQuery(query.trim()).catch((error) => {
         logger.error('Background collection error', error);
-        // Don't fail the search if collection fails
       });
     }
 
-    // Execute hybrid search
     logger.info('Executing hybrid search');
     const results = await hybridSearch({
       query: query.trim(),

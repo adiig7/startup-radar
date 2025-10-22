@@ -21,19 +21,16 @@ export default function ChatPanel({ searchResults, searchQuery, isOpen, onToggle
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input when panel opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
 
-  // Add welcome message when search results change
   useEffect(() => {
     if (searchResults.length > 0 && messages.length === 0) {
       const welcomeMessage: ChatMessageType = {
@@ -64,7 +61,6 @@ Some example questions:
     setInput('');
     setLoading(true);
 
-    // Don't add placeholder message yet - wait for first chunk
     const streamingMessageIndex = messages.length + 1;
 
     try {
@@ -73,7 +69,7 @@ Some example questions:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: input.trim(),
-          searchResults: searchResults, // Pass the actual dashboard results
+          searchResults: searchResults,
           context: {
             messages: messages,
             filters: {
@@ -88,7 +84,6 @@ Some example questions:
         throw new Error(errorData.error || 'Failed to get response');
       }
 
-      // Handle streaming response
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
@@ -108,7 +103,6 @@ Some example questions:
                 const data = JSON.parse(line.slice(6));
 
                 if (data.done) {
-                  // Final message with citations
                   setMessages(prev => {
                     const updated = [...prev];
                     updated[streamingMessageIndex] = {
@@ -120,13 +114,11 @@ Some example questions:
                     return updated;
                   });
                 } else {
-                  // Streaming chunk
                   fullContent += data.content;
 
                   setMessages(prev => {
                     const updated = [...prev];
 
-                    // Create message on first chunk
                     if (!messageCreated) {
                       updated[streamingMessageIndex] = {
                         role: 'assistant',
@@ -144,11 +136,11 @@ Some example questions:
 
                   if (!messageCreated) {
                     messageCreated = true;
-                    setLoading(false); // Stop loading animation once streaming starts
+                    setLoading(false);
                   }
                 }
               } catch (e) {
-                // Skip invalid JSON
+                // Ignore invalid JSON
               }
             }
           }

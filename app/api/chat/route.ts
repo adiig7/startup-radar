@@ -1,5 +1,3 @@
-// Chat API endpoint with Vertex AI grounding
-
 import { NextRequest, NextResponse } from 'next/server';
 import { sendGroundedMessage } from '@/lib/ai/grounding';
 import type { ConversationContext } from '@/lib/types';
@@ -15,7 +13,6 @@ export async function POST(request: NextRequest) {
       context?: ConversationContext;
     };
 
-    // Validate message
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return NextResponse.json(
         { error: 'Message is required and must be a non-empty string' },
@@ -32,7 +29,6 @@ export async function POST(request: NextRequest) {
 
     const { stream, citations } = await sendGroundedMessage(message, context, searchResults);
 
-    // Create a ReadableStream to send data to the client
     const encoder = new TextEncoder();
     let fullContent = '';
 
@@ -43,14 +39,12 @@ export async function POST(request: NextRequest) {
             const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (text) {
               fullContent += text;
-              // Send chunk to client
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ content: text, done: false })}\n\n`)
               );
             }
           }
 
-          // Send final message with citations
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
