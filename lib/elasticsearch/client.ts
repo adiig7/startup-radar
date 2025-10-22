@@ -2,6 +2,9 @@
 
 import { Client } from '@elastic/elasticsearch';
 import type { SocialPost } from '../types';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('ElasticsearchClient');
 
 export const SIGNALS_INDEX = 'social_signals';
 
@@ -9,21 +12,48 @@ let _esClient: Client | null = null;
 
 export function getEsClient(): Client {
   if (!_esClient) {
-    if (typeof window === 'undefined' && process.env.ELASTIC_CLOUD_ID) {
+    logger.info('Initializing Elasticsearch client');
+
+    // Check if running in browser
+    if (typeof window !== 'undefined') {
+      logger.error('Cannot initialize Elasticsearch client in browser');
+      throw new Error('Elasticsearch client can only be initialized on the server');
+    }
+
+    // Check for required environment variables
+    if (!process.env.ELASTIC_CLOUD_ID) {
+      logger.error('Missing ELASTIC_CLOUD_ID environment variable');
+      throw new Error('Elasticsearch client not initialized - missing ELASTIC_CLOUD_ID');
+    }
+
+    if (!process.env.ELASTIC_API_KEY) {
+      logger.error('Missing ELASTIC_API_KEY environment variable');
+      throw new Error('Elasticsearch client not initialized - missing ELASTIC_API_KEY');
+    }
+
+    try {
+      logger.debug('Creating Elasticsearch client with cloud configuration', {
+        cloudIdPrefix: process.env.ELASTIC_CLOUD_ID.substring(0, 20) + '...',
+        hasApiKey: !!process.env.ELASTIC_API_KEY,
+      });
+
       _esClient = new Client({
         cloud: {
           id: process.env.ELASTIC_CLOUD_ID,
         },
         auth: {
-          apiKey: process.env.ELASTIC_API_KEY!,
+          apiKey: process.env.ELASTIC_API_KEY,
         },
       });
-    } else if (!_esClient) {
-      // Return a mock client during build
-      throw new Error('Elasticsearch client not initialized - missing environment variables');
+
+      logger.info('Elasticsearch client initialized successfully');
+    } catch (error: any) {
+      logger.error('Failed to initialize Elasticsearch client', error);
+      throw error;
     }
   }
-  return _esClient!;
+
+  return _esClient;
 }
 
 // Create index with proper mappings
@@ -114,44 +144,57 @@ export async function createSignalsIndex() {
 // Bulk index social posts
 export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
   if (posts.length === 0) {
-    console.log('No posts to index');
+    logger.info('No posts to index');
     return;
   }
 
-  console.log(`Indexing ${posts.length} posts to Elasticsearch...`);
+  logger.info('Starting bulk index operation', { postsCount: posts.length });
 
-  const operations = posts.flatMap((post) => [
-    { index: { _index: SIGNALS_INDEX, _id: post.id } },
-    {
-      id: post.id,
-      platform: post.platform,
-      title: post.title,
-      content: post.content,
-      author: post.author,
-      url: post.url,
-      created_at: post.created_at,
-      score: post.score,
-      num_comments: post.num_comments,
-      tags: post.tags,
-      embedding: post.embedding,
-      indexed_at: post.indexed_at,
-      sentiment: post.sentiment,
-      quality: post.quality,
-      domain_context: post.domain_context,
-      relevance_score: post.relevance_score,
-    },
-  ]);
+  try {
+    const operations = posts.flatMap((post) => [
+      { index: { _index: SIGNALS_INDEX, _id: post.id } },
+      {
+        id: post.id,
+        platform: post.platform,
+        title: post.title,
+        content: post.content,
+        author: post.author,
+        url: post.url,
+        created_at: post.created_at,
+        score: post.score,
+        num_comments: post.num_comments,
+        tags: post.tags,
+        embedding: post.embedding,
+        indexed_at: post.indexed_at,
+        sentiment: post.sentiment,
+        quality: post.quality,
+        domain_context: post.domain_context,
+        relevance_score: post.relevance_score,
+      },
+    ]);
 
-  const client = getEsClient();
-  const result = await client.bulk({ operations, refresh: true });
+    logger.debug('Prepared bulk operations', { operationsCount: operations.length });
 
-  if (result.errors) {
-    const erroredDocuments = result.items.filter((item: any) => item.index?.error);
-    console.error('Bulk indexing errors:', erroredDocuments);
-    throw new Error('Bulk indexing had errors');
+    const client = getEsClient();
+    const result = await client.bulk({ operations, refresh: true });
+
+    if (result.errors) {
+      const erroredDocuments = result.items.filter((item: any) => item.index?.error);
+      logger.error('Bulk indexing had errors', null, {
+        errorCount: erroredDocuments.length,
+        errors: erroredDocuments.slice(0, 5), // Log first 5 errors
+      });
+      throw new Error(`Bulk indexing had ${erroredDocuments.length} errors`);
+    }
+
+    logger.info('Bulk index completed successfully', {
+      postsIndexed: posts.length,
+      took: result.took,
+    });
+  } catch (error: any) {
+    logger.error('Bulk index failed', error, { postsCount: posts.length });
+    throw error;
   }
-
-  console.log(`✅ Successfully indexed ${posts.length} posts`);
 }
 
 // Delete old posts (older than X days)

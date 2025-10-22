@@ -10,6 +10,9 @@ import { analyzeSentiment } from '../analysis/sentiment';
 import { analyzeQuality, classifyDomain } from '../analysis/quality';
 import { filterAndProcessPosts } from './enhanced-indexing';
 import type { SocialPost, Platform } from '../types';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('BackgroundCollector');
 
 // Track search queries to trigger collection
 const queryQueue: string[] = [];
@@ -222,10 +225,16 @@ async function searchProductHuntByQuery(query: string, limit: number): Promise<S
  * Manually trigger collection for a specific query (immediate)
  */
 export async function collectForQuery(query: string): Promise<SocialPost[]> {
-  console.log(`[Background Collector] Immediate collection for: "${query}"`);
+  const startTime = Date.now();
+  logger.info('Starting immediate collection', { query });
 
   try {
     const allPosts: SocialPost[] = [];
+
+    logger.info('Collecting from platforms', {
+      enabledPlatforms: ENABLED_PLATFORMS,
+      query,
+    });
 
     // Collect from all platforms in parallel
     const platformResults = await Promise.allSettled([
@@ -256,18 +265,30 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
       if (result.status === 'fulfilled') {
         const posts = result.value;
         allPosts.push(...posts);
-        console.log(`  ✅ ${platforms[index]}: ${posts.length} posts`);
+        logger.info(`Platform collection succeeded`, {
+          platform: platforms[index],
+          postsCount: posts.length,
+        });
       } else {
-        console.log(`  ⚠️  ${platforms[index]} failed: ${result.reason}`);
+        logger.warn(`Platform collection failed`, {
+          platform: platforms[index],
+          reason: String(result.reason),
+        });
       }
     });
 
     if (allPosts.length === 0) {
-      console.log('[Background Collector] No posts collected');
+      logger.warn('No posts collected from any platform', { query });
       return [];
     }
 
+    logger.info('Raw posts collected', {
+      totalPosts: allPosts.length,
+      collectionTimeMs: Date.now() - startTime,
+    });
+
     // Analyze content BEFORE enhancement
+    logger.debug('Analyzing post content');
     allPosts.forEach((post) => {
       const fullText = `${post.title} ${post.content}`;
       post.sentiment = analyzeSentiment(fullText);
@@ -276,22 +297,52 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
     });
 
     // Apply quality filtering and processing pipeline
+    logger.debug('Applying quality filters');
     const processedPosts = filterAndProcessPosts(allPosts, query);
 
     if (processedPosts.length === 0) {
-      console.log('[Background Collector] No posts passed quality filters');
+      logger.warn('No posts passed quality filters', {
+        originalCount: allPosts.length,
+      });
       return [];
     }
 
-    // Generate embeddings for high-quality posts only
-    const texts = processedPosts.map(prepareTextForEmbedding);
-    const embeddings = await generateBatchEmbeddings(texts);
-    processedPosts.forEach((post, idx) => {
-      post.embedding = embeddings[idx];
+    logger.info('Posts filtered and processed', {
+      originalCount: allPosts.length,
+      processedCount: processedPosts.length,
     });
 
+    // Generate embeddings for high-quality posts only
+    logger.info('Generating embeddings');
+    const embeddingStartTime = Date.now();
+    try {
+      const texts = processedPosts.map(prepareTextForEmbedding);
+      const embeddings = await generateBatchEmbeddings(texts);
+      processedPosts.forEach((post, idx) => {
+        post.embedding = embeddings[idx];
+      });
+      logger.info('Embeddings generated successfully', {
+        count: embeddings.length,
+        embeddingTimeMs: Date.now() - embeddingStartTime,
+      });
+    } catch (embeddingError: any) {
+      logger.error('Embedding generation failed', embeddingError);
+      throw embeddingError;
+    }
+
     // Index to Elasticsearch
-    await bulkIndexPosts(processedPosts);
+    logger.info('Indexing posts to Elasticsearch');
+    const indexStartTime = Date.now();
+    try {
+      await bulkIndexPosts(processedPosts);
+      logger.info('Posts indexed successfully', {
+        indexedCount: processedPosts.length,
+        indexTimeMs: Date.now() - indexStartTime,
+      });
+    } catch (indexError: any) {
+      logger.error('Indexing failed', indexError);
+      throw indexError;
+    }
 
     // Mark as processed
     processedQueries.add(query.toLowerCase().trim());
@@ -302,16 +353,21 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
       return acc;
     }, {} as Record<string, number>);
 
-    console.log('\n[Background Collector] Indexed posts by platform:');
-    Object.entries(platformCounts).forEach(([platform, count]) => {
-      console.log(`  - ${platform}: ${count}`);
+    const totalTime = Date.now() - startTime;
+    logger.info('Collection completed successfully', {
+      query,
+      totalPosts: processedPosts.length,
+      platformBreakdown: platformCounts,
+      totalTimeMs: totalTime,
     });
 
-    console.log(`[Background Collector] ✅ Total indexed: ${processedPosts.length} high-quality posts`);
-
     return processedPosts;
-  } catch (error) {
-    console.error('[Background Collector] Failed:', error);
+  } catch (error: any) {
+    const totalTime = Date.now() - startTime;
+    logger.error('Collection failed', error, {
+      query,
+      totalTimeMs: totalTime,
+    });
     return [];
   }
 }

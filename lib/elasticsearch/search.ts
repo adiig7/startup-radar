@@ -3,40 +3,77 @@
 import { getEsClient, SIGNALS_INDEX } from './client';
 import { generateEmbedding } from '../ai/embeddings';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('HybridSearch');
 
 export async function hybridSearch(request: SearchRequest): Promise<SearchResponse> {
   const startTime = Date.now();
 
   try {
-    console.log(`\n[Hybrid Search] Query: "${request.query}"`);
+    logger.info('Starting hybrid search', {
+      query: request.query,
+      limit: request.limit || 20,
+      offset: request.offset || 0,
+      filters: request.filters,
+    });
 
     // Generate query embedding for semantic search (optional - falls back to keyword-only)
     let queryEmbedding: number[] = [];
+    const embeddingStartTime = Date.now();
     try {
       queryEmbedding = await generateEmbedding(request.query);
-      console.log('[Hybrid Search] Using semantic + keyword search');
+      const embeddingTime = Date.now() - embeddingStartTime;
+      logger.info('Embedding generated successfully', {
+        embeddingDimensions: queryEmbedding.length,
+        embeddingTimeMs: embeddingTime,
+      });
+      logger.debug('Using semantic + keyword search');
     } catch (error: any) {
-      console.warn('[Hybrid Search] Embedding generation failed, falling back to keyword-only search');
-      console.warn('[Hybrid Search] Error:', error.message);
+      logger.warn('Embedding generation failed, falling back to keyword-only search', {
+        error: error.message,
+      });
     }
 
     // Build Elasticsearch query
+    logger.debug('Building Elasticsearch query');
     const esQuery = buildHybridQuery(request.query, queryEmbedding, request.filters);
+    logger.debug('Elasticsearch query built', { query: JSON.stringify(esQuery) });
 
     // Execute search
+    logger.info('Executing Elasticsearch query');
+    const searchStartTime = Date.now();
     const client = getEsClient();
-    const searchResponse = await client.search({
-      index: SIGNALS_INDEX,
-      body: esQuery,
-      size: request.limit || 20,
-      from: request.offset || 0,
-    });
+
+    let searchResponse;
+    try {
+      searchResponse = await client.search({
+        index: SIGNALS_INDEX,
+        body: esQuery,
+        size: request.limit || 20,
+        from: request.offset || 0,
+      });
+      const searchTime = Date.now() - searchStartTime;
+      logger.info('Elasticsearch query executed', {
+        searchTimeMs: searchTime,
+        took: searchResponse.took,
+      });
+    } catch (searchError: any) {
+      logger.error('Elasticsearch query failed', searchError, {
+        index: SIGNALS_INDEX,
+        query: request.query,
+      });
+      throw searchError;
+    }
 
     const totalResults = typeof searchResponse.hits.total === 'number'
       ? searchResponse.hits.total
       : searchResponse.hits.total?.value || 0;
 
-    console.log(`[Hybrid Search] Found ${totalResults} results`);
+    logger.info('Search results retrieved', {
+      totalResults,
+      returnedResults: searchResponse.hits.hits.length,
+    });
 
     // Format results
     const results: SocialPost[] = searchResponse.hits.hits.map((hit: any) => ({
@@ -53,14 +90,25 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
       indexed_at: new Date(hit._source.indexed_at),
     }));
 
+    const totalTime = Date.now() - startTime;
+    logger.info('Hybrid search completed successfully', {
+      totalResults,
+      returnedResults: results.length,
+      totalTimeMs: totalTime,
+    });
+
     return {
       query: request.query,
       results,
       total_results: totalResults,
-      search_time_ms: Date.now() - startTime,
+      search_time_ms: totalTime,
     };
-  } catch (error) {
-    console.error('[Hybrid Search] Error:', error);
+  } catch (error: any) {
+    const totalTime = Date.now() - startTime;
+    logger.error('Hybrid search failed', error, {
+      query: request.query,
+      totalTimeMs: totalTime,
+    });
     throw error;
   }
 }
