@@ -1,7 +1,7 @@
 // Check what's actually in the Elasticsearch index
 
 import * as dotenv from 'dotenv';
-import { esClient, SIGNALS_INDEX } from '../lib/elasticsearch/client';
+import { getEsClient, SIGNALS_INDEX } from '../lib/elasticsearch/client';
 
 dotenv.config({ path: '.env.local' });
 
@@ -9,12 +9,14 @@ async function checkIndex() {
   console.log('📊 Checking Elasticsearch index...\n');
 
   try {
+    const client = getEsClient();
+
     // Get index stats
-    const stats = await esClient.count({ index: SIGNALS_INDEX });
+    const stats = await client.count({ index: SIGNALS_INDEX });
     console.log(`Total documents: ${stats.count}\n`);
 
     // Get breakdown by platform
-    const platformAgg = await esClient.search({
+    const platformAgg = await client.search({
       index: SIGNALS_INDEX,
       body: {
         size: 0,
@@ -35,7 +37,7 @@ async function checkIndex() {
 
     // Get some sample documents
     console.log('\nSample documents:');
-    const samples = await esClient.search({
+    const samples = await client.search({
       index: SIGNALS_INDEX,
       body: {
         size: 5,
@@ -52,7 +54,7 @@ async function checkIndex() {
     });
 
     // Check for embeddings
-    const withEmbeddings = await esClient.count({
+    const withEmbeddings = await client.count({
       index: SIGNALS_INDEX,
       body: {
         query: {

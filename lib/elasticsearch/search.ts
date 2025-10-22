@@ -1,6 +1,6 @@
 // Hybrid search implementation (BM25 + Vector search)
 
-import { esClient, SIGNALS_INDEX } from './client';
+import { getEsClient, SIGNALS_INDEX } from './client';
 import { generateEmbedding } from '../ai/embeddings';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
 
@@ -24,7 +24,8 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
     const esQuery = buildHybridQuery(request.query, queryEmbedding, request.filters);
 
     // Execute search
-    const searchResponse = await esClient.search({
+    const client = getEsClient();
+    const searchResponse = await client.search({
       index: SIGNALS_INDEX,
       body: esQuery,
       size: request.limit || 20,
@@ -190,7 +191,8 @@ function buildHybridQuery(query: string, embedding: number[], filters?: SearchFi
 
 // Get trending posts (high engagement recently)
 export async function getTrendingPosts(limit: number = 20): Promise<SocialPost[]> {
-  const response = await esClient.search({
+  const client = getEsClient();
+  const response = await client.search({
     index: SIGNALS_INDEX,
     body: {
       query: {
@@ -225,7 +227,8 @@ export async function getTrendingPosts(limit: number = 20): Promise<SocialPost[]
 
 // Get posts by platform
 export async function getPostsByPlatform(platform: string, limit: number = 20): Promise<SocialPost[]> {
-  const response = await esClient.search({
+  const client = getEsClient();
+  const response = await client.search({
     index: SIGNALS_INDEX,
     body: {
       query: {

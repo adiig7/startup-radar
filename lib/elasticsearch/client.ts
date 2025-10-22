@@ -2,10 +2,6 @@
 
 import { Client } from '@elastic/elasticsearch';
 import type { SocialPost } from '../types';
-import * as dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config({ path: '.env.local' });
 
 export const SIGNALS_INDEX = 'social_signals';
 
@@ -14,30 +10,28 @@ let _esClient: Client | null = null;
 
 export function getEsClient(): Client {
   if (!_esClient) {
-    _esClient = new Client({
-      cloud: {
-        id: process.env.ELASTIC_CLOUD_ID!,
-      },
-      auth: {
-        apiKey: process.env.ELASTIC_API_KEY!,
-      },
-    });
+    // Only initialize if we're in a runtime environment (not during build)
+    if (typeof window === 'undefined' && process.env.ELASTIC_CLOUD_ID) {
+      _esClient = new Client({
+        cloud: {
+          id: process.env.ELASTIC_CLOUD_ID,
+        },
+        auth: {
+          apiKey: process.env.ELASTIC_API_KEY!,
+        },
+      });
+    } else if (!_esClient) {
+      // Return a mock client during build
+      throw new Error('Elasticsearch client not initialized - missing environment variables');
+    }
   }
-  return _esClient;
+  return _esClient!;
 }
-
-// For backwards compatibility, export a getter
-export const esClient = new Proxy({} as Client, {
-  get: (target, prop) => {
-    const client = getEsClient();
-    const value = (client as any)[prop];
-    return typeof value === 'function' ? value.bind(client) : value;
-  }
-});
 
 // Create index with proper mappings
 export async function createSignalsIndex() {
-  const indexExists = await esClient.indices.exists({ index: SIGNALS_INDEX });
+  const client = getEsClient();
+  const indexExists = await client.indices.exists({ index: SIGNALS_INDEX });
 
   if (indexExists) {
     console.log(`✅ Index "${SIGNALS_INDEX}" already exists`);
@@ -46,7 +40,7 @@ export async function createSignalsIndex() {
 
   console.log(`Creating index "${SIGNALS_INDEX}"...`);
 
-  await esClient.indices.create({
+  await client.indices.create({
     index: SIGNALS_INDEX,
     body: {
       settings: {
@@ -150,7 +144,8 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
     },
   ]);
 
-  const result = await esClient.bulk({ operations, refresh: true });
+  const client = getEsClient();
+  const result = await client.bulk({ operations, refresh: true });
 
   if (result.errors) {
     const erroredDocuments = result.items.filter((item: any) => item.index?.error);
@@ -165,7 +160,8 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
 export async function deleteOldPosts(daysOld: number = 30): Promise<void> {
   console.log(`Deleting posts older than ${daysOld} days...`);
 
-  const result = await esClient.deleteByQuery({
+  const client = getEsClient();
+  const result = await client.deleteByQuery({
     index: SIGNALS_INDEX,
     body: {
       query: {
@@ -183,7 +179,8 @@ export async function deleteOldPosts(daysOld: number = 30): Promise<void> {
 
 // Get index stats
 export async function getIndexStats() {
-  const stats = await esClient.count({ index: SIGNALS_INDEX });
+  const client = getEsClient();
+  const stats = await client.count({ index: SIGNALS_INDEX });
   return {
     total_documents: stats.count,
   };
