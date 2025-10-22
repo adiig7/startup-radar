@@ -3,6 +3,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, ChartBarIcon, LightBulbIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { FaReddit, FaYoutube } from 'react-icons/fa';
+import { SiProducthunt } from 'react-icons/si';
 import { useTheme } from './providers/ThemeProvider';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -143,11 +145,25 @@ export default function LandingPage() {
         </div>
 
         {/* Platform Icons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-8 sm:mt-16 opacity-60">
-          <div className="text-2xl sm:text-4xl">📺</div>
-          <div className="text-2xl sm:text-4xl">🚀</div>
-          <div className="text-2xl sm:text-4xl">💬</div>
-          <div className="text-2xl sm:text-4xl">📌</div>
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 mt-8 sm:mt-16 opacity-60">
+          <div className="flex items-center gap-2">
+            <FaYoutube className="w-8 h-8 sm:w-12 sm:h-12 text-red-600" />
+            <span className={`text-sm sm:text-base font-medium ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>YouTube</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <SiProducthunt className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />
+            <span className={`text-sm sm:text-base font-medium ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>Product Hunt</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <FaReddit className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />
+            <span className={`text-sm sm:text-base font-medium ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>Reddit</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded bg-orange-600 flex items-center justify-center">
+              <span className="text-white text-sm sm:text-xl font-bold">Y</span>
+            </div>
+            <span className={`text-sm sm:text-base font-medium ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>Hacker News</span>
+          </div>
         </div>
       </section>
 
