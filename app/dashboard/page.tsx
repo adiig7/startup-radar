@@ -236,44 +236,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Search Button */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleSearch}
-              disabled={loading || !query.trim() || selectedPlatforms.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
-            >
-              <MagnifyingGlassIcon className="w-5 h-5" />
-              {loading ? 'Searching...' : 'Search'}
-            </button>
-            <button
-              onClick={async () => {
-                if (!query.trim()) return;
-                const confirmed = confirm(`Collect fresh data for "${query}"?\n\nThis will fetch from YouTube, Reddit, HackerNews, and ProductHunt and index to Elasticsearch.`);
-                if (!confirmed) return;
-
-                setLoading(true);
-                try {
-                  const res = await fetch('/api/admin/collect-now', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: query.trim() })
-                  });
-                  const data = await res.json();
-                  alert(`✅ Collected ${data.postsCollected} posts!\n\nYouTube: ${data.platforms.youtube}\nReddit: ${data.platforms.reddit}\nHackerNews: ${data.platforms.hackernews}\nProductHunt: ${data.platforms.producthunt}`);
-                  // Re-run search to see new data
-                  await handleSearch();
-                } catch (err) {
-                  alert('❌ Collection failed. Check console for errors.');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              disabled={loading || !query.trim()}
-              className="px-6 py-3 bg-green-600/80 text-white rounded-lg font-medium hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
-            >
-              🔄 Collect Fresh Data
-            </button>
-          </div>
+          <button
+            onClick={handleSearch}
+            disabled={loading || !query.trim() || selectedPlatforms.length === 0}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+          >
+            <MagnifyingGlassIcon className="w-5 h-5" />
+            {loading ? 'Searching & Collecting Data...' : 'Search'}
+          </button>
         </div>
 
         {/* Results */}

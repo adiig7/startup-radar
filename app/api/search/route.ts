@@ -2,14 +2,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { hybridSearch } from '@/lib/elasticsearch/search';
-import { queueSearchQuery } from '@/lib/services/background-collector';
+import { collectForQuery } from '@/lib/services/background-collector';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { query, filters, limit, offset } = body;
+    const { query, filters, limit, offset, skipCollection } = body;
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
       return NextResponse.json(
@@ -20,9 +20,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`\n[Search API] Query: "${query}"`);
 
-    // Queue query for background YouTube data collection
-    // This will trigger collection every 10 unique searches
-    queueSearchQuery(query.trim());
+    // Trigger immediate background collection for this query
+    // This runs in the background and doesn't block the search
+    if (!skipCollection) {
+      collectForQuery(query.trim()).catch((error) => {
+        console.error('[Search API] Background collection error:', error);
+        // Don't fail the search if collection fails
+      });
+      console.log('[Search API] Triggered background data collection');
+    }
 
     const results = await hybridSearch({
       query: query.trim(),

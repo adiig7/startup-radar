@@ -5,12 +5,10 @@ import type { SocialPost } from '../types';
 
 export const SIGNALS_INDEX = 'social_signals';
 
-// Lazy-load Elasticsearch client to avoid initialization during build
 let _esClient: Client | null = null;
 
 export function getEsClient(): Client {
   if (!_esClient) {
-    // Only initialize if we're in a runtime environment (not during build)
     if (typeof window === 'undefined' && process.env.ELASTIC_CLOUD_ID) {
       _esClient = new Client({
         cloud: {

@@ -8,6 +8,7 @@ import { generateBatchEmbeddings, prepareTextForEmbedding } from '../ai/embeddin
 import { bulkIndexPosts } from '../elasticsearch/client';
 import { analyzeSentiment } from '../analysis/sentiment';
 import { analyzeQuality, classifyDomain } from '../analysis/quality';
+import { filterAndProcessPosts } from './enhanced-indexing';
 import type { SocialPost, Platform } from '../types';
 
 // Track search queries to trigger collection
@@ -266,34 +267,37 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
       return [];
     }
 
-    // Remove duplicates
-    const uniquePosts = Array.from(
-      new Map(allPosts.map((post) => [post.id, post])).values()
-    );
-
-    // Analyze content
-    uniquePosts.forEach((post) => {
+    // Analyze content BEFORE enhancement
+    allPosts.forEach((post) => {
       const fullText = `${post.title} ${post.content}`;
       post.sentiment = analyzeSentiment(fullText);
       post.quality = analyzeQuality(fullText);
       post.domain_context = classifyDomain(fullText, post.tags);
     });
 
-    // Generate embeddings
-    const texts = uniquePosts.map(prepareTextForEmbedding);
+    // Apply quality filtering and processing pipeline
+    const processedPosts = filterAndProcessPosts(allPosts, query);
+
+    if (processedPosts.length === 0) {
+      console.log('[Background Collector] No posts passed quality filters');
+      return [];
+    }
+
+    // Generate embeddings for high-quality posts only
+    const texts = processedPosts.map(prepareTextForEmbedding);
     const embeddings = await generateBatchEmbeddings(texts);
-    uniquePosts.forEach((post, idx) => {
+    processedPosts.forEach((post, idx) => {
       post.embedding = embeddings[idx];
     });
 
     // Index to Elasticsearch
-    await bulkIndexPosts(uniquePosts);
+    await bulkIndexPosts(processedPosts);
 
     // Mark as processed
     processedQueries.add(query.toLowerCase().trim());
 
     // Log summary
-    const platformCounts = uniquePosts.reduce((acc, post) => {
+    const platformCounts = processedPosts.reduce((acc, post) => {
       acc[post.platform] = (acc[post.platform] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -303,9 +307,9 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
       console.log(`  - ${platform}: ${count}`);
     });
 
-    console.log(`[Background Collector] ✅ Total indexed: ${uniquePosts.length} posts`);
+    console.log(`[Background Collector] ✅ Total indexed: ${processedPosts.length} high-quality posts`);
 
-    return uniquePosts;
+    return processedPosts;
   } catch (error) {
     console.error('[Background Collector] Failed:', error);
     return [];
