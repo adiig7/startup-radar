@@ -1,5 +1,3 @@
-// API endpoint to trigger immediate YouTube data collection for a query
-
 import { NextRequest, NextResponse } from 'next/server';
 import { collectForQuery, getQueueStatus } from '@/lib/services/background-collector';
 
@@ -19,7 +17,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`\n[Collect API] Triggering immediate collection for: "${query}"`);
 
-    // Trigger immediate collection (runs in background but returns quickly)
     const posts = await collectForQuery(query.trim());
 
     return NextResponse.json({

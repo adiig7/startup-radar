@@ -182,19 +182,16 @@ Some example questions:
 
   return (
     <>
-      {/* Overlay for mobile */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
         onClick={onToggle}
       />
       
-      {/* Chat Panel */}
       <div className={`fixed right-0 top-0 h-full w-full lg:w-96 backdrop-blur-sm z-50 flex flex-col ${
         theme === 'dark'
           ? 'bg-[#1f1a17] border-l border-[#4a3824]'
           : 'bg-[#ffffff] border-l border-[#e8dcc8]'
       }`}>
-        {/* Header */}
         <div className={`p-4 border-b flex items-center justify-between flex-shrink-0 ${
           theme === 'dark' ? 'border-[#4a3824]' : 'border-[#e8dcc8]'
         }`}>
@@ -242,7 +239,6 @@ Some example questions:
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {messages.map((message, idx) => (
             <ChatMessage key={idx} message={message} />
@@ -270,7 +266,6 @@ Some example questions:
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className={`p-4 border-t flex-shrink-0 ${
           theme === 'dark' ? 'border-[#4a3824]' : 'border-[#e8dcc8]'
         }`}>

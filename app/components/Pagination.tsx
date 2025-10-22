@@ -31,7 +31,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         ? 'bg-[#1f1a1733] border-[#4a3824]'
         : 'bg-[#ffffff99] border-[#e8dcc8]'
     }`}>
-      {/* Mobile Layout */}
       <div className="flex sm:hidden flex-col items-center gap-3">
         <div className={`text-sm font-medium ${
           theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
@@ -52,7 +51,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
             Prev
           </button>
           
-          {/* Show fewer page numbers on mobile */}
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
               let pageNum;
@@ -100,7 +98,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </div>
       </div>
 
-      {/* Desktop Layout */}
       <div className="hidden sm:flex items-center justify-center gap-4">
         <div className={`text-sm font-medium ${
           theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
@@ -120,7 +117,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           Previous
         </button>
         
-        {/* Page Numbers */}
         <div className="flex items-center gap-1">
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             let pageNum;

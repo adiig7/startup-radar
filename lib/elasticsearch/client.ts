@@ -1,5 +1,3 @@
-// Elasticsearch client configuration for StartupRadar
-
 import { Client } from '@elastic/elasticsearch';
 import type { SocialPost } from '../types';
 import { createLogger } from '../utils/logger';
@@ -16,13 +14,11 @@ export function getEsClient(): Client {
   if (!_esClient) {
     logger.info('Initializing Elasticsearch client');
 
-    // Check if running in browser
     if (typeof window !== 'undefined') {
       logger.error('Cannot initialize Elasticsearch client in browser');
       throw new Error('Elasticsearch client can only be initialized on the server');
     }
 
-    // Check for required environment variables
     if (!process.env.ELASTIC_CLOUD_ID) {
       logger.error('Missing ELASTIC_CLOUD_ID environment variable');
       throw new Error('Elasticsearch client not initialized - missing ELASTIC_CLOUD_ID');
@@ -58,7 +54,6 @@ export function getEsClient(): Client {
   return _esClient;
 }
 
-// Create index with proper mappings
 export async function createSignalsIndex() {
   const client = getEsClient();
   const indexExists = await client.indices.exists({ index: SIGNALS_INDEX });
@@ -108,7 +103,7 @@ export async function createSignalsIndex() {
           tags: { type: 'keyword' },
           embedding: {
             type: 'dense_vector',
-            dims: 768, // Vertex AI text-embedding-004 dimensions
+            dims: 768,
             index: true,
             similarity: 'cosine',
           },
@@ -143,7 +138,6 @@ export async function createSignalsIndex() {
   console.log(`✅ Index "${SIGNALS_INDEX}" created successfully`);
 }
 
-// Bulk index social posts
 export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
   if (posts.length === 0) {
     logger.info('No posts to index');
@@ -184,7 +178,7 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
       const erroredDocuments = result.items.filter((item: any) => item.index?.error);
       logger.error('Bulk indexing had errors', null, {
         errorCount: erroredDocuments.length,
-        errors: erroredDocuments.slice(0, 5), // Log first 5 errors
+        errors: erroredDocuments.slice(0, 5),
       });
       throw new Error(`Bulk indexing had ${erroredDocuments.length} errors`);
     }
@@ -199,7 +193,6 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
   }
 }
 
-// Delete old posts (older than X days)
 export async function deleteOldPosts(daysOld: number = 30): Promise<void> {
   console.log(`Deleting posts older than ${daysOld} days...`);
 
@@ -220,7 +213,6 @@ export async function deleteOldPosts(daysOld: number = 30): Promise<void> {
   console.log(`✅ Deleted ${result.deleted} old posts`);
 }
 
-// Get index stats
 export async function getIndexStats() {
   const client = getEsClient();
   const stats = await client.count({ index: SIGNALS_INDEX });

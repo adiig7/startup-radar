@@ -38,7 +38,6 @@ export default function DashboardPage() {
     setExpandedPosts(newExpanded);
   };
 
-  // Pagination helpers
   const totalPages = Math.ceil(totalResults / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -46,7 +45,6 @@ export default function DashboardPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top of results
     document.getElementById('search-results')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -71,7 +69,6 @@ export default function DashboardPage() {
         from.setFullYear(now.getFullYear() - 1);
         break;
       case 'alltime':
-        // Set to a very old date (e.g., year 2000)
         from.setFullYear(2000, 0, 1);
         break;
     }
@@ -84,7 +81,6 @@ export default function DashboardPage() {
 
     setLoading(true);
     
-    // Reset to first page if this is a new search
     if (page === 1) {
       setCurrentPage(1);
       setExpandedPosts(new Set());
@@ -105,7 +101,7 @@ export default function DashboardPage() {
               to: dateRange.to,
             },
           },
-          limit: 1000, // Fetch a large number to get all results
+          limit: 1000,
           offset: 0,
         }),
       });
@@ -176,7 +172,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Chat Panel */}
       <ChatPanel
         searchResults={results}
         searchQuery={query}

@@ -18,15 +18,14 @@ export async function GET() {
 
     return NextResponse.json({
       total_posts: stats.total_documents,
-      platforms: 4, // Reddit, Hacker News, YouTube, Product Hunt
+      platforms: 4,
       last_updated: new Date().toISOString(),
     });
   } catch (error: any) {
     logger.error('Stats retrieval failed', error);
 
-    // Return fallback stats if Elasticsearch is unavailable
     return NextResponse.json({
-      total_posts: 295, // Fallback number
+      total_posts: 300,
       platforms: 4,
       last_updated: new Date().toISOString(),
       fallback: true,

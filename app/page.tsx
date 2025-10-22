@@ -69,7 +69,6 @@ export default function LandingPage() {
 
       <main className="flex-1">
 
-      {/* Hero Section */}
       <section className="max-w-6xl mx-auto px-4 py-12 sm:py-20">
         <div className="text-center mb-8 sm:mb-12">
           <div className={`inline-block px-3 py-2 sm:px-4 border rounded-full mb-4 sm:mb-6 ${
@@ -144,7 +143,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Platform Icons */}
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 mt-8 sm:mt-16 opacity-60">
           <div className="flex items-center gap-2">
             <FaYoutube className="w-8 h-8 sm:w-12 sm:h-12 text-red-600" />
@@ -167,7 +165,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Core Features */}
       <section className={`backdrop-blur-sm border-y py-12 sm:py-20 ${
         theme === 'dark'
           ? 'bg-[#29241f66] border-[#3d2f1f]'
@@ -239,7 +236,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className={`border-y py-12 sm:py-20 ${
         theme === 'dark'
           ? 'bg-gradient-to-r from-[#3d2f1f] to-[#4a3824] border-[#3d2f1f]'

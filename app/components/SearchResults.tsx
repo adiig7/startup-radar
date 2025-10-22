@@ -43,7 +43,6 @@ export default function SearchResults({
 
   return (
     <div id="search-results" className="mt-3 sm:mt-6">
-      {/* Results Header */}
       <div className={`backdrop-blur-sm rounded-lg border p-3 sm:p-4 mb-3 sm:mb-4 ${
         theme === 'dark'
           ? 'bg-[#1f1a1733] border-[#4a3824]'
@@ -79,7 +78,6 @@ export default function SearchResults({
         </div>
       </div>
 
-      {/* Posts List */}
       <div className="space-y-3 sm:space-y-4">
         {currentResults.map((post) => (
           <PostCard
@@ -91,7 +89,6 @@ export default function SearchResults({
         ))}
       </div>
 
-      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

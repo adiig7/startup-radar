@@ -60,7 +60,6 @@ export default function PostCard({ post, isExpanded, onToggleExpand }: PostCardP
         ? 'bg-[#1f1a1733] border-[#4a3824] hover:border-amber-600'
         : 'bg-[#ffffff99] border-[#e8dcc8] hover:border-[#a8906e]'
     }`}>
-      {/* Platform Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
           theme === 'dark' 
@@ -90,7 +89,6 @@ export default function PostCard({ post, isExpanded, onToggleExpand }: PostCardP
         </div>
       </div>
 
-      {/* Content */}
       <div className="space-y-3">
         <a
           href={post.url}
@@ -136,7 +134,6 @@ export default function PostCard({ post, isExpanded, onToggleExpand }: PostCardP
           )}
         </div>
 
-        {/* Metadata */}
         <div className={`flex flex-wrap items-center gap-3 pt-2 border-t text-xs ${
           theme === 'dark' 
             ? 'border-[#4a3824] text-[#d4c5ae]' 

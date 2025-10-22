@@ -1,9 +1,5 @@
-// Sentiment analysis for social posts
-// Uses a simple lexicon-based approach similar to Needle
-
 import type { SentimentScore } from '../types';
 
-// Sentiment lexicon (positive and negative words)
 const POSITIVE_WORDS = new Set([
   'good', 'great', 'excellent', 'amazing', 'awesome', 'fantastic', 'wonderful',
   'love', 'best', 'perfect', 'happy', 'thanks', 'thank', 'solved', 'working',
@@ -18,15 +14,10 @@ const NEGATIVE_WORDS = new Set([
   'confusing', 'complicated', 'useless', 'waste', 'disappointed', 'wrong',
 ]);
 
-// Intensifiers increase sentiment strength
 const INTENSIFIERS = new Set(['very', 'really', 'extremely', 'absolutely', 'totally']);
 
-// Negation words flip sentiment
 const NEGATIONS = new Set(['not', 'no', 'never', 'none', 'nobody', 'nothing', "don't", "doesn't", "didn't"]);
 
-/**
- * Analyze sentiment of text using lexicon-based approach
- */
 export function analyzeSentiment(text: string): SentimentScore {
   const words = text.toLowerCase().split(/\s+/);
   let score = 0;
@@ -34,12 +25,9 @@ export function analyzeSentiment(text: string): SentimentScore {
   let negativeCount = 0;
 
   for (let i = 0; i < words.length; i++) {
-    const word = words[i].replace(/[^\w]/g, ''); // Remove punctuation
-
-    // Check for negation in previous word
+    const word = words[i].replace(/[^\w]/g, '');
     const isNegated = i > 0 && NEGATIONS.has(words[i - 1].replace(/[^\w]/g, ''));
 
-    // Check for intensifier in previous word
     const isIntensified = i > 0 && INTENSIFIERS.has(words[i - 1].replace(/[^\w]/g, ''));
     const multiplier = isIntensified ? 2 : 1;
 
@@ -56,16 +44,13 @@ export function analyzeSentiment(text: string): SentimentScore {
     }
   }
 
-  // Calculate comparative score (normalized by word count)
   const comparative = words.length > 0 ? score / words.length : 0;
 
-  // Determine label
   let label: 'positive' | 'negative' | 'neutral';
   if (score > 0.5) label = 'positive';
   else if (score < -0.5) label = 'negative';
   else label = 'neutral';
 
-  // Calculate confidence based on sentiment word density
   const sentimentWordCount = positiveCount + negativeCount;
   const confidence = Math.min(sentimentWordCount / Math.max(words.length / 10, 1), 1);
 
@@ -77,9 +62,6 @@ export function analyzeSentiment(text: string): SentimentScore {
   };
 }
 
-/**
- * Determine if content expresses a problem or pain point
- */
 export function isProblemPost(text: string, sentiment: SentimentScore): boolean {
   const problemIndicators = [
     'problem', 'issue', 'struggling', 'difficulty', 'frustrated', 'help',
@@ -94,9 +76,6 @@ export function isProblemPost(text: string, sentiment: SentimentScore): boolean 
   return hasProblemKeyword || isNegativeSentiment;
 }
 
-/**
- * Extract pain points from text
- */
 export function extractPainPoints(text: string): string[] {
   const painPointPatterns = [
     /(?:struggling with|problem with|issue with|difficult to|hard to|frustrated by)\s+([^,.!?]+)/gi,

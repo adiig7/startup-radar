@@ -1,5 +1,3 @@
-// Vertex AI embeddings generation for semantic search
-
 import { VertexAI } from '@google-cloud/vertexai';
 import type { SocialPost } from '../types';
 import { createLogger } from '../utils/logger';
@@ -61,30 +59,23 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       credentialsInfo: credentialsEnv.includes('/') ? credentialsEnv : `${credentialsEnv.length} chars`,
     });
 
-    // Create auth client - handle both file paths and direct credentials
     logger.debug('Creating Google Auth client');
     let auth;
     
     if (credentialsEnv.includes('/') || credentialsEnv.includes('\\')) {
-      // File path - use standard Google Auth with keyFilename
       logger.debug('Using credentials file path');
       auth = new GoogleAuth({
         keyFilename: credentialsEnv,
         scopes: ['https://www.googleapis.com/auth/cloud-platform'],
       });
     } else {
-      // Direct credentials content - parse and use credentials object
       logger.debug('Parsing credentials content');
       let credentials;
       try {
-        // First, try to parse as direct JSON
         try {
           credentials = JSON.parse(credentialsEnv);
           logger.debug('Credentials parsed as direct JSON');
-        } catch (directParseError) {
-          // If direct JSON parsing fails, try base64 decoding
-          logger.debug('Direct JSON parsing failed, trying base64 decode');
-          
+        } catch (directParseError) {          
           // Validate that it looks like base64 (no binary characters)
           if (!/^[A-Za-z0-9+/=\s]*$/.test(credentialsEnv)) {
             throw new Error('Credentials contain invalid characters - not valid base64 or JSON');
@@ -95,7 +86,6 @@ export async function generateEmbedding(text: string): Promise<number[]> {
           logger.debug('Credentials decoded from base64 and parsed');
         }
 
-        // Validate that it has the required fields
         if (!credentials.client_email) {
           throw new Error('Credentials missing client_email field');
         }
@@ -124,7 +114,6 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     logger.debug('Getting authenticated client');
     const client = await auth.getClient();
 
-    // Make the API request
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
     const request = {
       instances: [{ content: text }],
@@ -161,7 +150,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       timeMs: elapsedTime,
       textLength: text?.length,
     });
-    throw error; // Don't fallback to zero vector - let it fail properly
+    throw error;
   }
 }
 
@@ -169,7 +158,6 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
   const startTime = Date.now();
   logger.info('Starting batch embedding generation', { count: texts.length });
 
-  // Process in smaller batches to avoid rate limits (5 per batch)
   const batchSize = 5;
   const embeddings: number[][] = [];
 
@@ -197,7 +185,6 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
       throw batchError;
     }
 
-    // Longer delay to avoid rate limiting (2 seconds between batches)
     if (i + batchSize < texts.length) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
@@ -219,19 +206,16 @@ export function prepareTextForEmbedding(post: SocialPost): string {
 
   // Title (weighted more)
   parts.push(`Title: ${post.title}`);
-  parts.push(`Title: ${post.title}`); // Repeat for emphasis
+  parts.push(`Title: ${post.title}`); 
 
-  // Content
   if (post.content) {
-    parts.push(`Content: ${post.content.substring(0, 500)}`); // Limit content length
+    parts.push(`Content: ${post.content.substring(0, 500)}`);
   }
 
-  // Tags/Categories
   if (post.tags.length > 0) {
     parts.push(`Tags: ${post.tags.join(', ')}`);
   }
 
-  // Platform context
   parts.push(`Platform: ${post.platform}`);
 
   return parts.join(' | ');
