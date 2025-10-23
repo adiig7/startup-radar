@@ -1,46 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 
-interface Stats {
-  total_posts: number;
-  platforms: number;
-  last_updated: string;
-  fallback?: boolean;
-}
-
 export default function Footer() {
   const { theme } = useTheme();
-  const [stats, setStats] = useState<Stats>({
-    total_posts: 300,
-    platforms: 4,
-    last_updated: new Date().toISOString(),
-    fallback: true,
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await axios.get('/api/stats');
-        setStats(data);
-      } catch (error) {
-        console.error(`Failed to fetch stats: ${error}`);
-        // Keep fallback stats
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-    
-    // Refresh stats every 5 minutes
-    const interval = setInterval(fetchStats, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <footer className={`border-t backdrop-blur-sm py-8 sm:py-12 ${
