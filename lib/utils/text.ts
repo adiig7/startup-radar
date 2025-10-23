@@ -1,11 +1,4 @@
-/**
- * Truncates text to a specified length with ellipsis
- * @param text - The text to truncate
- * @param maxLength - Maximum length before truncation
- * @param suffix - Suffix to add when truncated (default: "...")
- * @returns Truncated text
- */
-export function truncateText(text: string, maxLength: number, suffix: string = "..."): string {
+export const truncateText = (text: string, maxLength: number, suffix: string = "..."): string => {
   if (!text || text.length <= maxLength) {
     return text;
   }
@@ -13,14 +6,8 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
   return text.substring(0, maxLength).trim() + suffix;
 }
 
-/**
- * Truncates text at word boundaries to avoid cutting words in half
- * @param text - The text to truncate
- * @param maxLength - Maximum length before truncation
- * @param suffix - Suffix to add when truncated (default: "...")
- * @returns Truncated text at word boundary
- */
-export function truncateAtWordBoundary(text: string, maxLength: number, suffix: string = "..."): string {
+// Truncates text at word boundaries to avoid cutting words in half
+export const truncateAtWordBoundary = (text: string, maxLength: number, suffix: string = "..."): string => {
   if (!text || text.length <= maxLength) {
     return text;
   }
@@ -37,12 +24,7 @@ export function truncateAtWordBoundary(text: string, maxLength: number, suffix: 
   return truncated.trim() + suffix;
 }
 
-/**
- * Gets responsive character limits based on screen size
- * @param isMobile - Whether the device is mobile
- * @returns Object with character limits for different content types
- */
-export function getResponsiveCharLimits(isMobile: boolean = false) {
+export const getResponsiveCharLimits = (isMobile: boolean = false) => {
   return {
     content: isMobile ? 200 : 400,
     title: isMobile ? 60 : 100,
@@ -50,18 +32,17 @@ export function getResponsiveCharLimits(isMobile: boolean = false) {
   };
 }
 
-/**
- * Formats content for display with proper truncation
- * @param content - The content to format
- * @param maxLength - Maximum length (optional, uses responsive default)
- * @param isMobile - Whether the device is mobile
- * @returns Formatted content object with truncated text and metadata
- */
-export function formatContentForDisplay(
+export const formatContentForDisplay = (
   content: string, 
   maxLength?: number, 
   isMobile: boolean = false
-) {
+): {
+  content: string;
+  originalContent: string;
+  isTruncated: boolean;
+  originalLength: number;
+  truncatedLength: number;
+} => {
   const limits = getResponsiveCharLimits(isMobile);
   const limit = maxLength || limits.content;
   
