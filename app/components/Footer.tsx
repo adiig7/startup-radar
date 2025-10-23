@@ -60,20 +60,10 @@ export default function Footer() {
               Powered by <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch</span> & <span className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI</span>
             </span>
           </div>
-          <div className={`flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
-            <span>
-              {loading ? (
-                <span className="inline-block animate-pulse">Loading...</span>
-              ) : (
-                <>
-                  {Math.floor(stats.total_posts / 100) * 100}+ indexed posts
-                </>
-              )}
-            </span>
+          <div className={`flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
+            <span>Find problems worth solving</span>
             <span className="hidden sm:inline">•</span>
-            <span>{stats.platforms} platforms</span>
-            <span className="hidden sm:inline">•</span>
-            <span>Real-time updates</span>
+            <span>Validate before you build</span>
           </div>
         </div>
       </div>

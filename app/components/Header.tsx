@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, SunIcon, MoonIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 
 interface HeaderProps {
@@ -23,9 +23,11 @@ export default function Header({ showDashboardButton = false, currentPage = 'hom
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`} />
+            <div className={`p-1.5 rounded-lg ${theme === 'dark' ? 'bg-amber-700' : 'bg-amber-800'}`}>
+              <MagnifyingGlassIcon className="w-5 h-5 text-white" />
+            </div>
             <span className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>
               StartupRadar
             </span>
