@@ -1,6 +1,6 @@
 'use client';
 
-import { ChatBubbleLeftIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftIcon, SparklesIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 import PostCard from './PostCard';
 import Pagination from './Pagination';
@@ -20,6 +20,7 @@ interface SearchResultsProps {
   onPageChange: (page: number) => void;
   onToggleChat: () => void;
   onAnalyzeOpportunity: () => void;
+  onViewAnalytics: () => void;
   searchQuery: string;
 }
 
@@ -37,6 +38,7 @@ export default function SearchResults({
   onPageChange,
   onToggleChat,
   onAnalyzeOpportunity,
+  onViewAnalytics,
   searchQuery
 }: SearchResultsProps) {
   const { theme } = useTheme();
@@ -65,18 +67,18 @@ export default function SearchResults({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
-              onClick={onAnalyzeOpportunity}
+              onClick={onViewAnalytics}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all hover:scale-105 ${
                 theme === 'dark'
-                  ? 'border-amber-600 bg-amber-900 bg-opacity-30 text-amber-300 hover:bg-amber-900 hover:bg-opacity-50'
-                  : 'border-amber-600 bg-amber-100 text-amber-800 hover:bg-amber-200'
+                  ? 'border-purple-600 bg-purple-900 bg-opacity-30 text-purple-300 hover:bg-purple-900 hover:bg-opacity-50'
+                  : 'border-purple-600 bg-purple-100 text-purple-800 hover:bg-purple-200'
               }`}
             >
-              <SparklesIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Analyze Opportunity</span>
-              <span className="sm:hidden">Analyze</span>
+              <ChartBarIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">View Analytics</span>
+              <span className="sm:hidden">Analytics</span>
             </button>
 
             <button

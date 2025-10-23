@@ -9,8 +9,10 @@ import SearchForm from '../components/SearchForm';
 import SearchResults from '../components/SearchResults';
 import ChatPanel from '../components/ChatPanel';
 import OpportunityReport from '../components/OpportunityReport';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import type { Platform, SocialPost } from '@/lib/types';
 import type { OpportunityReport as OpportunityReportType } from '@/lib/ai/opportunity-analyzer';
+import type { AnalyticsData } from '@/lib/elasticsearch/analytics';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
@@ -30,6 +32,9 @@ export default function DashboardPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [opportunityReport, setOpportunityReport] = useState<OpportunityReportType | null>(null);
   const [analyzingOpportunity, setAnalyzingOpportunity] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
 
   const toggleExpandPost = (postId: string) => {
@@ -155,6 +160,45 @@ export default function DashboardPage() {
     }
   };
 
+  const handleViewAnalytics = async () => {
+    if (!query.trim() || results.length === 0) return;
+
+    setLoadingAnalytics(true);
+    setShowAnalytics(true);
+
+    try {
+      const dateRange = getDateRange(timeframe);
+
+      const response = await fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query.trim(),
+          filters: {
+            platforms: selectedPlatforms,
+            dateRange: {
+              from: dateRange.from,
+              to: dateRange.to,
+            },
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Analytics generation failed');
+      }
+
+      const analytics = await response.json();
+      setAnalyticsData(analytics);
+    } catch (error) {
+      console.error('Analytics error:', error);
+      alert('Failed to generate analytics. Please try again.');
+      setShowAnalytics(false);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
       theme === 'dark'
@@ -190,6 +234,7 @@ export default function DashboardPage() {
             onPageChange={handlePageChange}
             onToggleChat={() => setChatOpen(!chatOpen)}
             onAnalyzeOpportunity={handleAnalyzeOpportunity}
+            onViewAnalytics={handleViewAnalytics}
             searchQuery={query}
           />
 
@@ -218,6 +263,17 @@ export default function DashboardPage() {
           report={opportunityReport}
           loading={analyzingOpportunity}
           onClose={() => setOpportunityReport(null)}
+        />
+      )}
+
+      {(analyticsData || loadingAnalytics) && (
+        <AnalyticsDashboard
+          analytics={analyticsData}
+          loading={loadingAnalytics}
+          onClose={() => {
+            setAnalyticsData(null);
+            setShowAnalytics(false);
+          }}
         />
       )}
 
