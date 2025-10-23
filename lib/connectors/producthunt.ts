@@ -1,163 +1,88 @@
+import axios from 'axios';
 import type { SocialPost } from '../types';
 
 const PRODUCT_HUNT_API = 'https://api.producthunt.com/v2/api/graphql';
 
-export async function fetchProductHuntPosts(limit: number = 20): Promise<SocialPost[]> {
+const POSTS_QUERY = (limit: number) => `
+  query {
+    posts(first: ${limit}, order: VOTES) {
+      edges {
+        node {
+          id
+          name
+          tagline
+          description
+          votesCount
+          commentsCount
+          createdAt
+          url
+          website
+          topics {
+            edges {
+              node {
+                name
+              }
+            }
+          }
+          user {
+            name
+            username
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function queryProductHunt(limit: number) {
   const token = process.env.PRODUCTHUNT_API_TOKEN;
   if (!token) {
-    console.warn(`PRODUCTHUNT_API_TOKEN not set`);
+    console.warn('PRODUCTHUNT_API_TOKEN not set');
     return [];
   }
 
   try {
-    const query = `
-      query {
-        posts(first: ${limit}, order: VOTES) {
-          edges {
-            node {
-              id
-              name
-              tagline
-              description
-              votesCount
-              commentsCount
-              createdAt
-              url
-              website
-              topics {
-                edges {
-                  node {
-                    name
-                  }
-                }
-              }
-              user {
-                name
-                username
-              }
-            }
-          }
-        }
+    const { data } = await axios.post(
+      PRODUCT_HUNT_API,
+      { query: POSTS_QUERY(limit) },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       }
-    `;
+    );
 
-    const response = await fetch(PRODUCT_HUNT_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ query }),
-    });
+    if (data.errors) throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`ProductHunt API Error: ${response.status} - ${JSON.stringify(errorData)}`);
-      throw new Error(`Product Hunt API failed: ${response.status} - ${JSON.stringify(errorData)}`);
-    }
-
-    const data = await response.json();
-
-    if (data.errors) {
-      console.error(`Product Hunt GraphQL errors: ${JSON.stringify(data.errors)}`);
-      throw new Error(`GraphQL query failed: ${JSON.stringify(data.errors)}`);
-    }
-
-    const posts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
-
-    return posts;
+    return data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
   } catch (error) {
-    console.error(`Error fetching Product Hunt posts: ${error}`);
+    console.error('Product Hunt error:', error);
     return [];
   }
 }
 
-export async function fetchProductHuntByTopic(topic: string, limit: number = 20): Promise<SocialPost[]> {
-  const token = process.env.PRODUCTHUNT_API_TOKEN;
-  if (!token) {
-    console.warn(`PRODUCTHUNT_API_TOKEN not set`);
-    return [];
-  }
+export const fetchProductHuntPosts = (limit = 20) => queryProductHunt(limit);
 
-  try {
-    const fetchLimit = Math.min(limit * 5, 50);
+export async function fetchProductHuntByTopic(topic: string, limit = 20): Promise<SocialPost[]> {
+  const allPosts = await queryProductHunt(Math.min(limit * 5, 50));
+  const topicLower = topic.toLowerCase();
 
-    const query = `
-      query {
-        posts(first: ${fetchLimit}, order: VOTES) {
-          edges {
-            node {
-              id
-              name
-              tagline
-              description
-              votesCount
-              commentsCount
-              createdAt
-              url
-              website
-              topics {
-                edges {
-                  node {
-                    name
-                  }
-                }
-              }
-              user {
-                name
-                username
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    const response = await fetch(PRODUCT_HUNT_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`ProductHunt API Error: ${response.status} : ${JSON.stringify(errorData)}`);
-      throw new Error(`Product Hunt API failed: ${response.status} ${JSON.stringify(errorData)}`);
-    }
-
-    const data = await response.json();
-
-    if (data.errors) {
-      console.error(`Product Hunt GraphQL errors: ${JSON.stringify(data.errors)}`);
-      throw new Error(`GraphQL query failed: ${JSON.stringify(data.errors)}`);
-    }
-
-    const allPosts = data.data.posts.edges.map((edge: any) => normalizeProductHuntPost(edge.node));
-
-    const topicLower = topic.toLowerCase();
-    const filteredPosts = allPosts.filter((post: SocialPost) =>
-      post.tags.some((tag: string) => tag.toLowerCase().includes(topicLower))
-    ).slice(0, limit);
-
-    return filteredPosts;
-  } catch (error) {
-    console.error(`Error searching Product Hunt: ${error}`);
-    return [];
-  }
+  return allPosts
+    .filter(post => post.tags.some(tag => tag.toLowerCase().includes(topicLower)))
+    .slice(0, limit);
 }
 
 
 function normalizeProductHuntPost(post: any): SocialPost {
   const topics = post.topics?.edges?.map((edge: any) => edge.node.name) || [];
+  const content = [post.tagline, post.description].filter(Boolean).join('\n\n');
 
   return {
     id: `producthunt_${post.id}`,
     platform: 'producthunt',
     title: post.name,
-    content: `${post.tagline}\n\n${post.description || ''}`.trim(),
+    content,
     author: post.user?.username || post.user?.name || 'anonymous',
     url: post.url || post.website || `https://www.producthunt.com/posts/${post.id}`,
     created_at: new Date(post.createdAt),

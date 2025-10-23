@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 
@@ -24,13 +25,8 @@ export default function Footer() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/stats', {
-          cache: 'no-store',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        }
+        const { data } = await axios.get('/api/stats');
+        setStats(data);
       } catch (error) {
         console.error(`Failed to fetch stats: ${error}`);
         // Keep fallback stats

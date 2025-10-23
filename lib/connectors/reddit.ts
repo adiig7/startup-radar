@@ -1,59 +1,39 @@
+import axios from 'axios';
 import type { SocialPost } from '../types';
 
+const USER_AGENT = process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0';
+
+async function fetchRedditJSON(url: string) {
+  const { data } = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+  return data;
+}
+
 export async function fetchRedditPosts(
-  subreddits: string[] = ['startups', 'Entrepreneur', 'SaaS', 'smallbusiness', 'sidehustle'],
-  limit: number = 25
+  subreddits = ['startups', 'Entrepreneur', 'SaaS', 'smallbusiness', 'sidehustle'],
+  limit = 25
 ): Promise<SocialPost[]> {
   const allPosts: SocialPost[] = [];
 
   for (const subreddit of subreddits) {
     try {
-      const response = await fetch(
-        `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`,
-        {
-          headers: {
-            'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        console.error(`Failed to fetch r/${subreddit}: ${response.statusText}`);
-        continue;
-      }
-
-      const data = await response.json();
+      const data = await fetchRedditJSON(`https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`);
       const posts = data.data.children.map((child: any) => normalizeRedditPost(child.data));
-
       allPosts.push(...posts);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error(`Error fetching r/${subreddit}: ${error}`);
+      console.error(`Error fetching r/${subreddit}:`, error);
     }
   }
   return allPosts;
 }
 
-export async function searchRedditPosts(query: string, limit: number = 50): Promise<SocialPost[]> {
+export async function searchRedditPosts(query: string, limit = 50): Promise<SocialPost[]> {
   try {
-    const response = await fetch(
-      `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=${limit}&sort=hot`,
-      {
-        headers: {
-          'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Reddit search failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const posts = data.data.children.map((child: any) => normalizeRedditPost(child.data));
-    return posts;
+    const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=${limit}&sort=hot`;
+    const data = await fetchRedditJSON(url);
+    return data.data.children.map((child: any) => normalizeRedditPost(child.data));
   } catch (error) {
-    console.error(`Error searching Reddit: ${error}`);
+    console.error('Error searching Reddit:', error);
     return [];
   }
 }

@@ -1,104 +1,61 @@
+import axios from 'axios';
 import type { SocialPost } from '../types';
 
 const HN_API_BASE = 'https://hacker-news.firebaseio.com/v0';
 
-export async function fetchHackerNewsStories(limit: number = 30): Promise<SocialPost[]> {
+async function fetchStories(endpoint: string, limit: number): Promise<SocialPost[]> {
   try {
-    const topStoriesResponse = await fetch(`${HN_API_BASE}/topstories.json`);
-    const storyIds: number[] = await topStoriesResponse.json();
-
-    const stories = await Promise.all(
-      storyIds.slice(0, limit).map((id) => fetchStoryDetails(id))
-    );
-
-    const validStories = stories.filter((story): story is SocialPost => story !== null);
-    return validStories;
+    const { data: storyIds } = await axios.get(`${HN_API_BASE}/${endpoint}.json`);
+    const stories = await Promise.all(storyIds.slice(0, limit).map(fetchStoryDetails));
+    return stories.filter((story): story is SocialPost => story !== null);
   } catch (error) {
-    console.error(`Error fetching Hacker News stories: ${error}`);
+    console.error(`Error fetching ${endpoint}:`, error);
     return [];
   }
 }
 
-export async function fetchAskHNPosts(limit: number = 20): Promise<SocialPost[]> {
-  try {
-    const askStoriesResponse = await fetch(`${HN_API_BASE}/askstories.json`);
-    const storyIds: number[] = await askStoriesResponse.json();
-
-    const stories = await Promise.all(
-      storyIds.slice(0, limit).map((id) => fetchStoryDetails(id))
-    );
-
-    const validStories = stories.filter((story): story is SocialPost => story !== null);
-    return validStories;
-  } catch (error) {
-    console.error(`Error fetching Ask HN posts: ${error}`);
-    return [];
-  }
-}
-
-export async function fetchShowHNPosts(limit: number = 20): Promise<SocialPost[]> {
-  try {
-    const showStoriesResponse = await fetch(`${HN_API_BASE}/showstories.json`);
-    const storyIds: number[] = await showStoriesResponse.json();
-
-    const stories = await Promise.all(
-      storyIds.slice(0, limit).map((id) => fetchStoryDetails(id))
-    );
-
-    const validStories = stories.filter((story): story is SocialPost => story !== null);
-    return validStories;
-  } catch (error) {
-    console.error(`Error fetching Show HN posts: ${error}`);
-    return [];
-  }
-}
+export const fetchHackerNewsStories = (limit = 30) => fetchStories('topstories', limit);
+export const fetchAskHNPosts = (limit = 20) => fetchStories('askstories', limit);
+export const fetchShowHNPosts = (limit = 20) => fetchStories('showstories', limit);
 
 async function fetchStoryDetails(id: number): Promise<SocialPost | null> {
   try {
-    const response = await fetch(`${HN_API_BASE}/item/${id}.json`);
-    const story = await response.json();
+    const { data: story } = await axios.get(`${HN_API_BASE}/item/${id}.json`);
 
-    if (!story || story.deleted || story.dead) {
-      return null;
-    }
+    if (!story || story.deleted || story.dead) return null;
 
-    return normalizeHNStory(story);
+    const titleLower = story.title?.toLowerCase() || '';
+    const tags = [
+      story.type,
+      titleLower.startsWith('ask hn') && 'Ask HN',
+      titleLower.startsWith('show hn') && 'Show HN'
+    ].filter(Boolean);
+
+    return {
+      id: `hn_${story.id}`,
+      platform: 'hackernews',
+      title: story.title || 'No title',
+      content: story.text || story.title || '',
+      author: story.by || 'anonymous',
+      url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
+      created_at: new Date(story.time * 1000),
+      score: story.score || 0,
+      num_comments: story.descendants || 0,
+      tags,
+      indexed_at: new Date(),
+    };
   } catch (error) {
-    console.error(`Error fetching HN story ${id}:`, error);
+    console.error(`Error fetching story ${id}:`, error);
     return null;
   }
 }
 
-function normalizeHNStory(story: any): SocialPost {
-  const tags: string[] = [];
-  if (story.type) tags.push(story.type);
-  if (story.title?.toLowerCase().startsWith('ask hn')) tags.push('Ask HN');
-  if (story.title?.toLowerCase().startsWith('show hn')) tags.push('Show HN');
-
-  return {
-    id: `hn_${story.id}`,
-    platform: 'hackernews',
-    title: story.title || 'No title',
-    content: story.text || story.title || '',
-    author: story.by || 'anonymous',
-    url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
-    created_at: new Date(story.time * 1000),
-    score: story.score || 0,
-    num_comments: story.descendants || 0,
-    tags,
-    indexed_at: new Date(),
-  };
-}
-
-export async function searchHackerNews(query: string, limit: number = 30): Promise<SocialPost[]> {
+export async function searchHackerNews(query: string, limit = 30): Promise<SocialPost[]> {
   try {
-    const response = await fetch(
-      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=${limit}`
-    );
+    const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=${limit}`;
+    const { data: { hits } } = await axios.get(url);
 
-    const data = await response.json();
-
-    const posts = data.hits.map((hit: any) => ({
+    return hits.map((hit: any) => ({
       id: `hn_${hit.objectID}`,
       platform: 'hackernews' as const,
       title: hit.title || hit.story_title || 'No title',
@@ -111,10 +68,8 @@ export async function searchHackerNews(query: string, limit: number = 30): Promi
       tags: hit._tags || [],
       indexed_at: new Date(),
     }));
-
-    return posts;
   } catch (error) {
-    console.error(`Error searching Hacker News: ${error}`);
+    console.error('Error searching HN:', error);
     return [];
   }
 }

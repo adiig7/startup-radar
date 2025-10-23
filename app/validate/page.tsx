@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
 import { useTheme } from '../providers/ThemeProvider';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -20,17 +21,10 @@ export default function ValidatePage() {
     setReport(null);
 
     try {
-      const response = await fetch('/api/validate-idea', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea: idea.trim() }),
+      const { data: validationReport } = await axios.post('/api/validate-idea', {
+        idea: idea.trim()
       });
 
-      if (!response.ok) {
-        throw new Error('Validation failed');
-      }
-
-      const validationReport = await response.json();
       setReport(validationReport);
     } catch (error) {
       console.error(` Validation error: ${error}`);

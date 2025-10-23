@@ -1,134 +1,82 @@
+import axios from 'axios';
 import type { SocialPost } from '../types';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 
-export async function searchYouTubeVideos(
-  keyword: string,
-  options: {
-    numOfPosts?: number;
-    startDate?: string;
-    endDate?: string;
-  } = {}
-): Promise<SocialPost[]> {
+async function youtubeRequest(endpoint: string, params: Record<string, string>) {
   const apiKey = process.env.YOUTUBE_API_KEY;
-
-  if (!apiKey) {
-    console.error('YOUTUBE_API_KEY not found in environment variables');
-    return [];
-  }
+  if (!apiKey) throw new Error('YOUTUBE_API_KEY not found');
 
   try {
-    const maxResults = Math.min(options.numOfPosts || 25, 50);
-    const publishedAfter = options.startDate ? `${options.startDate}T00:00:00Z` : undefined;
-    const publishedBefore = options.endDate ? `${options.endDate}T23:59:59Z` : undefined;
+    const { data } = await axios.get(`${YOUTUBE_API_BASE}/${endpoint}`, {
+      params: { ...params, key: apiKey }
+    });
 
-    const searchParams = new URLSearchParams({
+    if (data.error) throw new Error(data.error.message);
+    return data;
+  } catch (error: any) {
+    throw new Error(`YouTube API failed: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+export async function searchYouTubeVideos(
+  keyword: string,
+  options: { numOfPosts?: number; startDate?: string; endDate?: string } = {}
+): Promise<SocialPost[]> {
+  try {
+    const searchParams: Record<string, string> = {
       part: 'snippet',
       q: keyword,
       type: 'video',
-      maxResults: maxResults.toString(),
+      maxResults: Math.min(options.numOfPosts || 25, 50).toString(),
       order: 'relevance',
-      key: apiKey,
-    });
+    };
 
-    if (publishedAfter) {
-      searchParams.set('publishedAfter', publishedAfter);
-    }
-    if (publishedBefore) {
-      searchParams.set('publishedBefore', publishedBefore);
-    }
+    if (options.startDate) searchParams.publishedAfter = `${options.startDate}T00:00:00Z`;
+    if (options.endDate) searchParams.publishedBefore = `${options.endDate}T23:59:59Z`;
 
-    const searchResponse = await fetch(
-      `${YOUTUBE_API_BASE}/search?${searchParams}`
-    );
-
-    if (!searchResponse.ok) {
-      const errorData = await searchResponse.json().catch(() => ({}));
-      console.error('YouTube API Error:', searchResponse.status, errorData);
-      throw new Error(`YouTube API search failed: ${searchResponse.status} - ${errorData.error?.message || searchResponse.statusText}`);
-    }
-
-    const searchData = await searchResponse.json();
-
-    if (searchData.error) {
-      console.error('YouTube API Error:', searchData.error);
-      throw new Error(`YouTube API error: ${searchData.error.message}`);
-    }
-
-    if (!searchData.items || searchData.items.length === 0) {
-      console.error('No videos found for the search query');
-      return [];
-    }
+    const searchData = await youtubeRequest('search', searchParams);
+    if (!searchData.items?.length) return [];
 
     const videoIds = searchData.items
-      .filter((item: any) => item.id && item.id.videoId)
+      .filter((item: any) => item.id?.videoId)
       .map((item: any) => item.id.videoId)
       .join(',');
 
-    if (!videoIds) {
-      console.error('No valid video IDs found');
-      return [];
-    }
+    if (!videoIds) return [];
 
-    const detailsParams = new URLSearchParams({
+    const detailsData = await youtubeRequest('videos', {
       part: 'snippet,statistics',
       id: videoIds,
-      key: apiKey,
     });
 
-    const detailsResponse = await fetch(
-      `${YOUTUBE_API_BASE}/videos?${detailsParams}`
-    );
-
-    if (!detailsResponse.ok) {
-      const errorData = await detailsResponse.json().catch(() => ({}));
-      console.error(`YouTube API Error (videos): ${detailsResponse.status} - ${JSON.stringify(errorData)}`);
-      throw new Error(`YouTube API details request failed: ${detailsResponse.status} - ${errorData.error?.message || detailsResponse.statusText}`);
-    }
-
-    const detailsData = await detailsResponse.json();
-
-    if (detailsData.error) {
-      console.error(`YouTube API Error (videos): ${JSON.stringify(detailsData.error)}`);
-      throw new Error(`YouTube API error: ${detailsData.error.message}`);
-    }
-
-    const posts = detailsData.items.map((video: any) => normalizeYouTubeVideo(video));
-
-    return posts;
+    return detailsData.items.map(normalizeYouTubeVideo);
   } catch (error) {
-    console.error(`Error searching YouTube: ${error}`);
+    console.error('YouTube error:', error);
     return [];
   }
 }
 
 
 function normalizeYouTubeVideo(video: any): SocialPost {
-  const videoId = video.id;
-  const snippet = video.snippet || {};
-  const statistics = video.statistics || {};
+  const { id, snippet = {}, statistics = {} } = video;
 
-  const createdAt = snippet.publishedAt ? new Date(snippet.publishedAt) : new Date();
-
-  const tags: string[] = ['YouTube'];
-  if (snippet.categoryId) tags.push(`category_${snippet.categoryId}`);
-  if (snippet.liveBroadcastContent === 'live') tags.push('live');
-  if (snippet.channelTitle) tags.push(snippet.channelTitle);
-
-  if (snippet.tags && Array.isArray(snippet.tags)) {
-    tags.push(...snippet.tags.slice(0, 5));
-  }
-
-  const content = snippet.description || snippet.title || '';
+  const tags = [
+    'YouTube',
+    snippet.categoryId && `category_${snippet.categoryId}`,
+    snippet.liveBroadcastContent === 'live' && 'live',
+    snippet.channelTitle,
+    ...(snippet.tags || []).slice(0, 5)
+  ].filter(Boolean);
 
   return {
-    id: `youtube_${videoId}`,
+    id: `youtube_${id}`,
     platform: 'youtube',
     title: snippet.title || 'No title',
-    content: content,
+    content: snippet.description || snippet.title || '',
     author: snippet.channelTitle || 'Unknown',
-    url: `https://www.youtube.com/watch?v=${videoId}`,
-    created_at: createdAt,
+    url: `https://www.youtube.com/watch?v=${id}`,
+    created_at: new Date(snippet.publishedAt || Date.now()),
     score: parseInt(statistics.likeCount || '0', 10),
     num_comments: parseInt(statistics.commentCount || '0', 10),
     tags,

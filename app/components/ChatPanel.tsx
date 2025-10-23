@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import { XMarkIcon, PaperAirplaneIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 import ChatMessage from './ChatMessage';
@@ -64,27 +65,21 @@ Some example questions:
     const streamingMessageIndex = messages.length + 1;
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: input.trim(),
-          searchResults: searchResults,
-          context: {
-            messages: messages,
-            filters: {
-              platforms: ['reddit', 'hackernews', 'youtube', 'producthunt'] as const
-            }
+      const response = await axios.post('/api/chat', {
+        message: input.trim(),
+        searchResults: searchResults,
+        context: {
+          messages: messages,
+          filters: {
+            platforms: ['reddit', 'hackernews', 'youtube', 'producthunt'] as const
           }
-        }),
+        }
+      }, {
+        responseType: 'stream',
+        adapter: 'fetch'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to get response');
-      }
-
-      const reader = response.body?.getReader();
+      const reader = response.data?.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
       let messageCreated = false;

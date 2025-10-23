@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { useTheme } from '../providers/ThemeProvider';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -99,29 +100,20 @@ export default function DashboardPage() {
     try {
       const dateRange = getDateRange(timeframe);
 
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query.trim(),
-          filters: {
-            platforms: selectedPlatforms,
-            dateRange: {
-              from: dateRange.from,
-              to: dateRange.to,
-            },
+      const { data } = await axios.post('/api/search', {
+        query: query.trim(),
+        filters: {
+          platforms: selectedPlatforms,
+          dateRange: {
+            from: dateRange.from,
+            to: dateRange.to,
           },
-          limit: 1000,
-          offset: 0,
-          useReranking, // Enable AI reranking if checkbox is checked
-        }),
+        },
+        limit: 1000,
+        offset: 0,
+        useReranking, // Enable AI reranking if checkbox is checked
       });
 
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-
-      const data = await response.json();
       setResults(data.results);
       setTotalResults(data.total_results);
     } catch (error) {
@@ -139,20 +131,11 @@ export default function DashboardPage() {
     setOpportunityReport(null);
 
     try {
-      const response = await fetch('/api/analyze-opportunity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query.trim(),
-          posts: results,
-        }),
+      const { data: report } = await axios.post('/api/analyze-opportunity', {
+        query: query.trim(),
+        posts: results,
       });
 
-      if (!response.ok) {
-        throw new Error('Opportunity analysis failed');
-      }
-
-      const report = await response.json();
       setOpportunityReport(report);
     } catch (error) {
       console.error(`Opportunity analysis error: ${error}`);
@@ -171,26 +154,17 @@ export default function DashboardPage() {
     try {
       const dateRange = getDateRange(timeframe);
 
-      const response = await fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query.trim(),
-          filters: {
-            platforms: selectedPlatforms,
-            dateRange: {
-              from: dateRange.from,
-              to: dateRange.to,
-            },
+      const { data: analytics } = await axios.post('/api/analytics', {
+        query: query.trim(),
+        filters: {
+          platforms: selectedPlatforms,
+          dateRange: {
+            from: dateRange.from,
+            to: dateRange.to,
           },
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Analytics generation failed');
-      }
-
-      const analytics = await response.json();
       setAnalyticsData(analytics);
     } catch (error) {
       console.error(`Analytics error: ${error}`);
