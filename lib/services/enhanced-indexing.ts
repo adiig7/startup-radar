@@ -6,7 +6,6 @@ export function deduplicatePosts(posts: SocialPost[]): SocialPost[] {
   for (const post of posts) {
     const urlKey = normalizeUrl(post.url);
     const titleKey = normalizeTitle(post.title);
-    const contentKey = normalizeContent(post.content);
 
     const existingByUrl = uniquePosts.get(urlKey);
     const existingByTitle = uniquePosts.get(titleKey);
@@ -230,17 +229,9 @@ export function removeNoise(posts: SocialPost[]): SocialPost[] {
 }
 
 export function filterAndProcessPosts(posts: SocialPost[], query?: string): SocialPost[] {
-  console.log(`[Post Processing] Starting with ${posts.length} posts`);
-
   let filteredPosts = removeNoise(posts);
-  console.log(`[Post Processing] After noise removal: ${filteredPosts.length} posts`);
-
   filteredPosts = deduplicatePosts(filteredPosts);
-  console.log(`[Post Processing] After deduplication: ${filteredPosts.length} posts`);
-
   filteredPosts = filterByQuality(filteredPosts, 40);
-  console.log(`[Post Processing] After quality filter: ${filteredPosts.length} posts`);
-
   filteredPosts = filteredPosts.map(post => ({
     ...post,
     tags: extractEnhancedTags(post),
@@ -256,8 +247,5 @@ export function filterAndProcessPosts(posts: SocialPost[], query?: string): Soci
   }
 
   filteredPosts = applyFreshnessBoost(filteredPosts);
-
-  console.log(`[Post Processing] Final: ${filteredPosts.length} high-quality posts`);
-
   return filteredPosts;
 }

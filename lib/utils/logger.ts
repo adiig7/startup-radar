@@ -1,5 +1,3 @@
-// Enhanced logging utility controlled by IS_LOGGING_ENABLED environment variable
-
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LogContext {
@@ -27,7 +25,6 @@ class Logger {
   }
 
   private shouldLog(): boolean {
-    // Always log errors, regardless of IS_LOGGING_ENABLED
     return this.isEnabled;
   }
 

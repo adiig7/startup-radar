@@ -11,7 +11,7 @@ async function setupElasticsearch() {
   try {
     await createSignalsIndex();
 
-    console.log('\n✅ Elasticsearch setup complete!');
+    console.log('\n Elasticsearch setup complete!');
     console.log('\nNext step: Run `npm run collect-data` to start collecting social media posts');
   } catch (error) {
     console.error('\n❌ Error during setup:', error);

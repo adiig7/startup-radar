@@ -4,8 +4,6 @@ export async function fetchRedditPosts(
   subreddits: string[] = ['startups', 'Entrepreneur', 'SaaS', 'smallbusiness', 'sidehustle'],
   limit: number = 25
 ): Promise<SocialPost[]> {
-  console.log(`\n📱 Fetching posts from ${subreddits.length} subreddits...`);
-
   const allPosts: SocialPost[] = [];
 
   for (const subreddit of subreddits) {
@@ -20,7 +18,7 @@ export async function fetchRedditPosts(
       );
 
       if (!response.ok) {
-        console.error(`Failed to fetch r/${subreddit}: ${response.status}`);
+        console.error(`Failed to fetch r/${subreddit}: ${response.statusText}`);
         continue;
       }
 
@@ -28,21 +26,15 @@ export async function fetchRedditPosts(
       const posts = data.data.children.map((child: any) => normalizeRedditPost(child.data));
 
       allPosts.push(...posts);
-      console.log(`  ✅ r/${subreddit}: ${posts.length} posts`);
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error(`Error fetching r/${subreddit}:`, error);
+      console.error(`Error fetching r/${subreddit}: ${error}`);
     }
   }
-
-  console.log(`✅ Total Reddit posts fetched: ${allPosts.length}`);
   return allPosts;
 }
 
 export async function searchRedditPosts(query: string, limit: number = 50): Promise<SocialPost[]> {
-  console.log(`\n🔍 Searching Reddit for: "${query}"`);
-
   try {
     const response = await fetch(
       `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=${limit}&sort=hot`,
@@ -59,11 +51,9 @@ export async function searchRedditPosts(query: string, limit: number = 50): Prom
 
     const data = await response.json();
     const posts = data.data.children.map((child: any) => normalizeRedditPost(child.data));
-
-    console.log(`✅ Found ${posts.length} Reddit posts`);
     return posts;
   } catch (error) {
-    console.error('Error searching Reddit:', error);
+    console.error(`Error searching Reddit: ${error}`);
     return [];
   }
 }

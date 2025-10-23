@@ -1,5 +1,3 @@
-// Text utility functions for StartupRadar
-
 /**
  * Truncates text to a specified length with ellipsis
  * @param text - The text to truncate
@@ -36,7 +34,6 @@ export function truncateAtWordBoundary(text: string, maxLength: number, suffix: 
     return truncated.substring(0, lastSpaceIndex).trim() + suffix;
   }
   
-  // Otherwise, just truncate at the character limit
   return truncated.trim() + suffix;
 }
 

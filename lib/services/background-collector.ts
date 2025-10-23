@@ -50,7 +50,7 @@ async function collectYouTubeDataForQueries(queries: string[]) {
         if (result.status === 'fulfilled') {
           const posts = result.value;
           allPosts.push(...posts);
-          console.log(`  ✅ ${platforms[index]}: ${posts.length} posts`);
+          console.log(`   ${platforms[index]}: ${posts.length} posts`);
         } else {
           console.log(`  ⚠️  ${platforms[index]}: ${result.reason}`);
         }
@@ -99,7 +99,7 @@ async function collectYouTubeDataForQueries(queries: string[]) {
       console.log(`  - ${platform}: ${count} posts`);
     });
 
-    console.log('[Background Collector] ✅ Collection complete');
+    console.log('[Background Collector]  Collection complete');
   } catch (error) {
     console.error('[Background Collector] Collection failed:', error);
   }

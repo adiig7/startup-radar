@@ -13,7 +13,7 @@ async function resetIndex() {
 
     if (exists) {
       await client.indices.delete({ index: SIGNALS_INDEX });
-      console.log(`✅ Deleted index "${SIGNALS_INDEX}"`);
+      console.log(` Deleted index "${SIGNALS_INDEX}"`);
     } else {
       console.log(`ℹ️  Index "${SIGNALS_INDEX}" doesn't exist`);
     }
@@ -22,7 +22,7 @@ async function resetIndex() {
     console.log('\n🚀 Creating new index with updated schema...\n');
     await createSignalsIndex();
 
-    console.log('\n✅ Index reset complete!');
+    console.log('\n Index reset complete!');
     console.log('Next step: Run `npm run collect-data` to populate the index');
   } catch (error) {
     console.error('\n❌ Error:', error);

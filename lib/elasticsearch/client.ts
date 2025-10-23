@@ -59,7 +59,7 @@ export async function createSignalsIndex() {
   const indexExists = await client.indices.exists({ index: SIGNALS_INDEX });
 
   if (indexExists) {
-    console.log(`✅ Index "${SIGNALS_INDEX}" already exists`);
+    console.log(` Index "${SIGNALS_INDEX}" already exists`);
     return;
   }
 
@@ -109,7 +109,6 @@ export async function createSignalsIndex() {
           },
           indexed_at: { type: 'date' },
 
-          // Enhanced analysis fields
           sentiment: {
             properties: {
               score: { type: 'float' },
@@ -135,7 +134,7 @@ export async function createSignalsIndex() {
     },
   });
 
-  console.log(`✅ Index "${SIGNALS_INDEX}" created successfully`);
+  console.log(` Index "${SIGNALS_INDEX}" created successfully`);
 }
 
 export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {

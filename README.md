@@ -7,10 +7,10 @@ StartupRadar uses **Elasticsearch hybrid search** and **Vertex AI grounding** to
 ## 🎯 Built for AI Accelerate Hackathon - Elastic Challenge
 
 This project demonstrates:
-- ✅ **Elasticsearch hybrid search** (BM25 + vector similarity)
-- ✅ **Vertex AI native grounding** (LLM + enterprise data)
-- ✅ **Conversational AI interface** with real-time citations
-- ✅ **Multi-platform data collection** (Reddit, HN, etc.)
+-  **Elasticsearch hybrid search** (BM25 + vector similarity)
+-  **Vertex AI native grounding** (LLM + enterprise data)
+-  **Conversational AI interface** with real-time citations
+-  **Multi-platform data collection** (Reddit, HN, etc.)
 
 ## 🚀 Quick Start
 

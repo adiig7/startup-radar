@@ -50,7 +50,6 @@ export async function getAnalytics(
 
   const client = getEsClient();
 
-  // Build the base query with filters
   const filterClauses: any[] = [];
 
   if (filters) {
@@ -72,11 +71,9 @@ export async function getAnalytics(
     }
   }
 
-  // Determine time interval based on date range
   let calendarInterval: 'hour' | 'day' = 'day';
 
   if (filters?.dateRange) {
-    // Convert to Date objects if they're strings
     const fromDate = filters.dateRange.from instanceof Date
       ? filters.dateRange.from
       : new Date(filters.dateRange.from);
@@ -87,7 +84,6 @@ export async function getAnalytics(
     const diffMs = toDate.getTime() - fromDate.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
 
-    // Use hourly interval if range is 24 hours or less
     if (diffHours <= 24) {
       calendarInterval = 'hour';
     }
@@ -108,12 +104,11 @@ export async function getAnalytics(
     },
   };
 
-  // Execute aggregations
   const response = await client.search({
     index: SIGNALS_INDEX,
     body: {
       query: baseQuery,
-      size: 0, // We only want aggregations, not documents
+      size: 0,
       aggs: {
         // 1. Trend over time (hourly or daily buckets based on date range)
         trend_over_time: {
@@ -179,7 +174,6 @@ export async function getAnalytics(
     },
   });
 
-  // Process trend over time
   const trendBuckets = (response.aggregations?.trend_over_time as any)?.buckets || [];
   const trendOverTime = {
     buckets: trendBuckets.map((bucket: any) => {
@@ -187,7 +181,6 @@ export async function getAnalytics(
       let dateLabel: string;
 
       if (calendarInterval === 'hour') {
-        // For hourly, show "Oct 22, 3 PM" format
         dateLabel = date.toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -195,7 +188,6 @@ export async function getAnalytics(
           hour12: true,
         });
       } else {
-        // For daily, show "Oct 22" format
         dateLabel = date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -251,16 +243,13 @@ export async function getAnalytics(
     })),
   };
 
-  // Process time of day heatmap
   const timeOfDayBuckets = (response.aggregations?.time_of_day as any)?.buckets || [];
   const hourCounts: { [key: number]: number } = {};
 
-  // Initialize all hours with 0
   for (let i = 0; i < 24; i++) {
     hourCounts[i] = 0;
   }
 
-  // Fill in actual counts from the aggregation
   timeOfDayBuckets.forEach((bucket: any) => {
     const hour = bucket.key;
     hourCounts[hour] = bucket.doc_count;
