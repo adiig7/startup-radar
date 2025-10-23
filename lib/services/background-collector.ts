@@ -18,34 +18,6 @@ const processedQueries = new Set<string>();
 
 let ENABLED_PLATFORMS: Platform[] = ['youtube', 'reddit', 'hackernews', 'producthunt'];
 
-export function queueSearchQuery(query: string) {
-  const normalizedQuery = query.toLowerCase().trim();
-
-  if (processedQueries.has(normalizedQuery)) {
-    return;
-  }
-
-  queryQueue.push(normalizedQuery);
-  console.log(`[Background Collector] Queued: "${query}" (${queryQueue.length}/${QUEUE_THRESHOLD})`);
-
-  if (queryQueue.length >= QUEUE_THRESHOLD) {
-    triggerBackgroundCollection();
-  }
-}
-
-async function triggerBackgroundCollection() {
-  if (queryQueue.length === 0) return;
-
-  const queriesToProcess = [...queryQueue];
-  queryQueue.length = 0;
-
-  console.log(`\n[Background Collector] Processing ${queriesToProcess.length} queries...`);
-
-  collectYouTubeDataForQueries(queriesToProcess).catch((error) => {
-    console.error('[Background Collector] Error:', error);
-  });
-}
-
 async function collectYouTubeDataForQueries(queries: string[]) {
   console.log(`[Background Collector] Starting multi-platform data collection for ${queries.length} queries...`);
 
@@ -353,17 +325,3 @@ export function getQueueStatus() {
   };
 }
 
-/**
- * Configure which platforms to collect from
- */
-export function setPlatforms(platforms: Platform[]) {
-  ENABLED_PLATFORMS = [...platforms];
-  console.log(`[Background Collector] Platforms set to: ${platforms.join(', ')}`);
-}
-
-/**
- * Get currently enabled platforms
- */
-export function getEnabledPlatforms(): Platform[] {
-  return [...ENABLED_PLATFORMS];
-}

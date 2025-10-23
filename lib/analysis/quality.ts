@@ -74,14 +74,6 @@ function calculateSpamScore(text: string, words: string[]): number {
   return Math.min(spamIndicators / 5, 1);
 }
 
-export function isHighQuality(quality: QualityMetrics): boolean {
-  return (
-    quality.wordCount >= 20 &&
-    quality.wordCount <= 1000 &&
-    quality.readabilityScore > 0.4 &&
-    quality.spamScore < 0.3
-  );
-}
 
 export function classifyDomain(text: string, tags: string[]): string {
   const lowerText = text.toLowerCase();

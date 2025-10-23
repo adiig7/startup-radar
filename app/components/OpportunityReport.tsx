@@ -56,6 +56,8 @@ export default function OpportunityReport({ report, loading, onClose }: Opportun
             </h2>
           </div>
           <button
+            type="button"
+            aria-label="Close opportunity report"
             onClick={onClose}
             className={`p-2 rounded-lg transition-colors ${
               theme === 'dark'

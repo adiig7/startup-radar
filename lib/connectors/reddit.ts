@@ -84,34 +84,3 @@ function normalizeRedditPost(post: any): SocialPost {
   };
 }
 
-export async function fetchRedditComments(postId: string): Promise<string[]> {
-  try {
-    const cleanId = postId.replace('reddit_', '');
-
-    const response = await fetch(`https://www.reddit.com/comments/${cleanId}.json`, {
-      headers: {
-        'User-Agent': process.env.REDDIT_USER_AGENT || 'StartupRadar/1.0',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch comments: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const comments: string[] = [];
-    if (data[1]?.data?.children) {
-      data[1].data.children.forEach((child: any) => {
-        if (child.data.body && child.data.body !== '[deleted]' && child.data.body !== '[removed]') {
-          comments.push(child.data.body);
-        }
-      });
-    }
-
-    return comments.slice(0, 20);
-  } catch (error) {
-    console.error('Error fetching Reddit comments:', error);
-    return [];
-  }
-}

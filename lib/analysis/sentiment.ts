@@ -62,37 +62,3 @@ export function analyzeSentiment(text: string): SentimentScore {
   };
 }
 
-export function isProblemPost(text: string, sentiment: SentimentScore): boolean {
-  const problemIndicators = [
-    'problem', 'issue', 'struggling', 'difficulty', 'frustrated', 'help',
-    'how to', 'how do', 'cant', "can't", 'stuck', 'broken', 'not working',
-    'need', 'looking for', 'any suggestions', 'advice', 'tips',
-  ];
-
-  const lowerText = text.toLowerCase();
-  const hasProblemKeyword = problemIndicators.some(keyword => lowerText.includes(keyword));
-  const isNegativeSentiment = sentiment.label === 'negative' || sentiment.score < 0;
-
-  return hasProblemKeyword || isNegativeSentiment;
-}
-
-export function extractPainPoints(text: string): string[] {
-  const painPointPatterns = [
-    /(?:struggling with|problem with|issue with|difficult to|hard to|frustrated by)\s+([^,.!?]+)/gi,
-    /(?:need|want|looking for|wish there was)\s+(?:a|an|some)?\s*([^,.!?]+)/gi,
-    /(?:why (?:is|are|does)|how (?:do|can))\s+([^?]+)/gi,
-  ];
-
-  const painPoints: string[] = [];
-
-  for (const pattern of painPointPatterns) {
-    const matches = [...text.matchAll(pattern)];
-    for (const match of matches) {
-      if (match[1]) {
-        painPoints.push(match[1].trim());
-      }
-    }
-  }
-
-  return painPoints;
-}

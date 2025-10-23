@@ -193,25 +193,6 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
   }
 }
 
-export async function deleteOldPosts(daysOld: number = 30): Promise<void> {
-  console.log(`Deleting posts older than ${daysOld} days...`);
-
-  const client = getEsClient();
-  const result = await client.deleteByQuery({
-    index: SIGNALS_INDEX,
-    body: {
-      query: {
-        range: {
-          created_at: {
-            lt: `now-${daysOld}d`,
-          },
-        },
-      },
-    },
-  });
-
-  console.log(`✅ Deleted ${result.deleted} old posts`);
-}
 
 export async function getIndexStats() {
   const client = getEsClient();
