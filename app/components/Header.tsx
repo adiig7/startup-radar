@@ -6,7 +6,7 @@ import { useTheme } from '../providers/ThemeProvider';
 
 interface HeaderProps {
   showDashboardButton?: boolean;
-  currentPage?: 'home' | 'dashboard';
+  currentPage?: 'home' | 'dashboard' | 'validate';
 }
 
 export default function Header({ showDashboardButton = false, currentPage = 'home' }: HeaderProps) {
@@ -31,7 +31,33 @@ export default function Header({ showDashboardButton = false, currentPage = 'hom
             </span>
           </button>
           
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4">
+            {currentPage !== 'dashboard' && (
+              <button
+                onClick={() => router.push('/dashboard')}
+                className={`px-3 py-2 sm:px-4 rounded-lg transition-colors font-medium text-xs sm:text-sm ${
+                  theme === 'dark'
+                    ? 'bg-amber-700 text-white hover:bg-amber-600'
+                    : 'bg-amber-800 text-white hover:bg-amber-900'
+                }`}
+              >
+                Discover Problems
+              </button>
+            )}
+
+            {currentPage !== 'validate' && (
+              <button
+                onClick={() => router.push('/validate')}
+                className={`px-3 py-2 sm:px-4 rounded-lg transition-colors font-medium text-xs sm:text-sm ${
+                  theme === 'dark'
+                    ? 'bg-amber-700 text-white hover:bg-amber-600'
+                    : 'bg-amber-800 text-white hover:bg-amber-900'
+                }`}
+              >
+                Validate Ideas
+              </button>
+            )}
+
             <button
               onClick={toggleTheme}
               className={`p-2 rounded-lg transition-colors ${
@@ -47,19 +73,6 @@ export default function Header({ showDashboardButton = false, currentPage = 'hom
                 <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </button>
-            
-            {showDashboardButton && (
-              <button
-                onClick={() => router.push('/dashboard')}
-                className={`px-4 py-2 sm:px-6 rounded-lg transition-colors font-medium text-sm sm:text-base ${
-                  theme === 'dark'
-                    ? 'bg-amber-700 text-white hover:bg-amber-600'
-                    : 'bg-amber-800 text-white hover:bg-amber-900'
-                }`}
-              >
-                Dashboard
-              </button>
-            )}
           </div>
         </div>
       </div>

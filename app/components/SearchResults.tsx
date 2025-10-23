@@ -1,6 +1,6 @@
 'use client';
 
-import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 import PostCard from './PostCard';
 import Pagination from './Pagination';
@@ -19,6 +19,7 @@ interface SearchResultsProps {
   onToggleExpand: (postId: string) => void;
   onPageChange: (page: number) => void;
   onToggleChat: () => void;
+  onAnalyzeOpportunity: () => void;
   searchQuery: string;
 }
 
@@ -35,6 +36,7 @@ export default function SearchResults({
   onToggleExpand,
   onPageChange,
   onToggleChat,
+  onAnalyzeOpportunity,
   searchQuery
 }: SearchResultsProps) {
   const { theme } = useTheme();
@@ -62,19 +64,34 @@ export default function SearchResults({
               Showing {startIndex + 1}-{Math.min(endIndex, totalResults)} of {totalResults}
             </p>
           </div>
-          
-          <button
-            onClick={onToggleChat}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all hover:scale-105 ${
-              theme === 'dark'
-                ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 hover:text-amber-300'
-                : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 hover:text-amber-800'
-            }`}
-          >
-            <ChatBubbleLeftIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Chat about results</span>
-            <span className="sm:hidden">Chat</span>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onAnalyzeOpportunity}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all hover:scale-105 ${
+                theme === 'dark'
+                  ? 'border-amber-600 bg-amber-900 bg-opacity-30 text-amber-300 hover:bg-amber-900 hover:bg-opacity-50'
+                  : 'border-amber-600 bg-amber-100 text-amber-800 hover:bg-amber-200'
+              }`}
+            >
+              <SparklesIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Analyze Opportunity</span>
+              <span className="sm:hidden">Analyze</span>
+            </button>
+
+            <button
+              onClick={onToggleChat}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all hover:scale-105 ${
+                theme === 'dark'
+                  ? 'border-[#6b5943] bg-[#3d2f1f80] text-[#d4c5ae] hover:border-amber-500 hover:text-amber-300'
+                  : 'border-[#d4c5ae] bg-[#ffffff80] text-gray-700 hover:border-amber-400 hover:text-amber-800'
+              }`}
+            >
+              <ChatBubbleLeftIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Chat about results</span>
+              <span className="sm:hidden">Chat</span>
+            </button>
+          </div>
         </div>
       </div>
 

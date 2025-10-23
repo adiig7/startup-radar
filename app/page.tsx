@@ -15,24 +15,24 @@ export default function LandingPage() {
 
   const features = [
     {
+      icon: <SparklesIcon className="w-8 h-8" />,
+      title: 'AI Idea Validation',
+      description: 'Enter your startup idea and get instant validation backed by real social media discussions. Get scores for market demand, problem severity, competition, and monetization potential.'
+    },
+    {
       icon: <MagnifyingGlassIcon className="w-8 h-8" />,
       title: 'Social Media Search',
-      description: 'Search across Reddit, Stack Overflow, Hacker News, Quora, Product Hunt, YouTube, and more platforms to find relevant conversations and discussions.'
+      description: 'Search across Reddit, Hacker News, YouTube, Product Hunt, and more platforms to find relevant conversations and discover what people are struggling with.'
     },
     {
       icon: <LightBulbIcon className="w-8 h-8" />,
-      title: 'Trending Problems',
-      description: 'Identify trending problems and market gaps before competitors by analyzing real-time social conversations and discussions.'
+      title: 'Opportunity Analysis',
+      description: 'Analyze search results to identify trending problems, early adopters, and market gaps with AI-powered opportunity scoring and insights.'
     },
     {
       icon: <ChartBarIcon className="w-8 h-8" />,
-      title: 'Competitive Intelligence',
-      description: 'Monitor your competitors and discover market opportunities before they become obvious to everyone else with AI-powered analysis.'
-    },
-    {
-      icon: <SparklesIcon className="w-8 h-8" />,
-      title: 'GPT Analysis',
-      description: 'Analyze how well your brand gets recommended by AI systems and get actionable insights to improve your visibility.'
+      title: 'Grounded AI Chat',
+      description: 'Ask questions about your search results and get instant answers grounded in real discussions, not hallucinated information.'
     },
   ];
 
@@ -65,7 +65,7 @@ export default function LandingPage() {
         ? 'bg-gradient-to-br from-[#29241f] via-[#39322c] to-[#29241f]'
         : 'bg-gradient-to-br from-[#f5f1e8] via-[#fbf9f4] to-[#f0ebe0]'
     }`}>
-      <Header showDashboardButton={true} currentPage="home" />
+      <Header currentPage="home" />
 
       <main className="flex-1">
 
@@ -83,62 +83,61 @@ export default function LandingPage() {
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
             <span className={theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}>
-              Find Signals
+              Discover Problems,
             </span>
             <br />
-            <span className={theme === 'dark' ? 'text-amber-200' : 'text-gray-800'}>That Build Startups</span>
+            <span className={theme === 'dark' ? 'text-amber-200' : 'text-gray-800'}>Validate Ideas</span>
           </h1>
 
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto ${
             theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
           }`}>
-            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI grounding</span>, StartupRadar analyzes real discussions from Reddit, Hacker News, Stack Overflow, and more to help you discover trending problems, validate ideas, and find early adopters.
+            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI</span>, StartupRadar analyzes thousands of real discussions from Reddit, Hacker News, YouTube, and Product Hunt to help you find trending problems and validate startup ideas before you build.
           </p>
 
-          <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 max-w-md mx-auto text-left">
+          <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 max-w-2xl mx-auto text-left">
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                Discover early adopters and validate startup ideas with real conversations
+                <span className="font-semibold">Validate startup ideas</span> by searching thousands of real discussions for market demand, pain points, and willingness to pay
               </p>
             </div>
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                Identify trending problems and market gaps before competitors
+                <span className="font-semibold">Discover trending problems</span> and market gaps before competitors by analyzing social conversations
               </p>
             </div>
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                Free to start - no credit card required
+                <span className="font-semibold">Find early adopters</span> and understand your target users with AI-powered analysis
               </p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
-              onClick={() => router.push('/dashboard')}
-              className={`w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base ${
+              onClick={() => router.push('/validate')}
+              className={`w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all hover:scale-105 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base ${
                 theme === 'dark'
                   ? 'bg-amber-700 text-white hover:bg-amber-600'
                   : 'bg-amber-800 text-white hover:bg-amber-900'
               }`}
             >
-              Detect Signals
-              <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <SparklesIcon className="w-5 h-5" />
+              Validate an Idea
             </button>
             <button
-              onClick={() => {
-                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={`w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-colors font-medium text-sm sm:text-base ${
+              onClick={() => router.push('/dashboard')}
+              className={`w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all hover:scale-105 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base border-2 ${
                 theme === 'dark'
-                  ? 'bg-[#3d2f1f] text-amber-100 hover:bg-[#4a3824]'
-                  : 'bg-[#e8dcc8] text-gray-900 hover:bg-[#d4c5ae]'
+                  ? 'border-amber-600 text-amber-200 hover:bg-[#3d2f1f]'
+                  : 'border-amber-700 text-amber-900 hover:bg-[#f5eddb]'
               }`}
             >
-              How It Works
+              <MagnifyingGlassIcon className="w-5 h-5" />
+              Discover Problems
             </button>
           </div>
         </div>
@@ -203,9 +202,9 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-12 sm:py-20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className={`text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>How Social Media Search Works</h2>
+            <h2 className={`text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>How It Works</h2>
             <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-              Our advanced search technology helps you find meaningful conversations and validate startup ideas across multiple social media platforms.
+              Our hybrid search and AI validation technology analyzes thousands of real discussions to help you discover problems and validate startup ideas.
             </p>
           </div>
 
@@ -242,21 +241,34 @@ export default function LandingPage() {
           : 'bg-gradient-to-r from-[#f5eddb] to-[#e8dcc8] border-[#e8dcc8]'
       }`}>
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className={`text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>Ready to Find Your Next Startup Idea?</h2>
+          <h2 className={`text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>Ready to Build Your Next Startup?</h2>
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-            Join thousands of founders discovering opportunities in social conversations
+            Validate your ideas and discover opportunities backed by real conversations
           </p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className={`px-6 py-3 sm:px-10 sm:py-4 rounded-lg transition-colors font-medium text-base sm:text-lg inline-flex items-center gap-2 ${
-              theme === 'dark'
-                ? 'bg-amber-700 text-white hover:bg-amber-600'
-                : 'bg-amber-800 text-white hover:bg-amber-900'
-            }`}
-          >
-            Start Searching Now
-            <ArrowRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <button
+              onClick={() => router.push('/validate')}
+              className={`w-full sm:w-auto px-6 py-3 sm:px-10 sm:py-4 rounded-lg transition-all hover:scale-105 font-semibold text-base sm:text-lg inline-flex items-center justify-center gap-2 ${
+                theme === 'dark'
+                  ? 'bg-amber-700 text-white hover:bg-amber-600'
+                  : 'bg-amber-800 text-white hover:bg-amber-900'
+              }`}
+            >
+              <SparklesIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+              Validate an Idea
+            </button>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className={`w-full sm:w-auto px-6 py-3 sm:px-10 sm:py-4 rounded-lg transition-all hover:scale-105 font-semibold text-base sm:text-lg inline-flex items-center justify-center gap-2 border-2 ${
+                theme === 'dark'
+                  ? 'border-amber-400 text-amber-200 hover:bg-[#3d2f1f]'
+                  : 'border-amber-700 text-amber-900 hover:bg-[#f5eddb]'
+              }`}
+            >
+              <MagnifyingGlassIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+              Discover Problems
+            </button>
+          </div>
         </div>
       </section>
       </main>

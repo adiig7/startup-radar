@@ -8,7 +8,9 @@ import Footer from '../components/Footer';
 import SearchForm from '../components/SearchForm';
 import SearchResults from '../components/SearchResults';
 import ChatPanel from '../components/ChatPanel';
+import OpportunityReport from '../components/OpportunityReport';
 import type { Platform, SocialPost } from '@/lib/types';
+import type { OpportunityReport as OpportunityReportType } from '@/lib/ai/opportunity-analyzer';
 
 type Timeframe = '1hour' | '24hours' | '7days' | '30days' | '1year' | 'alltime';
 
@@ -26,6 +28,8 @@ export default function DashboardPage() {
   const [totalResults, setTotalResults] = useState(0);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
   const [chatOpen, setChatOpen] = useState(false);
+  const [opportunityReport, setOpportunityReport] = useState<OpportunityReportType | null>(null);
+  const [analyzingOpportunity, setAnalyzingOpportunity] = useState(false);
 
 
   const toggleExpandPost = (postId: string) => {
@@ -121,6 +125,35 @@ export default function DashboardPage() {
     }
   };
 
+  const handleAnalyzeOpportunity = async () => {
+    if (!query.trim() || results.length === 0) return;
+
+    setAnalyzingOpportunity(true);
+    setOpportunityReport(null);
+
+    try {
+      const response = await fetch('/api/analyze-opportunity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query.trim(),
+          posts: results,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Opportunity analysis failed');
+      }
+
+      const report = await response.json();
+      setOpportunityReport(report);
+    } catch (error) {
+      console.error('Opportunity analysis error:', error);
+      alert('Failed to analyze opportunity. Please try again.');
+    } finally {
+      setAnalyzingOpportunity(false);
+    }
+  };
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
@@ -156,6 +189,7 @@ export default function DashboardPage() {
             onToggleExpand={toggleExpandPost}
             onPageChange={handlePageChange}
             onToggleChat={() => setChatOpen(!chatOpen)}
+            onAnalyzeOpportunity={handleAnalyzeOpportunity}
             searchQuery={query}
           />
 
@@ -178,6 +212,14 @@ export default function DashboardPage() {
         isOpen={chatOpen}
         onToggle={() => setChatOpen(!chatOpen)}
       />
+
+      {(opportunityReport || analyzingOpportunity) && (
+        <OpportunityReport
+          report={opportunityReport}
+          loading={analyzingOpportunity}
+          onClose={() => setOpportunityReport(null)}
+        />
+      )}
 
       <Footer />
     </div>
