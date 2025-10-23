@@ -15,6 +15,8 @@ interface SearchFormProps {
   setTimeframe: (timeframe: Timeframe) => void;
   selectedPlatforms: Platform[];
   setSelectedPlatforms: (platforms: Platform[]) => void;
+  useReranking: boolean;
+  setUseReranking: (useReranking: boolean) => void;
   onSearch: () => void;
   loading: boolean;
 }
@@ -26,6 +28,8 @@ export default function SearchForm({
   setTimeframe,
   selectedPlatforms,
   setSelectedPlatforms,
+  useReranking,
+  setUseReranking,
   onSearch,
   loading
 }: SearchFormProps) {
@@ -164,6 +168,35 @@ export default function SearchForm({
             </button>
           ))}
         </div>
+      </div>
+
+      {/* AI Reranking Toggle */}
+      <div className="mb-6">
+        <label className={`flex items-center gap-3 cursor-pointer group ${
+          theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
+        }`}>
+          <input
+            type="checkbox"
+            checked={useReranking}
+            onChange={(e) => setUseReranking(e.target.checked)}
+            className="w-5 h-5 rounded border-2 cursor-pointer transition-colors checked:bg-amber-600 checked:border-amber-600 focus:ring-2 focus:ring-amber-500"
+          />
+          <div className="flex-1">
+            <span className="font-medium text-sm sm:text-base flex items-center gap-2">
+              🔥 AI-Powered Reranking
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                theme === 'dark' ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'
+              }`}>
+                Beta
+              </span>
+            </span>
+            <p className={`text-xs mt-1 ${
+              theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
+            }`}>
+              Uses Vertex AI + Elastic Open Inference API for superior result relevance
+            </p>
+          </div>
+        </label>
       </div>
 
       {/* Search Button */}

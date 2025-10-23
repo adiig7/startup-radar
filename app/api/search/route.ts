@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { query, filters, limit, offset, skipCollection } = body;
+    const { query, filters, limit, offset, skipCollection, useReranking } = body;
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
       return NextResponse.json(
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       filters: filters || {},
       limit: limit || 20,
       offset: offset || 0,
+      useReranking: useReranking === true
     });
 
     return NextResponse.json(results);

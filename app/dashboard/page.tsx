@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['youtube', 'reddit', 'hackernews', 'producthunt']);
+  const [useReranking, setUseReranking] = useState(true); // Default to TRUE for best results
   const [results, setResults] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
@@ -112,6 +113,7 @@ export default function DashboardPage() {
           },
           limit: 1000,
           offset: 0,
+          useReranking, // Enable AI reranking if checkbox is checked
         }),
       });
 
@@ -216,6 +218,8 @@ export default function DashboardPage() {
             setTimeframe={setTimeframe}
             selectedPlatforms={selectedPlatforms}
             setSelectedPlatforms={setSelectedPlatforms}
+            useReranking={useReranking}
+            setUseReranking={setUseReranking}
             onSearch={() => handleSearch()}
             loading={loading}
           />

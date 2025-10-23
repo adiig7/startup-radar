@@ -61,6 +61,7 @@ export interface SearchRequest {
   filters?: SearchFilters;
   limit?: number;
   offset?: number;
+  useReranking?: boolean; // Enable AI-powered reranking with Vertex AI via Open Inference API
 }
 
 export interface SignalInsight {
