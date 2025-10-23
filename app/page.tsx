@@ -40,22 +40,22 @@ export default function LandingPage() {
     {
       number: '1',
       title: 'Enter Your Search',
-      description: 'Start by entering keywords or a natural language query that describes what your startup is about. Our smart search understands context and intent.'
+      description: 'Enter keywords or describe the problem your startup solves. Our hybrid search combines keyword matching with semantic understanding to find relevant discussions.'
     },
     {
       number: '2',
       title: 'Select Platforms',
-      description: 'Choose from Reddit, Stack Overflow, Hacker News, Pinterest, Tumblr, GitHub, YouTube, Quora, and Mastodon to search across multiple platforms simultaneously.'
+      description: 'Search across Reddit, Hacker News, YouTube, and Product Hunt. Filter by date range and choose to enable AI-powered reranking for superior relevance.'
     },
     {
       number: '3',
-      title: 'Advanced Analysis',
-      description: 'We analyze posts for emotional content, intent, and relevance to help you find exactly what you\'re looking for with signal strength indicators.'
+      title: 'AI-Powered Analysis',
+      description: 'Posts are analyzed for sentiment, quality, and spam detection. Optional AI reranking uses Vertex AI to surface the most relevant results from thousands of discussions.'
     },
     {
       number: '4',
-      title: 'Get Results',
-      description: 'Receive curated results with emotional context, making it easy to identify and connect with the right people for your startup.'
+      title: 'Get Insights',
+      description: 'View analytics dashboards, get AI opportunity analysis, or chat with results for deeper insights. All answers are grounded in real discussions, not hallucinated.'
     },
   ];
 
