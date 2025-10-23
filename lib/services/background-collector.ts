@@ -15,72 +15,6 @@ const processedQueries = new Set<string>();
 
 let ENABLED_PLATFORMS: Platform[] = ['youtube', 'reddit', 'hackernews', 'producthunt'];
 
-async function collectYouTubeDataForQueries(queries: string[]) {
-  try {
-    const allPosts: SocialPost[] = [];
-
-    for (const query of queries) {
-      const platformResults = await Promise.allSettled([
-        ENABLED_PLATFORMS.includes('youtube')
-          ? searchYouTubeVideos(query, { numOfPosts: 5 })
-          : Promise.resolve([]),
-
-        ENABLED_PLATFORMS.includes('reddit')
-          ? searchRedditPosts(query, 10)
-          : Promise.resolve([]),
-
-        ENABLED_PLATFORMS.includes('hackernews')
-          ? searchHackerNews(query, 10)
-          : Promise.resolve([]),
-
-        ENABLED_PLATFORMS.includes('producthunt')
-          ? searchProductHuntByQuery(query, 5)
-          : Promise.resolve([]),
-      ]);
-
-      platformResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          const posts = result.value;
-          allPosts.push(...posts);
-        }
-      });
-
-      if (queries.indexOf(query) < queries.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    }
-
-    if (allPosts.length === 0) {
-      return;
-    }
-
-    const uniquePosts = Array.from(
-      new Map(allPosts.map((post) => [post.id, post])).values()
-    );
-
-
-    uniquePosts.forEach((post) => {
-      const fullText = `${post.title} ${post.content}`;
-      post.sentiment = analyzeSentiment(fullText);
-      post.quality = analyzeQuality(fullText);
-      post.domain_context = classifyDomain(fullText, post.tags);
-    });
-
-    const texts = uniquePosts.map(prepareTextForEmbedding);
-    const embeddings = await generateBatchEmbeddings(texts);
-    uniquePosts.forEach((post, idx) => {
-      post.embedding = embeddings[idx];
-    });
-
-    await bulkIndexPosts(uniquePosts);
-
-    queries.forEach((q) => processedQueries.add(q));
-
-  } catch (error) {
-    // Handle error silently
-  }
-}
-
 async function searchProductHuntByQuery(query: string, limit: number): Promise<SocialPost[]> {
   const queryLower = query.toLowerCase();
 
@@ -215,4 +149,3 @@ export function getQueueStatus() {
     enabledPlatforms: ENABLED_PLATFORMS,
   };
 }
-

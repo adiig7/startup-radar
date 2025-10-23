@@ -36,21 +36,17 @@ export async function sendGroundedMessage(
   providedResults?: SocialPost[]
 ): Promise<{ stream: any; citations: SocialPost[] }> {
   try {
-    console.log(`\n[Grounded Chat] User query: "${userMessage}"`);
 
     let relevantPosts: SocialPost[];
 
     if (providedResults && providedResults.length > 0) {
-      console.log(`[Grounded Chat] Using ${providedResults.length} pre-fetched results from dashboard`);
       relevantPosts = providedResults.slice(0, 15);
     } else {
-      console.log(`[Grounded Chat] No pre-fetched results, searching Elasticsearch...`);
       const searchResults = await hybridSearch({
         query: userMessage,
         filters: context?.filters,
         limit: 10,
       });
-      console.log(`[Grounded Chat] Found ${searchResults.results.length} relevant posts from search`);
       relevantPosts = searchResults.results;
     }
 
@@ -63,14 +59,12 @@ export async function sendGroundedMessage(
       contents: [{ role: 'user', parts: [{ text: conversationPrompt }] }],
     });
 
-    console.log(`[Grounded Chat] Streaming response...`);
 
     return {
       stream: result.stream,
       citations: relevantPosts.slice(0, 5),
     };
   } catch (error) {
-    console.error('[Grounded Chat] Error:', error);
     throw new Error('Failed to generate grounded response');
   }
 }

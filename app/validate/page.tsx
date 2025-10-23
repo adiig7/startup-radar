@@ -33,7 +33,7 @@ export default function ValidatePage() {
       const validationReport = await response.json();
       setReport(validationReport);
     } catch (error) {
-      console.error('Validation error:', error);
+      console.error(` Validation error: ${error}`);
       alert('Failed to validate idea. Please try again.');
     } finally {
       setLoading(false);

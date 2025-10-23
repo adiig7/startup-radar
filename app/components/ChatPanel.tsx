@@ -147,21 +147,7 @@ Some example questions:
         }
       }
     } catch (error: any) {
-      console.error('Chat error:', error);
-      const errorMessage: ChatMessageType = {
-        role: 'assistant',
-        content: error.message?.includes('Authentication error')
-          ? 'Sorry, there\'s an authentication issue with the AI service. The search results are still available above.'
-          : error.message?.includes('quota') || error.message?.includes('rate limit')
-          ? 'The AI service is temporarily unavailable due to rate limits. Please try again in a few minutes.'
-          : 'Sorry, I encountered an error analyzing the results. Please try again or check the search results above.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[streamingMessageIndex] = errorMessage;
-        return updated;
-      });
+      console.error(`Chat panel error: ${error}`);
     } finally {
       setLoading(false);
     }

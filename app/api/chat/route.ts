@@ -24,9 +24,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is too long (max 1000 characters)' }, { status: 400 });
     }
 
-    console.log(`\n[Chat API] New message: "${message.substring(0, 50)}..."`);
-    console.log(`[Chat API] Using ${searchResults?.length || 0} pre-fetched results`);
-
     const { stream, citations } = await sendGroundedMessage(message, context, searchResults);
 
     const encoder = new TextEncoder();
@@ -57,9 +54,8 @@ export async function POST(request: NextRequest) {
           );
 
           controller.close();
-          console.log(`[Chat API] Streaming completed (${fullContent.length} chars)\n`);
         } catch (error) {
-          console.error('[Chat API] Streaming error:', error);
+          console.error(`Chat API streaming error: ${error}`);
           controller.error(error);
         }
       },
@@ -73,7 +69,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Chat API] Error:', error);
+    console.error(`Chat API error: ${error}`);
 
     return NextResponse.json(
       {

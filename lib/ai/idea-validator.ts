@@ -65,10 +65,7 @@ export interface ValidationReport {
 }
 
 export async function validateStartupIdea(idea: string): Promise<ValidationReport> {
-  console.log(`\n[Idea Validator] Validating idea: "${idea}"`);
-
   const model = getModel();
-
   const keywordPrompt = `Extract 2-4 search keywords from this startup idea to find relevant discussions on social media.
 
 Startup idea: "${idea}"
@@ -92,7 +89,6 @@ Return ONLY the JSON, no markdown.`;
   keywordResponse = keywordResponse.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
   const { searchQuery } = JSON.parse(keywordResponse);
 
-  console.log(`[Idea Validator] Generated search query: "${searchQuery}"`);
 
   const searchResults = await hybridSearch({
     query: searchQuery,
@@ -100,7 +96,6 @@ Return ONLY the JSON, no markdown.`;
     offset: 0,
   });
 
-  console.log(`[Idea Validator] Found ${searchResults.results.length} relevant posts`);
 
   if (searchResults.results.length === 0) {
     return {
@@ -222,7 +217,6 @@ Return ONLY the JSON object.`;
 
   const report = JSON.parse(validationResponse);
 
-  console.log(`[Idea Validator] Validation complete. Score: ${report.overallScore}, Verdict: ${report.verdict}`);
 
   return {
     idea,

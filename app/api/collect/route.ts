@@ -15,10 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`\n[Collect API] Triggering immediate collection for: "${query}"`);
-
     const posts = await collectForQuery(query.trim());
-
     return NextResponse.json({
       success: true,
       message: `Started collection for "${query}"`,
@@ -30,8 +27,6 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error: any) {
-    console.error('[Collect API] Error:', error);
-
     return NextResponse.json(
       {
         error: 'Collection failed',
@@ -47,7 +42,6 @@ export async function GET() {
     const status = getQueueStatus();
     return NextResponse.json(status);
   } catch (error: any) {
-    console.error('[Collect API] Error:', error);
     return NextResponse.json(
       { error: 'Failed to get queue status' },
       { status: 500 }

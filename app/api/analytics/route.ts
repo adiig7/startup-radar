@@ -17,16 +17,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`\n[Analytics API] Generating analytics for: "${query.substring(0, 80)}..."`);
 
     const analytics = await getAnalytics(query, filters);
 
-    console.log(`[Analytics API] Analytics generated successfully\n`);
 
     return NextResponse.json(analytics);
   } catch (error: any) {
-    console.error('[Analytics API] Error:', error);
-
     return NextResponse.json(
       {
         error: 'Failed to generate analytics',

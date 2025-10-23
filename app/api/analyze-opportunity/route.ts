@@ -23,17 +23,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`\n[Opportunity API] Analyzing opportunity for: "${query}"`);
-    console.log(`[Opportunity API] Using ${posts.length} posts for analysis`);
 
     const report = await analyzeOpportunity(query, posts);
-
-    console.log(`[Opportunity API] Analysis complete. Overall score: ${report.overallScore}\n`);
-
     return NextResponse.json(report);
   } catch (error: any) {
-    console.error('[Opportunity API] Error:', error);
-
     return NextResponse.json(
       {
         error: 'Failed to analyze opportunity',

@@ -32,7 +32,7 @@ export default function Footer() {
           setStats(data);
         }
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        console.error(`Failed to fetch stats: ${error}`);
         // Keep fallback stats
       } finally {
         setLoading(false);

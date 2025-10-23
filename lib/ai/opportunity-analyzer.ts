@@ -70,8 +70,6 @@ export async function analyzeOpportunity(
   query: string,
   posts: SocialPost[]
 ): Promise<OpportunityReport> {
-  console.log(`\n[Opportunity Analyzer] Analyzing "${query}" with ${posts.length} posts`);
-
   const top50Posts = posts.slice(0, 50);
 
   const postsContext = top50Posts.map((post, idx) => {
@@ -157,7 +155,6 @@ Return ONLY the JSON object, no markdown formatting.`;
 
   const report = JSON.parse(cleanJson);
 
-  console.log(`[Opportunity Analyzer] Generated report with overall score: ${report.overallScore}`);
 
   return {
     query,

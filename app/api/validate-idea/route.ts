@@ -23,16 +23,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`\n[Validate API] Validating idea: "${idea.substring(0, 80)}..."`);
-
     const report = await validateStartupIdea(idea);
-
-    console.log(`[Validate API] Validation complete. Verdict: ${report.verdict}\n`);
-
     return NextResponse.json(report);
   } catch (error: any) {
-    console.error('[Validate API] Error:', error);
-
     return NextResponse.json(
       {
         error: 'Failed to validate idea',

@@ -123,7 +123,7 @@ export default function DashboardPage() {
       setResults(data.results);
       setTotalResults(data.total_results);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error(`Search error: ${error}`);
       alert('Search failed. Please try again.');
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export default function DashboardPage() {
       const report = await response.json();
       setOpportunityReport(report);
     } catch (error) {
-      console.error('Opportunity analysis error:', error);
+      console.error(`Opportunity analysis error: ${error}`);
       alert('Failed to analyze opportunity. Please try again.');
     } finally {
       setAnalyzingOpportunity(false);
@@ -191,7 +191,7 @@ export default function DashboardPage() {
       const analytics = await response.json();
       setAnalyticsData(analytics);
     } catch (error) {
-      console.error('Analytics error:', error);
+      console.error(`Analytics error: ${error}`);
       alert('Failed to generate analytics. Please try again.');
       setShowAnalytics(false);
     } finally {
