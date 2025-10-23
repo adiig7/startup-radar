@@ -1,74 +1,30 @@
 import { getEsClient, SIGNALS_INDEX } from './client';
 import { generateEmbedding } from '../ai/embeddings';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
-import { createLogger } from '../utils/logger';
-
-const logger = createLogger('HybridSearch');
 
 export async function hybridSearch(request: SearchRequest): Promise<SearchResponse> {
-  const startTime = Date.now();
-
   try {
-    logger.info('Starting hybrid search', {
-      query: request.query,
-      limit: request.limit || 20,
-      offset: request.offset || 0,
-      filters: request.filters,
-    });
 
     let queryEmbedding: number[] = [];
-    const embeddingStartTime = Date.now();
     try {
       queryEmbedding = await generateEmbedding(request.query);
-      const embeddingTime = Date.now() - embeddingStartTime;
-      logger.info('Embedding generated successfully', {
-        embeddingDimensions: queryEmbedding.length,
-        embeddingTimeMs: embeddingTime,
-      });
-      logger.debug('Using semantic + keyword search');
     } catch (error: any) {
-      logger.warn('Embedding generation failed, falling back to keyword-only search', {
-        error: error.message,
-      });
+      console.error(`Error generating embedding: ${error}`);
     }
 
-    logger.debug('Building Elasticsearch query');
     const esQuery = buildHybridQuery(request.query, queryEmbedding, request.filters);
-    logger.debug('Elasticsearch query built', { query: JSON.stringify(esQuery) });
-
-    logger.info('Executing Elasticsearch query');
-    const searchStartTime = Date.now();
     const client = getEsClient();
 
-    let searchResponse;
-    try {
-      searchResponse = await client.search({
-        index: SIGNALS_INDEX,
-        body: esQuery,
-        size: request.limit || 20,
-        from: request.offset || 0,
-      });
-      const searchTime = Date.now() - searchStartTime;
-      logger.info('Elasticsearch query executed', {
-        searchTimeMs: searchTime,
-        took: searchResponse.took,
-      });
-    } catch (searchError: any) {
-      logger.error('Elasticsearch query failed', searchError, {
-        index: SIGNALS_INDEX,
-        query: request.query,
-      });
-      throw searchError;
-    }
+    const searchResponse = await client.search({
+      index: SIGNALS_INDEX,
+      body: esQuery,
+      size: request.limit || 20,
+      from: request.offset || 0,
+    });
 
     const totalResults = typeof searchResponse.hits.total === 'number'
       ? searchResponse.hits.total
       : searchResponse.hits.total?.value || 0;
-
-    logger.info('Search results retrieved', {
-      totalResults,
-      returnedResults: searchResponse.hits.hits.length,
-    });
 
     const results: SocialPost[] = searchResponse.hits.hits.map((hit: any) => ({
       id: hit._source.id,
@@ -84,25 +40,13 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
       indexed_at: new Date(hit._source.indexed_at),
     }));
 
-    const totalTime = Date.now() - startTime;
-    logger.info('Hybrid search completed successfully', {
-      totalResults,
-      returnedResults: results.length,
-      totalTimeMs: totalTime,
-    });
-
     return {
       query: request.query,
       results,
       total_results: totalResults,
-      search_time_ms: totalTime,
+      search_time_ms: 0,
     };
   } catch (error: any) {
-    const totalTime = Date.now() - startTime;
-    logger.error('Hybrid search failed', error, {
-      query: request.query,
-      totalTimeMs: totalTime,
-    });
     throw error;
   }
 }

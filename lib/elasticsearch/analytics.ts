@@ -1,8 +1,5 @@
 import { getEsClient, SIGNALS_INDEX } from './client';
 import type { SearchFilters } from '../types';
-import { createLogger } from '../utils/logger';
-
-const logger = createLogger('Analytics');
 
 export interface AnalyticsData {
   trendOverTime: {
@@ -46,7 +43,6 @@ export async function getAnalytics(
   query: string,
   filters?: SearchFilters
 ): Promise<AnalyticsData> {
-  logger.info('Getting analytics', { query, filters });
 
   const client = getEsClient();
 
@@ -264,11 +260,6 @@ export async function getAnalytics(
       .sort((a, b) => a.hour - b.hour),
   };
 
-  logger.info('Analytics completed', {
-    trendPoints: trendOverTime.buckets.length,
-    platforms: platformBreakdown.buckets.length,
-    topPosts: engagementStats.topPosts.length,
-  });
 
   return {
     trendOverTime,

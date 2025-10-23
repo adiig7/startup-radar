@@ -1,8 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import type { SocialPost } from '../types';
-import { createLogger } from '../utils/logger';
 
-const logger = createLogger('ElasticsearchClient');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -12,29 +10,19 @@ let _esClient: Client | null = null;
 
 export function getEsClient(): Client {
   if (!_esClient) {
-    logger.info('Initializing Elasticsearch client');
-
     if (typeof window !== 'undefined') {
-      logger.error('Cannot initialize Elasticsearch client in browser');
       throw new Error('Elasticsearch client can only be initialized on the server');
     }
 
     if (!process.env.ELASTIC_CLOUD_ID) {
-      logger.error('Missing ELASTIC_CLOUD_ID environment variable');
       throw new Error('Elasticsearch client not initialized - missing ELASTIC_CLOUD_ID');
     }
 
     if (!process.env.ELASTIC_API_KEY) {
-      logger.error('Missing ELASTIC_API_KEY environment variable');
       throw new Error('Elasticsearch client not initialized - missing ELASTIC_API_KEY');
     }
 
     try {
-      logger.debug('Creating Elasticsearch client with cloud configuration', {
-        cloudIdPrefix: process.env.ELASTIC_CLOUD_ID.substring(0, 20) + '...',
-        hasApiKey: !!process.env.ELASTIC_API_KEY,
-      });
-
       _esClient = new Client({
         cloud: {
           id: process.env.ELASTIC_CLOUD_ID,
@@ -43,10 +31,7 @@ export function getEsClient(): Client {
           apiKey: process.env.ELASTIC_API_KEY,
         },
       });
-
-      logger.info('Elasticsearch client initialized successfully');
     } catch (error: any) {
-      logger.error('Failed to initialize Elasticsearch client', error);
       throw error;
     }
   }
@@ -59,11 +44,8 @@ export async function createSignalsIndex() {
   const indexExists = await client.indices.exists({ index: SIGNALS_INDEX });
 
   if (indexExists) {
-    console.log(` Index "${SIGNALS_INDEX}" already exists`);
     return;
   }
-
-  console.log(`Creating index "${SIGNALS_INDEX}"...`);
 
   await client.indices.create({
     index: SIGNALS_INDEX,
@@ -133,17 +115,12 @@ export async function createSignalsIndex() {
       },
     },
   });
-
-  console.log(` Index "${SIGNALS_INDEX}" created successfully`);
 }
 
 export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
   if (posts.length === 0) {
-    logger.info('No posts to index');
     return;
   }
-
-  logger.info('Starting bulk index operation', { postsCount: posts.length });
 
   try {
     const operations = posts.flatMap((post) => [
@@ -168,26 +145,14 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
       },
     ]);
 
-    logger.debug('Prepared bulk operations', { operationsCount: operations.length });
-
     const client = getEsClient();
     const result = await client.bulk({ operations, refresh: true });
 
     if (result.errors) {
       const erroredDocuments = result.items.filter((item: any) => item.index?.error);
-      logger.error('Bulk indexing had errors', null, {
-        errorCount: erroredDocuments.length,
-        errors: erroredDocuments.slice(0, 5),
-      });
       throw new Error(`Bulk indexing had ${erroredDocuments.length} errors`);
     }
-
-    logger.info('Bulk index completed successfully', {
-      postsIndexed: posts.length,
-      took: result.took,
-    });
   } catch (error: any) {
-    logger.error('Bulk index failed', error, { postsCount: posts.length });
     throw error;
   }
 }
