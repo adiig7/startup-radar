@@ -1,6 +1,5 @@
 import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
-import type { SocialPost } from '../types';
 
 let _vertexAI: VertexAI | null = null;
 let _model: any = null;
@@ -22,7 +21,7 @@ function getVertexAI(): VertexAI {
   return _vertexAI;
 }
 
-function getModel() {
+const getModel = (): any => {
   if (!_model) {
     const vertexAI = getVertexAI();
     _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
@@ -64,7 +63,7 @@ export interface ValidationReport {
   recommendation: string;
 }
 
-export async function validateStartupIdea(idea: string): Promise<ValidationReport> {
+export const validateStartupIdea = async (idea: string): Promise<ValidationReport> => {
   const model = getModel();
   const keywordPrompt = `Extract 2-4 search keywords from this startup idea to find relevant discussions on social media.
 

@@ -3,9 +3,9 @@ import { collectForQuery, getQueueStatus } from '@/lib/services/background-colle
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { query } = body;
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export const GET = async () => {
   try {
     const status = getQueueStatus();
     return NextResponse.json(status);

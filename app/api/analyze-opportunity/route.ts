@@ -4,9 +4,9 @@ import type { SocialPost } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { query, posts } = body as { query: string; posts: SocialPost[] };
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {

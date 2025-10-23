@@ -3,7 +3,7 @@ import { getIndexStats } from '@/lib/elasticsearch/client';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export const GET = async () => {
   try {
     const stats = await getIndexStats();
 

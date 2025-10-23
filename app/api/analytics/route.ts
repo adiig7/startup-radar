@@ -5,7 +5,7 @@ import type { SearchFilters } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { query, filters } = body as { query: string; filters?: SearchFilters };

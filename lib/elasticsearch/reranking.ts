@@ -2,7 +2,7 @@ import { getEsClient } from './client';
 
 const RERANKER_INFERENCE_ID = 'vertex_ai_reranker';
 
-export async function checkRerankingEndpoint(): Promise<boolean> {
+export const checkRerankingEndpoint = async (): Promise<boolean> => {
   try {
     const client = getEsClient();
     await client.inference.get({
@@ -17,7 +17,7 @@ export async function checkRerankingEndpoint(): Promise<boolean> {
   }
 }
 
-export async function createRerankingEndpoint(): Promise<void> {
+export const createRerankingEndpoint = async (): Promise<void> => {
   const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
   const serviceAccountCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
@@ -63,7 +63,7 @@ export async function createRerankingEndpoint(): Promise<void> {
   }
 }
 
-export async function setupRerankingEndpoint(): Promise<void> {
+export const setupRerankingEndpoint = async (): Promise<void> => {
   try {
     const exists = await checkRerankingEndpoint();
 
@@ -75,7 +75,7 @@ export async function setupRerankingEndpoint(): Promise<void> {
   }
 }
 
-export async function deleteRerankingEndpoint(): Promise<void> {
+export const deleteRerankingEndpoint = async (): Promise<void> => {
   const client = getEsClient();
 
   try {

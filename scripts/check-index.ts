@@ -1,11 +1,9 @@
-// Check what's actually in the Elasticsearch index
-
 import * as dotenv from 'dotenv';
 import { getEsClient, SIGNALS_INDEX } from '../lib/elasticsearch/client';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
-async function checkIndex() {
+const checkIndex = async () => {
   console.log('📊 Checking Elasticsearch index...\n');
 
   try {
@@ -53,7 +51,6 @@ async function checkIndex() {
       console.log(`   Has embedding: ${doc.embedding ? 'YES' : 'NO'}`);
     });
 
-    // Check for embeddings
     const withEmbeddings = await client.count({
       index: SIGNALS_INDEX,
       body: {

@@ -3,7 +3,7 @@ import type { SocialPost } from '../types';
 
 const HN_API_BASE = 'https://hacker-news.firebaseio.com/v0';
 
-async function fetchStories(endpoint: string, limit: number): Promise<SocialPost[]> {
+const fetchStories = async (endpoint: string, limit: number): Promise<SocialPost[]> => {
   try {
     const { data: storyIds } = await axios.get(`${HN_API_BASE}/${endpoint}.json`);
     const stories = await Promise.all(storyIds.slice(0, limit).map(fetchStoryDetails));
@@ -18,7 +18,7 @@ export const fetchHackerNewsStories = (limit = 30) => fetchStories('topstories',
 export const fetchAskHNPosts = (limit = 20) => fetchStories('askstories', limit);
 export const fetchShowHNPosts = (limit = 20) => fetchStories('showstories', limit);
 
-async function fetchStoryDetails(id: number): Promise<SocialPost | null> {
+const fetchStoryDetails = async (id: number): Promise<SocialPost | null> => {
   try {
     const { data: story } = await axios.get(`${HN_API_BASE}/item/${id}.json`);
 
@@ -50,7 +50,7 @@ async function fetchStoryDetails(id: number): Promise<SocialPost | null> {
   }
 }
 
-export async function searchHackerNews(query: string, limit = 30): Promise<SocialPost[]> {
+export const searchHackerNews = async (query: string, limit = 30): Promise<SocialPost[]> => {
   try {
     const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=${limit}`;
     const { data: { hits } } = await axios.get(url);

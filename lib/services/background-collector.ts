@@ -15,7 +15,7 @@ const processedQueries = new Set<string>();
 
 let ENABLED_PLATFORMS: Platform[] = ['youtube', 'reddit', 'hackernews', 'producthunt'];
 
-async function searchProductHuntByQuery(query: string, limit: number): Promise<SocialPost[]> {
+const searchProductHuntByQuery = async (query: string, limit: number): Promise<SocialPost[]> => {
   const queryLower = query.toLowerCase();
 
   const topicMappings: Record<string, string> = {
@@ -64,7 +64,7 @@ async function searchProductHuntByQuery(query: string, limit: number): Promise<S
   }
 }
 
-export async function collectForQuery(query: string): Promise<SocialPost[]> {
+export const collectForQuery = async (query: string): Promise<SocialPost[]> => {
   try {
     const allPosts: SocialPost[] = [];
 
@@ -137,11 +137,11 @@ export async function collectForQuery(query: string): Promise<SocialPost[]> {
   }
 }
 
-export function clearProcessedCache() {
+export const clearProcessedCache = () => {
   processedQueries.clear();
 }
 
-export function getQueueStatus() {
+export const getQueueStatus = () => {
   return {
     queueLength: queryQueue.length,
     threshold: QUEUE_THRESHOLD,

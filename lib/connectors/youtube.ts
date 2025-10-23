@@ -3,7 +3,7 @@ import type { SocialPost } from '../types';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 
-async function youtubeRequest(endpoint: string, params: Record<string, string>) {
+const youtubeRequest = async (endpoint: string, params: Record<string, string>): Promise<any> => {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) throw new Error('YOUTUBE_API_KEY not found');
 
@@ -19,10 +19,10 @@ async function youtubeRequest(endpoint: string, params: Record<string, string>) 
   }
 }
 
-export async function searchYouTubeVideos(
+export const searchYouTubeVideos = async (
   keyword: string,
   options: { numOfPosts?: number; startDate?: string; endDate?: string } = {}
-): Promise<SocialPost[]> {
+): Promise<SocialPost[]> => {
   try {
     const searchParams: Record<string, string> = {
       part: 'snippet',
@@ -58,7 +58,7 @@ export async function searchYouTubeVideos(
 }
 
 
-function normalizeYouTubeVideo(video: any): SocialPost {
+const normalizeYouTubeVideo = (video: any): SocialPost => {
   const { id, snippet = {}, statistics = {} } = video;
 
   const tags = [

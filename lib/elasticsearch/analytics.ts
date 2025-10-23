@@ -39,10 +39,10 @@ export interface AnalyticsData {
   };
 }
 
-export async function getAnalytics(
+export const getAnalytics = async (
   query: string,
   filters?: SearchFilters
-): Promise<AnalyticsData> {
+): Promise<AnalyticsData> => {
 
   const client = getEsClient();
 

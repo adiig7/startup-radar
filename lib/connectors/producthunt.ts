@@ -34,7 +34,7 @@ const POSTS_QUERY = (limit: number) => `
   }
 `;
 
-async function queryProductHunt(limit: number) {
+const queryProductHunt = async (limit: number): Promise<SocialPost[]> => {
   const token = process.env.PRODUCTHUNT_API_TOKEN;
   if (!token) {
     console.warn('PRODUCTHUNT_API_TOKEN not set');
@@ -64,17 +64,17 @@ async function queryProductHunt(limit: number) {
 
 export const fetchProductHuntPosts = (limit = 20) => queryProductHunt(limit);
 
-export async function fetchProductHuntByTopic(topic: string, limit = 20): Promise<SocialPost[]> {
+export const fetchProductHuntByTopic = async (topic: string, limit = 20): Promise<SocialPost[]> => {
   const allPosts = await queryProductHunt(Math.min(limit * 5, 50));
   const topicLower = topic.toLowerCase();
 
   return allPosts
-    .filter(post => post.tags.some(tag => tag.toLowerCase().includes(topicLower)))
+    .filter((post: any) => post.tags.some((tag: any) => tag.toLowerCase().includes(topicLower)))
     .slice(0, limit);
 }
 
 
-function normalizeProductHuntPost(post: any): SocialPost {
+const normalizeProductHuntPost = (post: any): SocialPost => {
   const topics = post.topics?.edges?.map((edge: any) => edge.node.name) || [];
   const content = [post.tagline, post.description].filter(Boolean).join('\n\n');
 

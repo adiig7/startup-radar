@@ -4,7 +4,7 @@ import type { SocialPost } from '../types';
 // Lazy-load VertexAI client to avoid initialization during build
 let _vertexAI: VertexAI | null = null;
 
-function getVertexAI(): VertexAI {
+export const getVertexAI = (): VertexAI => {
   if (!_vertexAI) {
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
@@ -21,7 +21,7 @@ function getVertexAI(): VertexAI {
   return _vertexAI;
 }
 
-export async function generateEmbedding(text: string): Promise<number[]> {
+export const generateEmbedding = async (text: string): Promise<number[]> => {
   try {
 
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
@@ -101,7 +101,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   }
 }
 
-export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+export const generateBatchEmbeddings = async (texts: string[]): Promise<number[][]> => {
   const batchSize = 5;
   const embeddings: number[][] = [];
 
@@ -124,7 +124,7 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
 }
 
 // Prepare text for embedding from social post
-export function prepareTextForEmbedding(post: SocialPost): string {
+export const prepareTextForEmbedding = (post: SocialPost): string => {
   const parts: string[] = [];
 
   // Title (weighted more)

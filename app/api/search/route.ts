@@ -4,11 +4,11 @@ import { collectForQuery } from '@/lib/services/background-collector';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
     let body;
     try {
-      body = await request.json();
+      body = await req.json();
     } catch (parseError: any) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },

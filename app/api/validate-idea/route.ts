@@ -4,9 +4,9 @@ import { validateStartupIdea } from '@/lib/ai/idea-validator';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { idea } = body as { idea: string };
 
     if (!idea || typeof idea !== 'string' || idea.trim().length === 0) {

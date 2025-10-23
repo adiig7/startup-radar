@@ -1,11 +1,10 @@
-// Reset Elasticsearch index (delete and recreate)
 import * as dotenv from 'dotenv';
 import { getEsClient, SIGNALS_INDEX, createSignalsIndex } from '../lib/elasticsearch/client';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
-async function resetIndex() {
-  console.log('🗑️  Deleting existing index...\n');
+const resetIndex = async () => {
+  console.log(' Deleting existing index...\n');
 
   try {
     const client = getEsClient();

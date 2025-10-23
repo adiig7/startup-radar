@@ -4,9 +4,9 @@ import type { ConversationContext } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { message, searchResults, context } = body as {
       message: string;
       searchResults?: any[];

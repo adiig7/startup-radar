@@ -3,7 +3,7 @@ import { generateEmbedding } from '../ai/embeddings';
 import { RERANKER_INFERENCE_ID, checkRerankingEndpoint } from './reranking';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
 
-export async function hybridSearch(request: SearchRequest): Promise<SearchResponse> {
+export const hybridSearch = async (request: SearchRequest): Promise<SearchResponse> => {
   const startTime = Date.now();
 
   try {
@@ -83,7 +83,7 @@ export async function hybridSearch(request: SearchRequest): Promise<SearchRespon
  * Hybrid search with AI-powered reranking using Elasticsearch retrievers API
  * This combines BM25 + vector search with Vertex AI reranking for superior relevance
  */
-async function hybridSearchWithReranking(request: SearchRequest, client: any) {
+const hybridSearchWithReranking = async (request: SearchRequest, client: any) => {
   const baseRetriever = await buildBaseRetriever(request);
   const searchQuery = {
     index: SIGNALS_INDEX,
@@ -108,7 +108,7 @@ async function hybridSearchWithReranking(request: SearchRequest, client: any) {
   return await client.search(searchQuery);
 }
 
-async function buildBaseRetriever(request: SearchRequest) {
+const buildBaseRetriever = async (request: SearchRequest) => {
   const shouldClauses: any[] = [];
   const filterClauses: any[] = [];
 
@@ -227,7 +227,7 @@ async function buildBaseRetriever(request: SearchRequest) {
   };
 }
 
-function buildHybridQuery(query: string, embedding: number[], filters?: SearchFilters) {
+const buildHybridQuery = (query: string, embedding: number[], filters?: SearchFilters): any => {
   const shouldClauses: any[] = [];
   const filterClauses: any[] = [];
 

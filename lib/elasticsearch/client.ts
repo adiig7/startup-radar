@@ -8,7 +8,7 @@ export const SIGNALS_INDEX = 'social_signals';
 
 let _esClient: Client | null = null;
 
-export function getEsClient(): Client {
+export const getEsClient = (): Client => {
   if (!_esClient) {
     if (typeof window !== 'undefined') {
       throw new Error('Elasticsearch client can only be initialized on the server');
@@ -39,7 +39,7 @@ export function getEsClient(): Client {
   return _esClient;
 }
 
-export async function createSignalsIndex() {
+export const createSignalsIndex = async () => {
   const client = getEsClient();
   const indexExists = await client.indices.exists({ index: SIGNALS_INDEX });
 
@@ -117,7 +117,7 @@ export async function createSignalsIndex() {
   });
 }
 
-export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
+export const bulkIndexPosts = async (posts: SocialPost[]): Promise<void> => {
   if (posts.length === 0) {
     return;
   }
@@ -158,7 +158,7 @@ export async function bulkIndexPosts(posts: SocialPost[]): Promise<void> {
 }
 
 
-export async function getIndexStats() {
+export const getIndexStats = async (): Promise<{ total_documents: number }> => {
   const client = getEsClient();
   const stats = await client.count({ index: SIGNALS_INDEX });
   return {

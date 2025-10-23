@@ -4,7 +4,7 @@ import type { SocialPost } from '../types';
 let _vertexAI: VertexAI | null = null;
 let _model: any = null;
 
-function getVertexAI(): VertexAI {
+const getVertexAI = (): VertexAI => {
   if (!_vertexAI) {
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
@@ -21,7 +21,7 @@ function getVertexAI(): VertexAI {
   return _vertexAI;
 }
 
-function getModel() {
+const getModel = (): any => {
   if (!_model) {
     const vertexAI = getVertexAI();
     _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
@@ -66,10 +66,10 @@ export interface OpportunityReport {
   keyInsights: string[];
 }
 
-export async function analyzeOpportunity(
+export const analyzeOpportunity = async (
   query: string,
   posts: SocialPost[]
-): Promise<OpportunityReport> {
+): Promise<OpportunityReport> => {
   const top50Posts = posts.slice(0, 50);
 
   const postsContext = top50Posts.map((post, idx) => {

@@ -5,7 +5,7 @@ import type { ChatMessage, ConversationContext, SocialPost } from '../types';
 let _vertexAI: VertexAI | null = null;
 let _model: any = null;
 
-function getVertexAI(): VertexAI {
+const getVertexAI = (): VertexAI => {
   if (!_vertexAI) {
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
@@ -22,7 +22,7 @@ function getVertexAI(): VertexAI {
   return _vertexAI;
 }
 
-function getModel() {
+const getModel = (): any => {
   if (!_model) {
     const vertexAI = getVertexAI();
     _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
@@ -30,11 +30,11 @@ function getModel() {
   return _model;
 }
 
-export async function sendGroundedMessage(
+export const sendGroundedMessage = async (
   userMessage: string,
   context?: ConversationContext,
   providedResults?: SocialPost[]
-): Promise<{ stream: any; citations: SocialPost[] }> {
+): Promise<{ stream: any; citations: SocialPost[] }> => {
   try {
 
     let relevantPosts: SocialPost[];
@@ -69,7 +69,7 @@ export async function sendGroundedMessage(
   }
 }
 
-function prepareGroundingContext(posts: SocialPost[]): string {
+const prepareGroundingContext = (posts: SocialPost[]): string => {
   if (posts.length === 0) {
     return 'No relevant discussions found.';
   }
@@ -97,11 +97,11 @@ Use these real discussions as the PRIMARY source for your answer. Always cite sp
 `;
 }
 
-function buildConversationPrompt(
+const buildConversationPrompt = (
   userMessage: string,
   groundingContext: string,
   chatHistory: ChatMessage[]
-): string {
+): string => {
   const systemPrompt = `You are StartupRadar AI, an expert at analyzing social media discussions to identify startup opportunities and market trends.
 
 Your job is to:
