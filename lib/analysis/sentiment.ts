@@ -10,7 +10,7 @@ const POSITIVE_WORDS = new Set([
 const NEGATIVE_WORDS = new Set([
   'bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'sucks', 'poor',
   'broken', 'fail', 'failed', 'error', 'bug', 'issue', 'problem', 'struggling',
-  'frustrated', 'annoying', 'difficult', 'hard', 'impossible', 'slow', 'slow',
+  'frustrated', 'annoying', 'difficult', 'hard', 'impossible', 'slow',
   'confusing', 'complicated', 'useless', 'waste', 'disappointed', 'wrong',
 ]);
 

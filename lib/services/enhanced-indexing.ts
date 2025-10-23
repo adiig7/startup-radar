@@ -44,14 +44,6 @@ function normalizeTitle(title: string): string {
     .substring(0, 100);
 }
 
-function normalizeContent(content: string): string {
-  return content.toLowerCase()
-    .replace(/[^\w\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .substring(0, 200);
-}
-
 export function filterByQuality(posts: SocialPost[], minScore: number = 50): SocialPost[] {
   return posts.filter(post => {
     const qualityScore = calculateQualityScore(post);
@@ -104,17 +96,13 @@ export function extractEnhancedTags(post: SocialPost): string[] {
 
   const tags = [...existingTags];
 
-  problemKeywords.forEach(keyword => {
-    if (text.includes(keyword) && !tags.includes('problem')) {
-      tags.push('problem');
-    }
-  });
+  if (problemKeywords.some(k => text.includes(k)) && !tags.includes('problem')) {
+    tags.push('problem');
+  }
 
-  solutionKeywords.forEach(keyword => {
-    if (text.includes(keyword) && !tags.includes('solution')) {
-      tags.push('solution');
-    }
-  });
+  if (solutionKeywords.some(k => text.includes(k)) && !tags.includes('solution')) {
+    tags.push('solution');
+  }
 
   techKeywords.forEach(keyword => {
     if (text.includes(keyword)) {

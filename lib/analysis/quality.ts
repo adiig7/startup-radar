@@ -79,7 +79,7 @@ export function classifyDomain(text: string, tags: string[]): string {
   const lowerText = text.toLowerCase();
   const allTags = tags.map(t => t.toLowerCase()).join(' ');
 
-  const domains: { [key: string]: string[] } = {
+  const domains: Record<string, string[]> = {
     remote_work: ['remote', 'work from home', 'wfh', 'distributed', 'async', 'remote team'],
     saas: ['saas', 'subscription', 'b2b', 'software as a service', 'cloud'],
     ai_tools: ['ai', 'machine learning', 'gpt', 'llm', 'chatbot', 'artificial intelligence'],
@@ -96,13 +96,7 @@ export function classifyDomain(text: string, tags: string[]): string {
   let maxMatches = 0;
 
   for (const [domain, keywords] of Object.entries(domains)) {
-    let matches = 0;
-    for (const keyword of keywords) {
-      if (lowerText.includes(keyword) || allTags.includes(keyword)) {
-        matches++;
-      }
-    }
-
+    const matches = keywords.filter(k => lowerText.includes(k) || allTags.includes(k)).length;
     if (matches > maxMatches) {
       maxMatches = matches;
       bestDomain = domain;
