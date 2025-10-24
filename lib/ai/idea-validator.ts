@@ -1,32 +1,33 @@
-import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
+import { getGoogleAuth } from '../utils/google-auth';
 
-let _vertexAI: VertexAI | null = null;
-let _model: any = null;
+const cleanJsonResponse = (response: string): string => {
+  return response.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
+};
 
-function getVertexAI(): VertexAI {
-  if (!_vertexAI) {
-    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
-    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+async function callGemini(prompt: string): Promise<string> {
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
+  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 
-    if (!projectId) {
-      throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required');
-    }
-
-    _vertexAI = new VertexAI({
-      project: projectId,
-      location: location,
-    });
+  if (!projectId) {
+    throw new Error('GOOGLE_CLOUD_PROJECT_ID not set in environment');
   }
-  return _vertexAI;
-}
 
-const getModel = (): any => {
-  if (!_model) {
-    const vertexAI = getVertexAI();
-    _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-  }
-  return _model;
+  const auth = getGoogleAuth();
+  const client = await auth.getClient();
+  const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.0-flash-exp:generateContent`;
+
+  // @ts-ignore
+  const response = await client.request({
+    url: endpoint,
+    method: 'POST',
+    data: {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    },
+  });
+
+  const responseData = response.data as any;
+  return responseData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 export interface ValidationReport {
@@ -64,8 +65,8 @@ export interface ValidationReport {
 }
 
 export const validateStartupIdea = async (idea: string): Promise<ValidationReport> => {
-  const model = getModel();
-  const keywordPrompt = `Extract 2-4 search keywords from this startup idea to find relevant discussions on social media.
+  try {
+    const keywordPrompt = `Extract 2-4 search keywords from this startup idea to find relevant discussions on social media.
 
 Startup idea: "${idea}"
 
@@ -80,80 +81,73 @@ Output: {"searchQuery": "struggling with meeting notes automation"}
 
 Return ONLY the JSON, no markdown.`;
 
-  const keywordResult = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: keywordPrompt }] }],
-  });
+    const keywordResponse = await callGemini(keywordPrompt);
+    const { searchQuery } = JSON.parse(cleanJsonResponse(keywordResponse));
 
-  let keywordResponse = keywordResult.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  keywordResponse = keywordResponse.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
-  const { searchQuery } = JSON.parse(keywordResponse);
+    const searchResults = await hybridSearch({
+      query: searchQuery,
+      limit: 50,
+      offset: 0,
+    });
 
+    if (searchResults.results.length === 0) {
+      return {
+        idea,
+        searchQuery,
+        overallScore: 20,
+        verdict: "DON'T BUILD",
+        marketDemand: {
+          score: 10,
+          evidence: ['No discussions found about this problem'],
+          postsAnalyzed: 0,
+        },
+        problemSeverity: {
+          score: 0,
+          signals: ['No evidence of people struggling with this'],
+        },
+        competitionLevel: {
+          level: 'Low',
+          existingSolutions: [],
+          yourAdvantage: 'First mover advantage, but may indicate no market demand',
+        },
+        monetization: {
+          score: 20,
+          signals: [],
+          suggestedModel: 'Unknown - validate demand first',
+        },
+        targetUsers: {
+          who: 'Unknown',
+          size: 'Unknown',
+          whereToFind: [],
+        },
+        risks: [
+          'No evidence of market demand',
+          'No discussions found about this problem',
+          'May be solving a problem that doesn\'t exist',
+        ],
+        nextSteps: [
+          'Conduct user interviews to validate the problem exists',
+          'Search with different keywords',
+          'Consider pivoting to a related problem with more evidence',
+        ],
+        recommendation: 'Insufficient market validation. No discussions found about this problem, which is a major red flag. Before building, conduct extensive user research to confirm the problem exists and people care about it.',
+      };
+    }
 
-  const searchResults = await hybridSearch({
-    query: searchQuery,
-    limit: 50,
-    offset: 0,
-  });
+    const postsContext = searchResults.results.slice(0, 30).map((post, idx) => {
+      const dateStr = post.created_at instanceof Date
+        ? post.created_at.toLocaleDateString()
+        : new Date(post.created_at).toLocaleDateString();
 
-
-  if (searchResults.results.length === 0) {
-    return {
-      idea,
-      searchQuery,
-      overallScore: 20,
-      verdict: "DON'T BUILD",
-      marketDemand: {
-        score: 10,
-        evidence: ['No discussions found about this problem'],
-        postsAnalyzed: 0,
-      },
-      problemSeverity: {
-        score: 0,
-        signals: ['No evidence of people struggling with this'],
-      },
-      competitionLevel: {
-        level: 'Low',
-        existingSolutions: [],
-        yourAdvantage: 'First mover advantage, but may indicate no market demand',
-      },
-      monetization: {
-        score: 20,
-        signals: [],
-        suggestedModel: 'Unknown - validate demand first',
-      },
-      targetUsers: {
-        who: 'Unknown',
-        size: 'Unknown',
-        whereToFind: [],
-      },
-      risks: [
-        'No evidence of market demand',
-        'No discussions found about this problem',
-        'May be solving a problem that doesn\'t exist',
-      ],
-      nextSteps: [
-        'Conduct user interviews to validate the problem exists',
-        'Search with different keywords',
-        'Consider pivoting to a related problem with more evidence',
-      ],
-      recommendation: 'Insufficient market validation. No discussions found about this problem, which is a major red flag. Before building, conduct extensive user research to confirm the problem exists and people care about it.',
-    };
-  }
-
-  const postsContext = searchResults.results.slice(0, 30).map((post, idx) => {
-    const dateStr = post.created_at instanceof Date
-      ? post.created_at.toLocaleDateString()
-      : new Date(post.created_at).toLocaleDateString();
-
-    return `[Post ${idx + 1}] ${post.platform.toUpperCase()} - ${post.title}
+      return `[Post ${idx + 1}] ${post.platform.toUpperCase()} - ${post.title}
 Author: ${post.author}
 Engagement: ${post.score} upvotes, ${post.num_comments} comments
 Date: ${dateStr}
 Content: ${post.content.substring(0, 300)}${post.content.length > 300 ? '...' : ''}
 ---`;
-  }).join('\n\n');
+    }).join('\n\n');
 
-  const validationPrompt = `You are a startup validation expert. Analyze if this startup idea is viable based on real social media discussions.
+    const validationPrompt = `You are a startup validation expert. Analyze if this startup idea is viable based on real social media discussions.
 
 STARTUP IDEA: "${idea}"
 
@@ -207,19 +201,16 @@ VERDICT RULES:
 
 Return ONLY the JSON object.`;
 
-  const validationResult = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: validationPrompt }] }],
-  });
+    const validationResponse = await callGemini(validationPrompt);
+    const report = JSON.parse(cleanJsonResponse(validationResponse));
 
-  let validationResponse = validationResult.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  validationResponse = validationResponse.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
-
-  const report = JSON.parse(validationResponse);
-
-
-  return {
-    idea,
-    searchQuery,
-    ...report,
-  };
+    return {
+      idea,
+      searchQuery,
+      ...report,
+    };
+  } catch (error: any) {
+    console.error('[Idea Validator]', error.message);
+    throw error;
+  }
 }

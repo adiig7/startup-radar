@@ -26,6 +26,7 @@ export const POST = async (req: NextRequest) => {
     const report = await validateStartupIdea(idea);
     return NextResponse.json(report);
   } catch (error: any) {
+    console.error('Validate Idea Error:', error.message);
     return NextResponse.json(
       {
         error: 'Failed to validate idea',

@@ -1,7 +1,6 @@
 import { VertexAI } from '@google-cloud/vertexai';
-import { GoogleAuth } from 'google-auth-library';
 import type { SocialPost } from '../types';
-import { parseGoogleCredentials } from '../utils/credentials';
+import { getGoogleAuth } from '../utils/google-auth';
 
 let _vertexAI: VertexAI | null = null;
 
@@ -24,7 +23,6 @@ export const getVertexAI = (): VertexAI => {
 
 export const generateEmbedding = async (text: string): Promise<number[]> => {
   try {
-
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 
@@ -32,23 +30,7 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
       throw new Error('GOOGLE_CLOUD_PROJECT_ID not set in environment');
     }
 
-    const credentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    if (!credentialsEnv) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
-    }
-
-    const parsed = parseGoogleCredentials(credentialsEnv);
-
-    const auth = parsed.isFilePath
-      ? new GoogleAuth({
-          keyFilename: parsed.path,
-          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-        })
-      : new GoogleAuth({
-          credentials: parsed,
-          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-        });
-
+    const auth = getGoogleAuth();
     const client = await auth.getClient();
 
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
