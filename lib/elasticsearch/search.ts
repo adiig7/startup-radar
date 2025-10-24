@@ -1,6 +1,6 @@
 import { getEsClient, SIGNALS_INDEX } from './client';
 import { generateEmbedding } from '../ai/embeddings';
-import { RERANKER_INFERENCE_ID, checkRerankingEndpoint } from './reranking';
+import { RERANKER_INFERENCE_ID, checkRerankingEndpoint, setupRerankingEndpoint } from './reranking';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
 
 export const hybridSearch = async (request: SearchRequest): Promise<SearchResponse> => {
@@ -17,10 +17,16 @@ export const hybridSearch = async (request: SearchRequest): Promise<SearchRespon
       try {
         rerankingAvailable = await checkRerankingEndpoint();
         if (!rerankingAvailable) {
-          console.warn('Reranking requested but endpoint not available, falling back to standard search');
+          try {
+            await setupRerankingEndpoint();
+            rerankingAvailable = await checkRerankingEndpoint();
+          } catch (setupError: any) {
+            console.error('[Search] Failed to setup reranking:', setupError.message);
+            rerankingAvailable = false;
+          }
         }
-      } catch (error) {
-        console.error('Error checking reranking endpoint:', error);
+      } catch (error: any) {
+        console.error('Search Reranking check failed:', error.message);
         rerankingAvailable = false;
       }
     }
@@ -28,7 +34,6 @@ export const hybridSearch = async (request: SearchRequest): Promise<SearchRespon
     let searchResponse;
 
     if (useReranking && rerankingAvailable) {
-      console.log('Using AI reranking with Vertex AI via Open Inference API');
       searchResponse = await hybridSearchWithReranking(request, client);
     } else {
       let queryEmbedding: number[] = [];
@@ -79,31 +84,36 @@ export const hybridSearch = async (request: SearchRequest): Promise<SearchRespon
   }
 }
 
-/**
- * Hybrid search with AI-powered reranking using Elasticsearch retrievers API
- * This combines BM25 + vector search with Vertex AI reranking for superior relevance
- */
 const hybridSearchWithReranking = async (request: SearchRequest, client: any) => {
   const baseRetriever = await buildBaseRetriever(request);
-  const searchQuery = {
+
+  const requestedSize = request.limit || 20;
+  const requestedOffset = request.offset || 0;
+  const totalNeeded = requestedSize + requestedOffset;
+  const rankWindowSize = Math.min(Math.max(totalNeeded, 100), 10000);
+
+  const searchQuery: any = {
     index: SIGNALS_INDEX,
     retriever: {
       text_similarity_reranker: {
         retriever: baseRetriever,
         field: 'content',
-        rank_window_size: 100,
+        rank_window_size: rankWindowSize,
         inference_id: RERANKER_INFERENCE_ID,
         inference_text: request.query
       }
     },
-    size: request.limit || 20,
-    from: request.offset || 0,
+    size: requestedSize,
     _source: [
-      'id', 'platform', 'title', 'content', 'author', 'url', 
+      'id', 'platform', 'title', 'content', 'author', 'url',
       'created_at', 'score', 'num_comments', 'tags', 'indexed_at',
       'sentiment', 'quality', 'domain_context', 'relevance_score'
     ]
   };
+
+  if (requestedOffset > 0) {
+    searchQuery.from = requestedOffset;
+  }
 
   return await client.search(searchQuery);
 }
@@ -121,25 +131,6 @@ const buildBaseRetriever = async (request: SearchRequest) => {
       boost: 1.5,
     },
   });
-
-  try {
-    const queryEmbedding = await generateEmbedding(request.query);
-    const hasValidEmbedding = queryEmbedding && queryEmbedding.some((val) => val !== 0);
-    
-    if (hasValidEmbedding) {
-      shouldClauses.push({
-        knn: {
-          field: 'embedding',
-          query_vector: queryEmbedding,
-          k: 50,
-          num_candidates: 100,
-          boost: 2.0,
-        },
-      });
-    }
-  } catch (error: any) {
-    console.error(`Error generating embedding for reranking: ${error}`);
-  }
 
   if (request.filters) {
     const filters = request.filters;
@@ -214,17 +205,22 @@ const buildBaseRetriever = async (request: SearchRequest) => {
       });
     }
   }
-  return {
+  const retriever: any = {
     standard: {
       query: {
         bool: {
           should: shouldClauses,
-          filter: filterClauses.length > 0 ? filterClauses : undefined,
           minimum_should_match: 1,
         },
       },
     },
   };
+
+  if (filterClauses.length > 0) {
+    retriever.standard.query.bool.filter = filterClauses;
+  }
+
+  return retriever;
 }
 
 const buildHybridQuery = (query: string, embedding: number[], filters?: SearchFilters): any => {

@@ -1,7 +1,8 @@
 import { VertexAI } from '@google-cloud/vertexai';
+import { GoogleAuth } from 'google-auth-library';
 import type { SocialPost } from '../types';
+import { parseGoogleCredentials } from '../utils/credentials';
 
-// Lazy-load VertexAI client to avoid initialization during build
 let _vertexAI: VertexAI | null = null;
 
 export const getVertexAI = (): VertexAI => {
@@ -31,59 +32,24 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
       throw new Error('GOOGLE_CLOUD_PROJECT_ID not set in environment');
     }
 
-    const { GoogleAuth } = require('google-auth-library');
-
     const credentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    console.log('DEBUG credentialsEnv', credentialsEnv);
     if (!credentialsEnv) {
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
     }
 
-    let auth;
-    
-    if (credentialsEnv.includes('/') || credentialsEnv.includes('\\')) {
-      auth = new GoogleAuth({
-        keyFilename: credentialsEnv,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-      });
-    } else {
-      let credentials;
-      try {
-        try {
-          credentials = JSON.parse(credentialsEnv);
-          console.log('DEBUG credentials', credentials);
-        } catch (directParseError) {          
-          // Validate that it looks like base64 (no binary characters)
-          if (!/^[A-Za-z0-9+/=\s]*$/.test(credentialsEnv)) {
-            console.log('DEBUG directParseError', directParseError);
-            throw new Error('Credentials contain invalid characters - not valid base64 or JSON');
-          }
-          
-          const credentialsJson = Buffer.from(credentialsEnv.trim(), 'base64').toString('utf-8');
-          credentials = JSON.parse(credentialsJson);
-          console.log('DEBUG credentialsJson', credentialsJson);
-        }
+    const parsed = parseGoogleCredentials(credentialsEnv);
 
-        if (!credentials.client_email) {
-          throw new Error('Credentials missing client_email field');
-        }
-        if (!credentials.private_key) {
-          throw new Error('Credentials missing private_key field');
-        }
-
-        auth = new GoogleAuth({
-          credentials: credentials,
+    const auth = parsed.isFilePath
+      ? new GoogleAuth({
+          keyFilename: parsed.path,
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        })
+      : new GoogleAuth({
+          credentials: parsed,
           scopes: ['https://www.googleapis.com/auth/cloud-platform'],
         });
-      } catch (parseError: any) {
-        console.log('DEBUG parseError', parseError);
-        throw new Error(`Invalid GOOGLE_APPLICATION_CREDENTIALS format: ${parseError.message}`);
-      }
-    }
 
-    console.log('DEBUG auth', auth);
     const client = await auth.getClient();
-    console.log('DEBUG client', client);
 
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
     const request = {

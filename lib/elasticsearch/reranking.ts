@@ -1,4 +1,5 @@
 import { getEsClient } from './client';
+import { parseGoogleCredentials } from '../utils/credentials';
 
 const RERANKER_INFERENCE_ID = 'vertex_ai_reranker';
 
@@ -29,18 +30,8 @@ export const createRerankingEndpoint = async (): Promise<void> => {
     throw new Error('GOOGLE_APPLICATION_CREDENTIALS environment variable is required for reranking');
   }
 
-  let serviceAccountJson: string;
-  try {
-    if (serviceAccountCredentials.length > 100 && !serviceAccountCredentials.startsWith('{')) {
-      serviceAccountJson = Buffer.from(serviceAccountCredentials, 'base64').toString('utf-8');
-    } else {
-      serviceAccountJson = serviceAccountCredentials;
-    }
-    
-    JSON.parse(serviceAccountJson);
-  } catch (error) {
-    throw new Error('Invalid GOOGLE_APPLICATION_CREDENTIALS format. Must be valid JSON or base64-encoded JSON.');
-  }
+  const credentials = parseGoogleCredentials(serviceAccountCredentials);
+  const serviceAccountJson = JSON.stringify(credentials);
 
   const client = getEsClient();
 
@@ -57,9 +48,8 @@ export const createRerankingEndpoint = async (): Promise<void> => {
         },
       },
     });
-
   } catch (error: any) {
-    console.error('Failed to create reranking endpoint:', error.message);
+    console.error('Failed to create endpoint:', error.message);
   }
 }
 

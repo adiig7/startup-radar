@@ -41,6 +41,7 @@ export const POST = async (req: NextRequest) => {
 
     return NextResponse.json(results);
   } catch (error: any) {
+    console.error('Search API Error:', error.message);
     return NextResponse.json(
       {
         error: 'Search failed',
