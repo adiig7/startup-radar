@@ -14,7 +14,7 @@ interface ChatPanelProps {
   onToggle: () => void;
 }
 
-export default function ChatPanel({ searchResults, searchQuery, isOpen, onToggle }: ChatPanelProps) {
+const ChatPanel = ({ searchResults, searchQuery, isOpen, onToggle }: ChatPanelProps) => {
   const { theme } = useTheme();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [input, setInput] = useState('');
@@ -288,3 +288,5 @@ Some example questions:
     </>
   );
 }
+
+export default ChatPanel;

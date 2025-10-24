@@ -5,10 +5,12 @@ import axios from 'axios';
 import { useTheme } from '../providers/ThemeProvider';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { SparklesIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import type { ValidationReport } from '@/lib/ai/idea-validator';
+import { EvidenceItem } from '../components/EvidenceItem';
+import ScoreCard from '../components/ScoreCard';
 
-export default function ValidatePage() {
+const ValidatePage = () => {
   const { theme } = useTheme();
   const [idea, setIdea] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,38 +64,33 @@ export default function ValidatePage() {
     >
       <Header showDashboardButton={true} currentPage="validate" />
 
-      <main className="flex-1">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <SparklesIcon
-                className={`w-10 h-10 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}
-              />
-              <h1
-                className={`text-4xl font-bold ${
-                  theme === 'dark' ? 'text-amber-200' : 'text-gray-900'
-                }`}
-              >
-                Validate Your Startup Idea
-              </h1>
-            </div>
+      <main className="flex-1 py-8 sm:py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10 sm:mb-12">
+            <h1
+              className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-3 ${
+                theme === 'dark' ? 'text-amber-200' : 'text-gray-900'
+              }`}
+            >
+              Validate Your Startup Idea
+            </h1>
             <p
-              className={`text-lg ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}
+              className={`text-base sm:text-lg ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}
             >
               Get instant validation from real social media discussions
             </p>
           </div>
 
           <div
-            className={`backdrop-blur-sm rounded-xl border p-6 mb-6 ${
+            className={`backdrop-blur-sm rounded-xl border p-6 sm:p-8 mb-6 shadow-lg ${
               theme === 'dark'
                 ? 'bg-[#1f1a1799] border-[#4a3824]'
                 : 'bg-[#ffffff99] border-[#e8dcc8]'
             }`}
           >
             <label
-              className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-amber-300' : 'text-gray-700'
+              className={`block text-base font-medium mb-3 ${
+                theme === 'dark' ? 'text-amber-300' : 'text-gray-900'
               }`}
             >
               Describe your startup idea
@@ -102,22 +99,22 @@ export default function ValidatePage() {
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               placeholder="e.g., A Slack bot that automatically summarizes meeting notes and action items"
-              rows={4}
+              rows={5}
               disabled={loading}
-              className={`w-full px-4 py-3 rounded-lg border text-base transition-colors disabled:opacity-50 ${
+              className={`w-full px-4 py-3 rounded-lg border text-base transition-colors disabled:opacity-50 resize-none ${
                 theme === 'dark'
-                  ? 'bg-[#3d2f1f] border-[#6b5943] text-amber-100 placeholder-[#a8906e] focus:border-amber-500 focus:ring-2 focus:ring-amber-500'
-                  : 'bg-white border-[#d4c5ae] text-gray-900 placeholder-gray-500 focus:border-amber-400 focus:ring-2 focus:ring-amber-400'
+                  ? 'bg-[#3d2f1f] border-[#6b5943] text-amber-100 placeholder-[#a8906e] focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none'
+                  : 'bg-white border-[#d4c5ae] text-gray-900 placeholder-gray-500 focus:border-amber-400 focus:ring-2 focus:ring-amber-400 focus:outline-none'
               }`}
             />
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-5">
               <p className={`text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
                 {idea.length}/500 characters
               </p>
               <button
                 onClick={handleValidate}
                 disabled={!idea.trim() || loading}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 ${
+                className={`w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 ${
                   theme === 'dark'
                     ? 'bg-amber-700 text-white hover:bg-amber-600'
                     : 'bg-amber-800 text-white hover:bg-amber-900'
@@ -142,9 +139,9 @@ export default function ValidatePage() {
           )}
 
           {report && (
-            <div className="space-y-6">
+            <div className="space-y-6 sm:space-y-8">
               <div
-                className={`p-8 rounded-xl text-center ${
+                className={`p-6 sm:p-8 rounded-xl text-center shadow-lg ${
                   theme === 'dark' ? 'bg-[#1f1a17] border border-[#4a3824]' : 'bg-white border border-[#e8dcc8]'
                 }`}
               >
@@ -168,21 +165,17 @@ export default function ValidatePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ScoreCard title="Market Demand" score={report.marketDemand.score} theme={theme}>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className="list-disc list-inside space-y-2 text-sm">
                     {report.marketDemand.evidence.map((evidence, idx) => (
-                      <li key={idx} className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
-                        {evidence}
-                      </li>
+                      <EvidenceItem key={idx} text={evidence} theme={theme} />
                     ))}
                   </ul>
                 </ScoreCard>
 
                 <ScoreCard title="Problem Severity" score={report.problemSeverity.score} theme={theme}>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className="list-disc list-inside space-y-2 text-sm">
                     {report.problemSeverity.signals.map((signal, idx) => (
-                      <li key={idx} className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
-                        {signal}
-                      </li>
+                      <EvidenceItem key={idx} text={signal} theme={theme} />
                     ))}
                   </ul>
                 </ScoreCard>
@@ -192,11 +185,9 @@ export default function ValidatePage() {
                     <p className={`font-medium ${theme === 'dark' ? 'text-amber-300' : 'text-amber-700'}`}>
                       Suggested: {report.monetization.suggestedModel}
                     </p>
-                    <ul className="list-disc list-inside space-y-1">
+                    <ul className="list-disc list-inside space-y-2">
                       {report.monetization.signals.map((signal, idx) => (
-                        <li key={idx} className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
-                          {signal}
-                        </li>
+                        <EvidenceItem key={idx} text={signal} theme={theme} />
                       ))}
                     </ul>
                   </div>
@@ -347,38 +338,4 @@ export default function ValidatePage() {
   );
 }
 
-function ScoreCard({
-  title,
-  score,
-  theme,
-  children,
-}: {
-  title: string;
-  score: number;
-  theme: string;
-  children: React.ReactNode;
-}) {
-  const getScoreColor = (score: number) => {
-    if (score >= 70) return theme === 'dark' ? 'text-green-400' : 'text-green-600';
-    if (score >= 40) return theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600';
-    return theme === 'dark' ? 'text-red-400' : 'text-red-600';
-  };
-
-  return (
-    <div
-      className={`p-4 rounded-lg ${
-        theme === 'dark'
-          ? 'bg-[#3d2f1f] border border-[#6b5943]'
-          : 'bg-gray-50 border border-gray-200'
-      }`}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h4 className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-gray-900'}`}>
-          {title}
-        </h4>
-        <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
+export default ValidatePage;

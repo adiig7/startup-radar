@@ -10,7 +10,7 @@ interface OpportunityReportProps {
   onClose: () => void;
 }
 
-export default function OpportunityReport({ report, loading, onClose }: OpportunityReportProps) {
+const OpportunityReport = ({ report, loading, onClose }: OpportunityReportProps) => {
   const { theme } = useTheme();
 
   if (!report && !loading) return null;
@@ -392,3 +392,5 @@ function ScoreCard({
     </div>
   );
 }
+
+export default OpportunityReport;

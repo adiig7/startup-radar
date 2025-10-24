@@ -7,7 +7,7 @@ interface ChatMessageProps {
   message: ChatMessageType;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+const ChatMessage = ({ message }: ChatMessageProps) => {
   const { theme } = useTheme();
 
   return (
@@ -87,3 +87,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     </div>
   );
 }
+
+export default ChatMessage;

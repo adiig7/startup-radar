@@ -24,7 +24,7 @@ interface SearchResultsProps {
   searchQuery: string;
 }
 
-export default function SearchResults({
+const SearchResults = ({
   results,
   totalResults,
   selectedPlatforms,
@@ -40,7 +40,7 @@ export default function SearchResults({
   onAnalyzeOpportunity,
   onViewAnalytics,
   searchQuery
-}: SearchResultsProps) {
+}: SearchResultsProps) => {
   const { theme } = useTheme();
 
   if (results.length === 0) return null;
@@ -116,3 +116,5 @@ export default function SearchResults({
     </div>
   );
 }
+
+export default SearchResults;

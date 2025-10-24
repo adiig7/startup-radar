@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { FaReddit, FaYoutube } from 'react-icons/fa';
 import { SiProducthunt } from 'react-icons/si';
@@ -14,7 +13,7 @@ interface PostCardProps {
   onToggleExpand: (postId: string) => void;
 }
 
-export default function PostCard({ post, isExpanded, onToggleExpand }: PostCardProps) {
+const PostCard = ({ post, isExpanded, onToggleExpand }: PostCardProps) => {
   const { theme } = useTheme();
 
   const getPlatformIcon = (platform: string) => {
@@ -170,3 +169,5 @@ export default function PostCard({ post, isExpanded, onToggleExpand }: PostCardP
     </div>
   );
 }
+
+export default PostCard;

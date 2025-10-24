@@ -3,7 +3,7 @@
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 
-export default function Footer() {
+const Footer = () => {
   const { theme } = useTheme();
 
   return (
@@ -30,3 +30,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default Footer;

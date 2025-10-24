@@ -8,7 +8,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   const { theme } = useTheme();
 
   if (totalPages <= 1) return null;
@@ -165,3 +165,5 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     </div>
   );
 }
+
+export default Pagination;

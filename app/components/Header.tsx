@@ -9,7 +9,7 @@ interface HeaderProps {
   currentPage?: 'home' | 'dashboard' | 'validate';
 }
 
-export default function Header({ showDashboardButton = false, currentPage = 'home' }: HeaderProps) {
+const Header = ({ showDashboardButton = false, currentPage = 'home' }: HeaderProps) => {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
 
@@ -83,3 +83,5 @@ export default function Header({ showDashboardButton = false, currentPage = 'hom
     </nav>
   );
 }
+
+export default Header;

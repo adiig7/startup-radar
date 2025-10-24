@@ -3,6 +3,7 @@
 import { useTheme } from '../providers/ThemeProvider';
 import { ChartBarIcon, ClockIcon, ChatBubbleLeftIcon, FireIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { AnalyticsData } from '@/lib/elasticsearch/analytics';
+import StatCard from './StatCard';
 
 interface AnalyticsDashboardProps {
   analytics: AnalyticsData | null;
@@ -10,7 +11,7 @@ interface AnalyticsDashboardProps {
   onClose: () => void;
 }
 
-export default function AnalyticsDashboard({ analytics, loading, onClose }: AnalyticsDashboardProps) {
+const AnalyticsDashboard = ({ analytics, loading, onClose }: AnalyticsDashboardProps) => {
   const { theme } = useTheme();
 
   if (!analytics && !loading) return null;
@@ -393,51 +394,7 @@ export default function AnalyticsDashboard({ analytics, loading, onClose }: Anal
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon,
-  theme,
-}: {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  theme: string;
-}) {
-  return (
-    <div
-      className={`p-6 rounded-xl border ${
-        theme === 'dark'
-          ? 'bg-[#1f1a17] border-[#4a3824]'
-          : 'bg-white border-[#e8dcc8]'
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p
-            className={`text-sm font-medium mb-1 ${
-              theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
-            }`}
-          >
-            {title}
-          </p>
-          <p
-            className={`text-3xl font-bold ${
-              theme === 'dark' ? 'text-amber-200' : 'text-gray-900'
-            }`}
-          >
-            {value}
-          </p>
-        </div>
-        <div className={theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}>
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function getPlatformColor(idx: number): string {
+const getPlatformColor = (idx: number): string => {
   const colors = [
     'bg-blue-500',
     'bg-orange-500',
@@ -450,3 +407,5 @@ function getPlatformColor(idx: number): string {
   ];
   return colors[idx % colors.length];
 }
+
+export default AnalyticsDashboard;

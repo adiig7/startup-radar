@@ -139,7 +139,8 @@ Return ONLY the JSON, no markdown.`;
         ? post.created_at.toLocaleDateString()
         : new Date(post.created_at).toLocaleDateString();
 
-      return `[Post ${idx + 1}] ${post.platform.toUpperCase()} - ${post.title}
+      return `${post.platform.toUpperCase()} - ${post.title}
+URL: ${post.url}
 Author: ${post.author}
 Engagement: ${post.score} upvotes, ${post.num_comments} comments
 Date: ${dateStr}
@@ -161,12 +162,12 @@ Provide a comprehensive validation report in JSON format:
   "verdict": "BUILD IT" | "MAYBE" | "DON'T BUILD",
   "marketDemand": {
     "score": <0-100>,
-    "evidence": ["evidence 1", "evidence 2", "evidence 3"],
+    "evidence": ["Quote from discussion with source URL", "Another quote with URL"],
     "postsAnalyzed": ${searchResults.results.length}
   },
   "problemSeverity": {
     "score": <0-100>,
-    "signals": ["people are frustrated", "spending time on workarounds", etc]
+    "signals": ["Quote showing frustration with source URL", "Another pain point with URL"]
   },
   "competitionLevel": {
     "level": "Low|Medium|High",
@@ -175,7 +176,7 @@ Provide a comprehensive validation report in JSON format:
   },
   "monetization": {
     "score": <0-100, willingness to pay>,
-    "signals": ["mention of paying for solutions", "complaining about expensive tools"],
+    "signals": ["Quote about paying for solutions with source URL"],
     "suggestedModel": "SaaS subscription | One-time purchase | Freemium | etc"
   },
   "targetUsers": {
@@ -187,6 +188,8 @@ Provide a comprehensive validation report in JSON format:
   "nextSteps": ["step 1", "step 2", "step 3"],
   "recommendation": "detailed recommendation paragraph"
 }
+
+IMPORTANT: When referencing evidence, include the source URL from the discussions above. Format evidence like: "Quote or summary (Source: URL)"
 
 SCORING GUIDE:
 - Overall Score: Weighted average considering demand, problem severity, and monetization

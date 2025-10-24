@@ -21,7 +21,7 @@ interface SearchFormProps {
   loading: boolean;
 }
 
-export default function SearchForm({
+const SearchForm = ({
   query,
   setQuery,
   timeframe,
@@ -32,7 +32,7 @@ export default function SearchForm({
   setUseReranking,
   onSearch,
   loading
-}: SearchFormProps) {
+}: SearchFormProps) => {
   const { theme } = useTheme();
 
   const timeframeOptions = [
@@ -170,7 +170,6 @@ export default function SearchForm({
         </div>
       </div>
 
-      {/* AI Reranking Toggle */}
       <div className="mb-6">
         <label className={`flex items-center gap-3 cursor-pointer group ${
           theme === 'dark' ? 'text-amber-200' : 'text-gray-800'
@@ -184,11 +183,6 @@ export default function SearchForm({
           <div className="flex-1">
             <span className="font-medium text-sm sm:text-base flex items-center gap-2">
               🔥 AI-Powered Reranking
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                theme === 'dark' ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'
-              }`}>
-                Beta
-              </span>
             </span>
             <p className={`text-xs mt-1 ${
               theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
@@ -199,7 +193,6 @@ export default function SearchForm({
         </label>
       </div>
 
-      {/* Search Button */}
       <button
         onClick={onSearch}
         disabled={loading || !query.trim() || selectedPlatforms.length === 0}
@@ -216,3 +209,5 @@ export default function SearchForm({
     </div>
   );
 }
+
+export default SearchForm;
