@@ -96,7 +96,7 @@ const SearchForm = ({
         <textarea
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g., 'people struggling with remote work' or 'alternatives to Slack for small teams'"
+          placeholder="e.g., 'need better invoice software' or 'frustrated with time tracking apps'"
           maxLength={500}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600 resize-none ${
             theme === 'dark'

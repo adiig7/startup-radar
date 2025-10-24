@@ -98,7 +98,7 @@ const ValidatePage = () => {
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
-              placeholder="e.g., A Slack bot that automatically summarizes meeting notes and action items"
+              placeholder="e.g., An AI assistant that turns voice memos into formatted documentation"
               rows={5}
               disabled={loading}
               className={`w-full px-4 py-3 rounded-lg border text-base transition-colors disabled:opacity-50 resize-none ${
