@@ -132,8 +132,14 @@ const ValidatePage = () => {
                   theme === 'dark' ? 'border-amber-600' : 'border-amber-700'
                 }`}
               ></div>
-              <p className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
-                Searching 1000s of discussions and analyzing with AI...
+              <p className={`text-lg font-medium mb-2 ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
+                🔍 Scanning thousands of Reddit threads, YouTube comments, and startup discussions...
+              </p>
+              <p className={`text-base mb-1 ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
+                🤖 AI is crunching the data to validate your idea
+              </p>
+              <p className={`text-sm ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
+                ⏱️ Grab a coffee - this takes ~1-2 minutes
               </p>
             </div>
           )}
