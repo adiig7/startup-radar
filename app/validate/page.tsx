@@ -206,27 +206,27 @@ const ValidatePage = () => {
                       : 'bg-gray-50 border border-gray-200'
                   }`}
                 >
-                  <h4 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-amber-300' : 'text-gray-900'}`}>
+                  <h4 className={`font-semibold mb-3 ${theme === 'dark' ? 'text-amber-300' : 'text-gray-900'}`}>
                     Competition: {report.competitionLevel.level}
                   </h4>
-                  <div className="space-y-2 text-sm">
+                  <div className="max-h-96 overflow-y-auto pr-2 space-y-2 text-sm">
                     {report.competitionLevel.existingSolutions.length > 0 && (
                       <div>
-                        <p className={`font-medium ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
+                        <p className={`font-medium mb-1 ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
                           Existing:
                         </p>
-                        <ul className="list-disc list-inside">
+                        <ul className="list-disc list-inside space-y-1">
                           {report.competitionLevel.existingSolutions.map((solution, idx) => (
-                            <li key={idx} className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
+                            <li key={idx} className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} break-words`}>
                               {solution}
                             </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    <p className={theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}>
+                    <div className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} break-words`}>
                       <span className="font-medium">Your edge:</span> {report.competitionLevel.yourAdvantage}
-                    </p>
+                    </div>
                   </div>
                 </div>
               </div>
