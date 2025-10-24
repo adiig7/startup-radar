@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateStartupIdea } from '@/lib/ai/idea-validator';
+import { collectForQuery } from '@/lib/services/background-collector';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -24,6 +25,11 @@ export const POST = async (req: NextRequest) => {
     }
 
     const report = await validateStartupIdea(idea);
+
+    collectForQuery(report.searchQuery).catch((error) => {
+      console.error('Background collection failed:', error.message);
+    });
+
     return NextResponse.json(report);
   } catch (error: any) {
     console.error('Validate Idea Error:', error.message);
