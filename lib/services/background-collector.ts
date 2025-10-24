@@ -60,6 +60,7 @@ const searchProductHuntByQuery = async (query: string, limit: number): Promise<S
   try {
     return await fetchProductHuntByTopic(matchedTopic, limit);
   } catch (error) {
+    console.error(error);
     return [];
   }
 }
@@ -73,26 +74,25 @@ export const collectForQuery = async (query: string): Promise<SocialPost[]> => {
         ? searchYouTubeVideos(query, { numOfPosts: 10 })
         : Promise.resolve([]),
 
-      // Reddit - 15 posts
       ENABLED_PLATFORMS.includes('reddit')
         ? searchRedditPosts(query, 15)
         : Promise.resolve([]),
 
-      // HackerNews - 15 posts
       ENABLED_PLATFORMS.includes('hackernews')
         ? searchHackerNews(query, 15)
         : Promise.resolve([]),
 
-      // ProductHunt - 10 posts
       ENABLED_PLATFORMS.includes('producthunt')
         ? searchProductHuntByQuery(query, 10)
         : Promise.resolve([]),
     ]);
 
+    const platformNames = ['youtube', 'reddit', 'hackernews', 'producthunt'];
     platformResults.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        const posts = result.value;
-        allPosts.push(...posts);
+        allPosts.push(...result.value);
+      } else {
+        console.error(`COLLECTOR ${platformNames[index]} failed:`, result.reason?.message);
       }
     });
 

@@ -1,42 +1,55 @@
 import type { SocialPost } from '../types';
 
-export function deduplicatePosts(posts: SocialPost[]): SocialPost[] {
-  const uniquePosts = new Map<string, SocialPost>();
+export const deduplicatePosts = (posts: SocialPost[]): SocialPost[] => {
+  const seenUrls = new Map<string, SocialPost>();
+  const seenTitles = new Map<string, SocialPost>();
+  const finalPosts = new Map<string, SocialPost>();
 
   for (const post of posts) {
     const urlKey = normalizeUrl(post.url);
     const titleKey = normalizeTitle(post.title);
 
-    const existingByUrl = uniquePosts.get(urlKey);
-    const existingByTitle = uniquePosts.get(titleKey);
+    const existingByUrl = seenUrls.get(urlKey);
+    const existingByTitle = seenTitles.get(titleKey);
 
     if (existingByUrl || existingByTitle) {
       const existing = existingByUrl || existingByTitle!;
-      if (post.score + post.num_comments > existing.score + existing.num_comments) {
-        uniquePosts.set(urlKey, post);
-        uniquePosts.set(titleKey, post);
+      const newEngagement = post.score + post.num_comments;
+      const existingEngagement = existing.score + existing.num_comments;
+
+      if (newEngagement > existingEngagement) {
+        finalPosts.delete(existing.id);
+        seenUrls.set(urlKey, post);
+        seenTitles.set(titleKey, post);
+        finalPosts.set(post.id, post);
       }
     } else {
-      uniquePosts.set(urlKey, post);
-      uniquePosts.set(titleKey, post);
+      seenUrls.set(urlKey, post);
+      seenTitles.set(titleKey, post);
+      finalPosts.set(post.id, post);
     }
   }
 
-  return Array.from(new Map(
-    Array.from(uniquePosts.values()).map(post => [post.id, post])
-  ).values()).sort((a, b) =>
+  const result = Array.from(finalPosts.values()).sort((a, b) =>
     (b.score + b.num_comments) - (a.score + a.num_comments)
   );
+
+  const duplicatesRemoved = posts.length - result.length;
+  if (duplicatesRemoved > 0) {
+    console.log(`DEDUP Removed ${duplicatesRemoved} duplicate(s) from ${posts.length} posts`);
+  }
+
+  return result;
 }
 
-function normalizeUrl(url: string): string {
+const normalizeUrl = (url: string): string => {
   return url.toLowerCase()
     .replace(/^https?:\/\/(www\.)?/, '')
     .replace(/[?#].*$/, '')
     .trim();
 }
 
-function normalizeTitle(title: string): string {
+const normalizeTitle = (title: string): string => {
   return title.toLowerCase()
     .replace(/[^\w\s]/g, '')
     .replace(/\s+/g, ' ')
@@ -44,14 +57,14 @@ function normalizeTitle(title: string): string {
     .substring(0, 100);
 }
 
-export function filterByQuality(posts: SocialPost[], minScore: number = 50): SocialPost[] {
+export const filterByQuality = (posts: SocialPost[], minScore: number = 50): SocialPost[] => {
   return posts.filter(post => {
     const qualityScore = calculateQualityScore(post);
     return qualityScore >= minScore;
   });
 }
 
-function calculateQualityScore(post: SocialPost): number {
+const calculateQualityScore = (post: SocialPost): number => {
   let score = 50;
 
   const engagementScore = Math.min(30, (post.score + post.num_comments * 2) / 10);
@@ -73,7 +86,7 @@ function calculateQualityScore(post: SocialPost): number {
   return Math.min(100, score);
 }
 
-export function extractEnhancedTags(post: SocialPost): string[] {
+export const extractEnhancedTags = (post: SocialPost): string[] => {
   const text = `${post.title} ${post.content}`.toLowerCase();
   const existingTags = new Set(post.tags.map(t => t.toLowerCase()));
 
@@ -116,7 +129,7 @@ export function extractEnhancedTags(post: SocialPost): string[] {
   return Array.from(new Set(tags)).slice(0, 20);
 }
 
-function extractProductMentions(text: string): string[] {
+const extractProductMentions = (text: string): string[] => {
   const products: string[] = [];
 
   const patterns = [
@@ -140,7 +153,7 @@ function extractProductMentions(text: string): string[] {
   return products.slice(0, 5);
 }
 
-export function calculateRelevanceScore(post: SocialPost, query: string): number {
+export const calculateRelevanceScore = (post: SocialPost, query: string): number => {
   const queryLower = query.toLowerCase();
   const titleLower = post.title.toLowerCase();
   const contentLower = post.content.toLowerCase();
@@ -175,7 +188,7 @@ export function calculateRelevanceScore(post: SocialPost, query: string): number
   return Math.min(100, relevance);
 }
 
-export function applyFreshnessBoost(posts: SocialPost[]): SocialPost[] {
+export const applyFreshnessBoost = (posts: SocialPost[]): SocialPost[] => {
   const now = Date.now();
 
   return posts.map(post => {
@@ -193,7 +206,7 @@ export function applyFreshnessBoost(posts: SocialPost[]): SocialPost[] {
   });
 }
 
-export function removeNoise(posts: SocialPost[]): SocialPost[] {
+export const removeNoise = (posts: SocialPost[]): SocialPost[] => {
   return posts.filter(post => {
     if (post.content.includes('[deleted]') || post.content.includes('[removed]')) {
       return false;
@@ -216,7 +229,7 @@ export function removeNoise(posts: SocialPost[]): SocialPost[] {
   });
 }
 
-export function filterAndProcessPosts(posts: SocialPost[], query?: string): SocialPost[] {
+export const filterAndProcessPosts = (posts: SocialPost[], query?: string): SocialPost[] => {
   let filteredPosts = removeNoise(posts);
   filteredPosts = deduplicatePosts(filteredPosts);
   filteredPosts = filterByQuality(filteredPosts, 40);

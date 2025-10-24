@@ -1,6 +1,7 @@
 import { getEsClient, SIGNALS_INDEX } from './client';
 import { generateEmbedding } from '../ai/embeddings';
 import { RERANKER_INFERENCE_ID, checkRerankingEndpoint, setupRerankingEndpoint } from './reranking';
+import { deduplicatePosts } from '../services/enhanced-indexing';
 import type { SearchRequest, SearchResponse, SocialPost, SearchFilters } from '../types';
 
 export const hybridSearch = async (request: SearchRequest): Promise<SearchResponse> => {
@@ -57,7 +58,7 @@ export const hybridSearch = async (request: SearchRequest): Promise<SearchRespon
       ? searchResponse.hits.total
       : searchResponse.hits.total?.value || 0;
 
-    const results: SocialPost[] = searchResponse.hits.hits.map((hit: any) => ({
+    const rawResults: SocialPost[] = searchResponse.hits.hits.map((hit: any) => ({
       id: hit._source.id,
       platform: hit._source.platform,
       title: hit._source.title,
@@ -71,8 +72,9 @@ export const hybridSearch = async (request: SearchRequest): Promise<SearchRespon
       indexed_at: new Date(hit._source.indexed_at),
     }));
 
+    const results = deduplicatePosts(rawResults);
+
     const searchTimeMs = Date.now() - startTime;
-    
     return {
       query: request.query,
       results,

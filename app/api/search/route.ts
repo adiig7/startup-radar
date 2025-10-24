@@ -26,9 +26,7 @@ export const POST = async (req: NextRequest) => {
     }
 
     if (!skipCollection) {
-      collectForQuery(query.trim()).catch((error) => {
-        // Silently handle background collection errors
-      });
+      collectForQuery(query.trim()).catch((error) => {console.error(error)});
     }
 
     const results = await hybridSearch({
