@@ -43,10 +43,16 @@ export const deduplicatePosts = (posts: SocialPost[]): SocialPost[] => {
 }
 
 const normalizeUrl = (url: string): string => {
-  return url.toLowerCase()
+  const normalized = url.toLowerCase()
     .replace(/^https?:\/\/(www\.)?/, '')
-    .replace(/[?#].*$/, '')
-    .trim();
+    .trim()
+
+  // For YouTube, keep the video ID (v= parameter)
+  if (normalized.includes('youtube.com/watch')) {
+    return normalized;
+  }
+
+  return normalized.replace(/[?#].*$/, '');
 }
 
 const normalizeTitle = (title: string): string => {

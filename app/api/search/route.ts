@@ -37,7 +37,12 @@ export const POST = async (req: NextRequest) => {
       useReranking: useReranking === true
     });
 
-    return NextResponse.json(results);
+    return NextResponse.json(results, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+      },
+    });
   } catch (error: any) {
     console.error('Search API Error:', error.message);
     return NextResponse.json(

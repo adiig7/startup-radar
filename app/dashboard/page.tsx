@@ -97,6 +97,11 @@ export default function DashboardPage() {
     if (page === 1) {
       setCurrentPage(1);
       setExpandedPosts(new Set());
+      setResults([]);
+      setTotalResults(0);
+      setOpportunityReport(null);
+      setAnalyticsData(null);
+      setShowAnalytics(false);
     }
 
     try {
