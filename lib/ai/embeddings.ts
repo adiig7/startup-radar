@@ -63,8 +63,9 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
       data: request,
     });
 
-    if (response.data?.predictions?.[0]?.embeddings?.values) {
-      const embedding = response.data.predictions[0].embeddings.values;
+    const responseData = response.data as any;
+    if (responseData?.predictions?.[0]?.embeddings?.values) {
+      const embedding = responseData.predictions[0].embeddings.values;
       return embedding;
     }
 
