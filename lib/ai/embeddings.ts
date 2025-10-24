@@ -34,6 +34,7 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
     const { GoogleAuth } = require('google-auth-library');
 
     const credentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    console.log('DEBUG credentialsEnv', credentialsEnv);
     if (!credentialsEnv) {
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set in environment');
     }
@@ -50,14 +51,17 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
       try {
         try {
           credentials = JSON.parse(credentialsEnv);
+          console.log('DEBUG credentials', credentials);
         } catch (directParseError) {          
           // Validate that it looks like base64 (no binary characters)
           if (!/^[A-Za-z0-9+/=\s]*$/.test(credentialsEnv)) {
+            console.log('DEBUG directParseError', directParseError);
             throw new Error('Credentials contain invalid characters - not valid base64 or JSON');
           }
           
           const credentialsJson = Buffer.from(credentialsEnv.trim(), 'base64').toString('utf-8');
           credentials = JSON.parse(credentialsJson);
+          console.log('DEBUG credentialsJson', credentialsJson);
         }
 
         if (!credentials.client_email) {
@@ -72,11 +76,14 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
           scopes: ['https://www.googleapis.com/auth/cloud-platform'],
         });
       } catch (parseError: any) {
+        console.log('DEBUG parseError', parseError);
         throw new Error(`Invalid GOOGLE_APPLICATION_CREDENTIALS format: ${parseError.message}`);
       }
     }
 
+    console.log('DEBUG auth', auth);
     const client = await auth.getClient();
+    console.log('DEBUG client', client);
 
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-004:predict`;
     const request = {
