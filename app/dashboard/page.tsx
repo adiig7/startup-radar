@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const [results, setResults] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
+  const [hasSearched, setHasSearched] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
   const [chatOpen, setChatOpen] = useState(false);
   const [opportunityReport, setOpportunityReport] = useState<OpportunityReportType | null>(null);
@@ -91,7 +92,8 @@ export default function DashboardPage() {
     if (!query.trim() || selectedPlatforms.length === 0) return;
 
     setLoading(true);
-    
+    setHasSearched(true);
+
     if (page === 1) {
       setCurrentPage(1);
       setExpandedPosts(new Set());
@@ -214,6 +216,8 @@ export default function DashboardPage() {
             onAnalyzeOpportunity={handleAnalyzeOpportunity}
             onViewAnalytics={handleViewAnalytics}
             searchQuery={query}
+            hasSearched={hasSearched}
+            loading={loading}
           />
 
         {loading && (

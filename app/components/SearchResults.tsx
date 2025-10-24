@@ -23,6 +23,8 @@ interface SearchResultsProps {
   onAnalyzeOpportunity: () => void;
   onViewAnalytics: () => void;
   searchQuery: string;
+  hasSearched: boolean;
+  loading: boolean;
 }
 
 const SearchResults = ({
@@ -39,12 +41,14 @@ const SearchResults = ({
   onPageChange,
   onToggleChat,
   onViewAnalytics,
-  searchQuery
+  searchQuery,
+  hasSearched,
+  loading
 }: SearchResultsProps) => {
   const { theme } = useTheme();
 
   // no results found
-  if (results.length === 0 && searchQuery.trim()) {
+  if (results.length === 0 && hasSearched && !loading) {
     return <NoResultsFound searchQuery={searchQuery} />;
   }
 
