@@ -1,40 +1,37 @@
-import { VertexAI } from '@google-cloud/vertexai';
 import { hybridSearch } from '../elasticsearch/search';
+import { getGoogleAuth } from '../utils/google-auth';
 import type { ChatMessage, ConversationContext, SocialPost } from '../types';
 
-let _vertexAI: VertexAI | null = null;
-let _model: any = null;
+const callGemini = async (prompt: string): Promise<string> => {
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID!;
+  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 
-const getVertexAI = (): VertexAI => {
-  if (!_vertexAI) {
-    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
-    const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
-
-    if (!projectId) {
-      throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required');
-    }
-
-    _vertexAI = new VertexAI({
-      project: projectId,
-      location: location,
-    });
+  if (!projectId) {
+    throw new Error('GOOGLE_CLOUD_PROJECT_ID not set in environment');
   }
-  return _vertexAI;
-}
 
-const getModel = (): any => {
-  if (!_model) {
-    const vertexAI = getVertexAI();
-    _model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-  }
-  return _model;
+  const auth = getGoogleAuth();
+  const client = await auth.getClient();
+  const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.5-flash:generateContent`;
+
+  // @ts-ignore
+  const response = await client.request({
+    url: endpoint,
+    method: 'POST',
+    data: {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    },
+  });
+
+  const responseData = response.data as any;
+  return responseData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 export const sendGroundedMessage = async (
   userMessage: string,
   context?: ConversationContext,
   providedResults?: SocialPost[]
-): Promise<{ stream: any; citations: SocialPost[] }> => {
+): Promise<{ response: string; citations: SocialPost[] }> => {
   try {
 
     let relevantPosts: SocialPost[];
@@ -54,18 +51,15 @@ export const sendGroundedMessage = async (
     const chatHistory = context?.messages || [];
     const conversationPrompt = buildConversationPrompt(userMessage, groundingContext, chatHistory);
 
-    const model = getModel();
-    const result = await model.generateContentStream({
-      contents: [{ role: 'user', parts: [{ text: conversationPrompt }] }],
-    });
-
+    const response = await callGemini(conversationPrompt);
 
     return {
-      stream: result.stream,
+      response: response,
       citations: relevantPosts.slice(0, 5),
     };
-  } catch (error) {
-    throw new Error('Failed to generate grounded response');
+  } catch (error: any) {
+    console.error('Grounding error:', error.message);
+    throw new Error(`Failed to generate grounded response: ${error.message}`);
   }
 }
 

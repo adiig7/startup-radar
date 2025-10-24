@@ -24,29 +24,32 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ error: 'Message is too long (max 1000 characters)' }, { status: 400 });
     }
 
-    const { stream, citations } = await sendGroundedMessage(message, context, searchResults);
+    const { response, citations } = await sendGroundedMessage(message, context, searchResults);
 
     const encoder = new TextEncoder();
-    let fullContent = '';
 
+    // Simulate streaming by chunking the response
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
-            const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            if (text) {
-              fullContent += text;
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ content: text, done: false })}\n\n`)
-              );
-            }
+          // Stream response word by word for better UX
+          const words = response.split(' ');
+
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i] + (i < words.length - 1 ? ' ' : '');
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ content: word, done: false })}\n\n`)
+            );
+            // Small delay for streaming effect
+            await new Promise(resolve => setTimeout(resolve, 20));
           }
 
+          // Send final message with citations
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
                 done: true,
-                fullContent,
+                fullContent: response,
                 citations,
                 timestamp: new Date().toISOString(),
               })}\n\n`
