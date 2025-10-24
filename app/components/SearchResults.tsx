@@ -1,10 +1,11 @@
 'use client';
 
-import { ChatBubbleLeftIcon, SparklesIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../providers/ThemeProvider';
 import PostCard from './PostCard';
 import Pagination from './Pagination';
 import type { SocialPost, Platform } from '@/lib/types';
+import NoResultsFound from './NoResultsFound';
 
 interface SearchResultsProps {
   results: SocialPost[];
@@ -37,11 +38,15 @@ const SearchResults = ({
   onToggleExpand,
   onPageChange,
   onToggleChat,
-  onAnalyzeOpportunity,
   onViewAnalytics,
   searchQuery
 }: SearchResultsProps) => {
   const { theme } = useTheme();
+
+  // no results found
+  if (results.length === 0 && searchQuery.trim()) {
+    return <NoResultsFound searchQuery={searchQuery} />;
+  }
 
   if (results.length === 0) return null;
 

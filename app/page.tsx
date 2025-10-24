@@ -17,22 +17,22 @@ export default function LandingPage() {
     {
       icon: <SparklesIcon className="w-8 h-8" />,
       title: 'AI Idea Validation',
-      description: 'Enter your startup idea and get instant validation backed by real social media discussions. Get scores for market demand, problem severity, competition, and monetization potential.'
+      description: 'Get instant validation scores for market demand, problem severity, competition, and monetization potential backed by real discussions.'
     },
     {
       icon: <MagnifyingGlassIcon className="w-8 h-8" />,
-      title: 'Social Media Search',
-      description: 'Search across Reddit, Hacker News, YouTube, Product Hunt, and more platforms to find relevant conversations and discover what people are struggling with.'
+      title: 'Multi-Platform Search',
+      description: 'Search across Reddit, Hacker News, YouTube, and Product Hunt to find relevant conversations and user pain points.'
     },
     {
       icon: <LightBulbIcon className="w-8 h-8" />,
       title: 'Opportunity Analysis',
-      description: 'Analyze search results to identify trending problems, early adopters, and market gaps with AI-powered opportunity scoring and insights.'
+      description: 'Identify trending problems, early adopters, and market gaps with AI-powered scoring and insights.'
     },
     {
       icon: <ChartBarIcon className="w-8 h-8" />,
       title: 'Grounded AI Chat',
-      description: 'Ask questions about your search results and get instant answers grounded in real discussions, not hallucinated information.'
+      description: 'Ask questions about your search results and get answers grounded in real discussions, not hallucinations.'
     },
   ];
 
@@ -40,22 +40,22 @@ export default function LandingPage() {
     {
       number: '1',
       title: 'Enter Your Search',
-      description: 'Enter keywords or describe the problem your startup solves. Our hybrid search combines keyword matching with semantic understanding to find relevant discussions.'
+      description: 'Enter keywords or describe your problem. Hybrid search combines keyword matching with semantic understanding.'
     },
     {
       number: '2',
       title: 'Select Platforms',
-      description: 'Search across Reddit, Hacker News, YouTube, and Product Hunt. Filter by date range and choose to enable AI-powered reranking for superior relevance.'
+      description: 'Choose from Reddit, Hacker News, YouTube, and Product Hunt. Filter by date and enable AI reranking.'
     },
     {
       number: '3',
       title: 'AI-Powered Analysis',
-      description: 'Posts are analyzed for sentiment, quality, and spam detection. Optional AI reranking uses Vertex AI to surface the most relevant results from thousands of discussions.'
+      description: 'Posts are analyzed for sentiment, quality, and spam. AI reranking surfaces the most relevant results.'
     },
     {
       number: '4',
       title: 'Get Insights',
-      description: 'View analytics dashboards, get AI opportunity analysis, or chat with results for deeper insights. All answers are grounded in real discussions, not hallucinated.'
+      description: 'View analytics, get opportunity scores, or chat with results for deeper insights grounded in real data.'
     },
   ];
 
@@ -92,26 +92,26 @@ export default function LandingPage() {
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto ${
             theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'
           }`}>
-            Powered by <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Elasticsearch hybrid search</span> and <span className={`font-semibold ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>Vertex AI</span>, StartupRadar analyzes thousands of real discussions from Reddit, Hacker News, YouTube, and Product Hunt to help you find trending problems and validate startup ideas before you build.
+            Analyze thousands of real discussions from Reddit, Hacker News, YouTube, and Product Hunt to validate ideas and discover market opportunities.
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 max-w-2xl mx-auto text-left">
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                <span className="font-semibold">Validate startup ideas</span> by searching thousands of real discussions for market demand, pain points, and willingness to pay
+                <span className="font-semibold">Validate ideas</span> with real market demand signals
               </p>
             </div>
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                <span className="font-semibold">Discover trending problems</span> and market gaps before competitors by analyzing social conversations
+                <span className="font-semibold">Discover problems</span> before your competitors do
               </p>
             </div>
             <div className="flex items-start gap-3">
               <div className={`${theme === 'dark' ? 'text-amber-500 mt-1' : 'text-green-600 mt-1'} text-sm sm:text-base`}>✓</div>
               <p className={`${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'} text-sm sm:text-base`}>
-                <span className="font-semibold">Find early adopters</span> and understand your target users with AI-powered analysis
+                <span className="font-semibold">Find early adopters</span> with AI-powered insights
               </p>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function LandingPage() {
           <div className="text-center mb-8 sm:mb-16">
             <h2 className={`text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>Core Features</h2>
             <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-              Everything you need to discover market opportunities, validate ideas, and stay ahead of the competition.
+              Discover opportunities, validate ideas, and stay ahead of competitors.
             </p>
           </div>
 
@@ -204,7 +204,7 @@ export default function LandingPage() {
           <div className="text-center mb-8 sm:mb-16">
             <h2 className={`text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>How It Works</h2>
             <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-              Our hybrid search and AI validation technology analyzes thousands of real discussions to help you discover problems and validate startup ideas.
+              Discover problems and validate ideas with AI-powered analysis of real discussions.
             </p>
           </div>
 
@@ -241,9 +241,9 @@ export default function LandingPage() {
           : 'bg-gradient-to-r from-[#f5eddb] to-[#e8dcc8] border-[#e8dcc8]'
       }`}>
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className={`text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>Ready to Build Your Next Startup?</h2>
+          <h2 className={`text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 ${theme === 'dark' ? 'text-amber-100' : 'text-gray-900'}`}>Ready to Validate Your Idea?</h2>
           <p className={`text-base sm:text-xl mb-6 sm:mb-8 ${theme === 'dark' ? 'text-[#e8dcc8]' : 'text-gray-700'}`}>
-            Validate your ideas and discover opportunities backed by real conversations
+            Start discovering opportunities backed by real conversations
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
