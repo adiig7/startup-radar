@@ -97,6 +97,7 @@ const SearchForm = ({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="e.g., 'people struggling with remote work' or 'alternatives to Slack for small teams'"
+          maxLength={500}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600 resize-none ${
             theme === 'dark'
               ? 'bg-[#3d2f1f] border-[#6b5943] text-amber-100 placeholder-[#a8906e]'
@@ -104,9 +105,9 @@ const SearchForm = ({
           }`}
           rows={3}
         />
-        <p className={`text-sm mt-1 ${
-          theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'
-        }`}>{query.length} characters</p>
+        <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-[#d4c5ae]' : 'text-gray-600'}`}>
+          {query.length}/500 characters
+        </p>
       </div>
 
       {/* Timeframe */}
