@@ -15,7 +15,7 @@ async function callGemini(prompt: string): Promise<string> {
 
   const auth = getGoogleAuth();
   const client = await auth.getClient();
-  const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.0-flash-exp:generateContent`;
+  const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.5-flash:generateContent`;
 
   // @ts-ignore
   const response = await client.request({
